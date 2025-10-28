@@ -1,79 +1,83 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Manajemen Mitra')
-
 @section('content')
     <h1>Manajemen Mitra</h1>
-    <p>Daftar semua mitra yang terdaftar.</p>
-
-    @if (session('success'))
-        <div style="padding: 10px; margin-bottom: 15px; background: #d4edda; color: #155724;">
-            {{ session('success') }}
-        </div>
+    {{-- ... Notifikasi ... --}}
+    @if ($errors->has('alasan_blokir_option_id'))
+         <div class="error-msg">{{ $errors->first('alasan_blokir_option_id') }}</div>
     @endif
 
-    <table border="1" style="width: 100%; margin-top: 20px; border-collapse: collapse;" cellpadding="5">
+    <table>
         <thead>
             <tr>
                 <th>Nama Mitra</th>
-                <th>Email Bisnis</th>
-                <th>Status</th>
+                <th>Kategori Usaha</th>
+                <th>Status Verifikasi</th>
+                <th>Status Akun</th>
                 <th>Tgl. Daftar</th>
-                <th>Aksi</th>
+                <th style="min-width: 250px;">Aksi</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($mitra as $m)
-                <tr style="@if($m->status_verifikasi == 'Pending') background: #fffbe6; @endif">
-                    <td>{{ $m->nama_mitra }}</td>
-                    <td>{{ $m->email_bisnis }}</td>
+                <tr style=" /* ... style baris ... */ ">
+                    <td>{{ $m->nama_mitra }}<br><small>{{ $m->email_bisnis }}</small></td>
+                    <td>{{ $m->kategoriUsaha->nama_kategori ?? '-' }}</td>
+                    <td> /* ... status verifikasi ... */ </td>
                     <td>
-                        <span style="font-weight: bold; color:
-                            @if($m->status_verifikasi == 'Verified') green;
-                            @elseif($m->status_verifikasi == 'Rejected') red;
-                            @else orange; @endif
-                        ">
-                            {{ $m->status_verifikasi }}
+                         <span style="font-weight: bold; color: {{ $m->status_akun == 'Diblokir' ? 'red' : 'green' }};">
+                            {{ $m->status_akun }}
                         </span>
+                        {{-- Tampilkan alasan jika diblokir (dari relasi) --}}
+                        @if($m->status_akun == 'Diblokir' && $m->alasanBlokir)
+                            <small style="display: block; cursor: help;" title="Alasan: {{ $m->alasanBlokir->alasan_text }}">(Lihat alasan)</small>
+                        @endif
                     </td>
                     <td>{{ $m->created_at->format('d M Y') }}</td>
+                    <td style="white-space: nowrap;">
+                        {{-- ... Tombol Verifikasi/Tolak, Detail, Edit ... --}}
 
-                    <td>
-                        @if ($m->status_verifikasi == 'Pending')
-                            <form method="POST" action="{{ route('admin.mitra.verify', $m->mitra_id) }}" style="display: inline;">
-                                @csrf
-                                @method('PATCH')
-                                <button type.submit" style="color: green; background: #d4edda; border: 1px solid green; cursor: pointer;">Setujui</button>
+                        {{-- === TOMBOL & FORM BLOKIR / AKTIFKAN === --}}
+                        @if ($m->status_akun == 'Aktif')
+                            {{-- Tombol untuk menampilkan form blokir --}}
+                            <button onclick="toggleBlockForm('{{ $m->mitra_id }}')" style="background: orange; ..."> Blokir </button>
+                            {{-- Form Blokir (Tersembunyi Awalnya) --}}
+                            <form id="block-form-{{ $m->mitra_id }}" action="{{ route('admin.mitra.block', $m->mitra_id) }}" method="POST" style="display: none; margin-top: 5px; border: 1px solid orange; padding: 5px;" onsubmit="return confirm('Anda yakin ingin memblokir akun {{ $m->nama_mitra }}?');">
+                                @csrf @method('PATCH')
+                                <label for="alasan-{{ $m->mitra_id }}" style="font-size: 0.9em;">Pilih Alasan:</label><br>
+                                <select name="alasan_blokir_option_id" id="alasan-{{ $m->mitra_id }}" required style="width: 150px; font-size: 0.9em;">
+                                    <option value="">-- Pilih --</option>
+                                    {{-- Loop pilihan alasan dari Controller --}}
+                                    @foreach ($alasanBlokirOptions as $alasan)
+                                    <option value="{{ $alasan->alasan_id }}">{{ $alasan->alasan_text }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" style="background: orange; ...">Konfirmasi Blokir</button>
+                                <button type="button" onclick="toggleBlockForm('{{ $m->mitra_id }}')" style="background: grey; ...">Batal</button>
                             </form>
-                            <form method="POST" action="{{ route('admin.mitra.reject', $m->mitra_id) }}" style="display: inline;">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" style="color: red; background: #f8d7da; border: 1px solid red; cursor: pointer;">Tolak</button>
-                            </form>
-                        @endif
-
-                        <a href="{{ route('admin.mitra.show', $m->mitra_id) }}" style="background: grey; color: white; padding: 5px 8px; text-decoration: none;">
-                            Detail
-                        </a>
-
-                        @if(auth()->guard('admin')->user()->role === 'SuperAdmin')
-                            <a href="{{ route('admin.mitra.edit', $m->mitra_id) }}" style="background: blue; color: white; padding: 5px 8px; text-decoration: none;">
-                                Edit
-                            </a>
-
-                            <form action="{{ route('admin.mitra.destroy', $m->mitra_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Anda yakin ingin menghapus mitra {{ $m->nama_mitra }}? Tindakan ini tidak bisa dibatalkan.');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" style="background: darkred; color: white; border: none; padding: 5px 8px; cursor: pointer;">Hapus</button>
+                        @else {{-- Jika status Diblokir --}}
+                            {{-- Tombol Aktifkan --}}
+                            <form action="{{ route('admin.mitra.unblock', $m->mitra_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Anda yakin ingin mengaktifkan kembali akun {{ $m->nama_mitra }}?');">
+                                @csrf @method('PATCH')
+                                <button type="submit" style="background: seagreen; ...">Aktifkan</button>
                             </form>
                         @endif
+                        {{-- ============================================= --}}
+
+                        {{-- ... Tombol Hapus (SuperAdmin) ... --}}
                     </td>
-                    </tr>
-            @empty
-                <tr>
-                    <td colspan="5" style="text-align: center;">Belum ada mitra yang mendaftar.</td>
                 </tr>
+            @empty
+                <tr><td colspan="6" style="text-align: center;">Belum ada mitra yang mendaftar.</td></tr>
             @endforelse
         </tbody>
     </table>
+
+    {{-- Script JavaScript untuk toggle form blokir --}}
+    <script>
+        function toggleBlockForm(mitraId) {
+            const form = document.getElementById(`block-form-${mitraId}`);
+            if (form) { form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
+        }
+    </script>
 @endsection

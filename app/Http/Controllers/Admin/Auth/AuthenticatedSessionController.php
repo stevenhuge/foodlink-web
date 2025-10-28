@@ -7,52 +7,66 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Menampilkan halaman login.
+     * Menampilkan halaman login Admin.
      */
     public function create(): View
     {
-        // Gunakan view 'admin.auth.login'
+        // Pastikan view mengarah ke form login admin
         return view('admin.auth.login');
     }
 
     /**
-     * Menangani permintaan login.
+     * Menangani permintaan login Admin.
      */
     public function store(Request $request): RedirectResponse
     {
+        // 1. Validasi menggunakan 'username'
         $request->validate([
-            'username' => 'required|string',
+            'username' => 'required|string', // Ganti dari email_bisnis
             'password' => 'required|string',
         ]);
 
-        // Sesuaikan kredensial dengan nama kolom di database Anda
+        // 2. Siapkan kredensial dengan 'username'
         $credentials = [
-            'username' => $request->username,
-            'password' => $request->password, // Laravel otomatis hash-check
+            'username' => $request->username, // Ganti dari email_bisnis
+            'password' => $request->password,
         ];
 
-        // Coba login menggunakan guard 'admin'
+        // 3. Coba login menggunakan guard 'admin'
         if (Auth::guard('admin')->attempt($credentials, $request->boolean('remember'))) {
+
+            // Pengecekan status akun admin jika perlu (misal: aktif/nonaktif)
+            // $admin = Auth::guard('admin')->user();
+            // if ($admin->status === 'nonaktif') {
+            //     Auth::guard('admin')->logout();
+            //     // ... throw ValidationException ...
+            // }
+
+            // Jika login berhasil & akun aktif
             $request->session()->regenerate();
 
-            // Redirect ke dashboard admin
+            // 4. Redirect ke dashboard admin
             return redirect()->intended(route('admin.dashboard'));
         }
 
-        return back()->withErrors([
-            'username' => 'Kredensial yang diberikan tidak cocok dengan catatan kami.',
-        ])->onlyInput('username');
+        // Jika kredensial salah
+        throw ValidationException::withMessages([
+            // 5. Tampilkan error pada field 'username'
+            'username' => __('auth.failed'), // Pesan error standar Laravel
+        ]);
     }
 
     /**
-     * Menangani permintaan logout.
+     * Menangani permintaan logout Admin.
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Pastikan logout menggunakan guard 'admin'
         Auth::guard('admin')->logout();
 
         $request->session()->invalidate();

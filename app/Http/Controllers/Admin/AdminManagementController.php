@@ -12,21 +12,24 @@ use Illuminate\Validation\Rule;
 class AdminManagementController extends Controller
 {
     // Terapkan middleware di constructor agar hanya SuperAdmin
-    public function __construct()
-    {
-        // Hanya SuperAdmin yang bisa mengakses SEMUA method di controller ini
-        $this->middleware(function ($request, $next) {
-            if (Gate::denies('is-superadmin')) {
-                abort(403, 'Akses Ditolak. Hanya SuperAdmin.');
-            }
-            return $next($request);
-        });
-    }
+    // public function __construct()
+    // {
+    //     // Hanya SuperAdmin yang bisa mengakses SEMUA method di controller ini
+    //     $this->middleware(function ($request, $next) {
+    //         if (Gate::denies('is-superadmin')) {
+    //             abort(403, 'Akses Ditolak. Hanya SuperAdmin.');
+    //         }
+    //         return $next($request);
+    //     });
+    // }
 
     public function index()
     {
-        $admins = Admin::all();
-        return view('admin.admins.index', compact('admins'));
+        // Ambil semua admin KECUALI diri sendiri (SuperAdmin)
+        $admins = Admin::where('admin_id', '!=', auth()->guard('admin')->id())
+                    ->orderBy('nama_lengkap')
+                    ->get();
+        return view('admin.admins.index', compact('admins')); // Pastikan nama view benar
     }
 
     public function create()

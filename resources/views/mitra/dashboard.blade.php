@@ -11,13 +11,29 @@
     <p>Di halaman ini, Anda dapat mengelola produk surplus Anda.</p>
 
     <div style="margin-top: 20px;">
-        <a href="#" style="background: #007bff; color: white; padding: 15px; text-decoration: none; font-size: 18px;">
+
+        <a href="{{ route('mitra.produk.create') }}" style="background: #007bff; color: white; padding: 15px; text-decoration: none; font-size: 18px;">
             + Tambah Produk (Jual Cepat / Donasi)
+        </a>
+        </div>
+
+    <div style="margin-top: 20px;">
+        <a href="{{ route('mitra.produk.index') }}" style="background: #6c757d; color: white; padding: 15px; text-decoration: none; font-size: 18px;">
+            Lihat & Kelola Produk Saya
         </a>
     </div>
 
-    <h3 style="margin-top: 30px;">Produk Anda Saat Ini</h3>
-    <p><em>(Daftar produk Anda akan muncul di sini...)</em></p>
+<div style="margin-top: 20px;">
+    <a href="{{ route('mitra.barter.index') }}" style="background: #17a2b8; color: white; padding: 15px; text-decoration: none; font-size: 18px;">
+        Lihat Marketplace Barter
+    </a>
+</div>
+
+    <div style="margin-top: 20px;">
+        <a href="{{ route('mitra.barter.inbox') }}" style="background: #ffc107; color: black; padding: 15px; text-decoration: none; font-size: 18px;">
+            Inbox Penawaran Barter
+        </a>
+    </div>
 
     <h3 style="margin-top: 30px;">Riwayat Transaksi</h3>
     <p><em>(Riwayat produk yang diambil user akan muncul di sini...)</em></p>

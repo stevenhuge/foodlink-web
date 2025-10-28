@@ -4,87 +4,52 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mitra;
+use App\Models\KategoriUsaha;
+use App\Models\AlasanBlokirOption; // <-- Tambahkan ini
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash; // <-- Pastikan ini ada
+use Illuminate\Support\Facades\Hash;
 
 class MitraVerificationController extends Controller
 {
-
     public function index()
     {
-        // Tampilkan mitra yang 'Pending' dulu, lalu sisanya
-        $mitra = Mitra::orderByRaw("FIELD(status_verifikasi, 'Pending') DESC")
+        $mitra = Mitra::with(['kategoriUsaha', 'alasanBlokir']) // Eager load relasi
+            ->orderByRaw("FIELD(status_verifikasi, 'Pending') DESC")
             ->orderBy('created_at', 'desc')
             ->get();
+        // Ambil juga pilihan alasan untuk dropdown di view
+        $alasanBlokirOptions = AlasanBlokirOption::orderBy('alasan_text')->get();
 
-        return view('admin.mitra.index', compact('mitra'));
+        return view('admin.mitra.index', compact('mitra', 'alasanBlokirOptions')); // Kirim $alasanBlokirOptions
     }
 
-    public function show(Mitra $mitra)
+    public function show(Mitra $mitra) { /* ... */ }
+    public function edit(Mitra $mitra) { /* ... */ }
+    public function update(Request $request, Mitra $mitra) { /* ... */ }
+    public function destroy(Mitra $mitra) { /* ... */ }
+    public function verify(Mitra $mitra) { /* ... */ }
+    public function reject(Mitra $mitra) { /* ... */ }
+
+    /**
+     * Blokir akun Mitra dengan memilih alasan.
+     */
+    public function block(Request $request, Mitra $mitra)
     {
-        // Tampilkan detail mitra untuk verifikasi
-        return view('admin.mitra.show', compact('mitra'));
-    }
-
-    // ====================================================================
-    // INI ADALAH FUNGSI EDIT YANG BENAR (Hanya menampilkan view)
-    // ====================================================================
-    public function edit(Mitra $mitra)
-    {
-        // Fungsi edit HANYA menampilkan form edit.
-        return view('admin.mitra.edit', compact('mitra'));
-    }
-
-    // ====================================================================
-    // INI ADALAH FUNGSI UPDATE YANG BARU (Menyimpan data)
-    // ====================================================================
-    public function update(Request $request, Mitra $mitra)
-    {
-        // 1. Validasi data
-        $validated = $request->validate([
-            'nama_mitra' => 'required|string|max:255',
-            'email_bisnis' => 'required|string|email|max:255|unique:mitra,email_bisnis,'.$mitra->mitra_id.',mitra_id',
-            'nomor_telepon' => 'required|string|max:20',
-            'alamat' => 'required|string',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        // 2. Update data utama
-        $mitra->update($validated);
-
-        // 3. (SOLUSI PASSWORD) Cek jika admin ingin me-RESET password
-        if ($request->filled('password_baru')) {
-            $request->validate([
-                'password_baru' => 'string|min:8|confirmed',
-            ]);
-            // Hash dan simpan password baru
-            $mitra->password_hash = Hash::make($request->password_baru);
-            $mitra->save();
-        }
-
-        // Redirect kembali ke index (atau show) dengan pesan sukses
-        return redirect()->route('admin.mitra.index')->with('success', 'Data Mitra berhasil diupdate.');
-    }
-
-    public function destroy(Mitra $mitra)
-    {
-        $mitra->delete();
-        return redirect()->route('admin.mitra.index')->with('success', 'Mitra berhasil dihapus.');
-    }
-
-    // Method untuk menyetujui (Verify)
-    public function verify(Mitra $mitra)
-    {
-        $mitra->status_verifikasi = 'Verified';
+        $request->validate(['alasan_blokir_option_id' => 'required|integer|exists:alasan_blokir_options,alasan_id'], [ /* ... pesan error ... */ ]);
+        $mitra->status_akun = 'Diblokir';
+        $mitra->alasan_blokir_option_id = $request->input('alasan_blokir_option_id'); // Simpan ID alasan
         $mitra->save();
-        return redirect()->route('admin.mitra.index')->with('success', $mitra->nama_mitra . ' berhasil diverifikasi.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Akun ' . $mitra->nama_mitra . ' berhasil diblokir.');
     }
 
-    // Method untuk menolak (Reject)
-    public function reject(Mitra $mitra)
+    /**
+     * Aktifkan kembali akun Mitra.
+     */
+    public function unblock(Mitra $mitra)
     {
-        $mitra->status_verifikasi = 'Rejected';
+        $mitra->status_akun = 'Aktif';
+        $mitra->alasan_blokir_option_id = null; // Hapus ID alasan
         $mitra->save();
-        return redirect()->route('admin.mitra.index')->with('success', $mitra->nama_mitra . ' berhasil ditolak.');
+        return redirect()->route('admin.mitra.index')->with('success', 'Akun ' . $mitra->nama_mitra . ' berhasil diaktifkan kembali.');
     }
 }

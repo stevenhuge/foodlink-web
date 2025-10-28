@@ -3,17 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // <-- UBAH INI
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; // <-- Pastikan ini ada
 
-class Mitra extends Authenticatable // <-- UBAH INI
+class Mitra extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    // Tambahkan HasApiTokens di sini
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * Tentukan tabel dan primary key.
      */
-    protected $table = 'mitra';
+    protected $table = 'mitra'; // <-- Ini dari kode Anda (Bagus!)
     protected $primaryKey = 'mitra_id';
 
     /**
@@ -31,6 +33,10 @@ class Mitra extends Authenticatable // <-- UBAH INI
         'alamat',
         'deskripsi',
         'password_hash',
+        'status_verifikasi', // <-- Saya tambahkan ini dari kode saya sebelumnya
+        'status_akun',
+        'alasan_blokir_option_id',
+        'kategori_usaha_id', // <-- Tambahkan ini untuk relasi kategori usaha
     ];
 
     /**
@@ -48,7 +54,17 @@ class Mitra extends Authenticatable // <-- UBAH INI
         return $this->password_hash;
     }
 
-    // --- RELASI-RELASI YANG SUDAH DIBUAT ---
+    // --- INI PERBAIKAN UNTUK ERROR 'REMEMBER TOKEN' ---
+    /**
+     * Beri tahu Laravel bahwa model ini tidak menggunakan 'remember_token'.
+     */
+    public function getRememberTokenName()
+    {
+        return null;
+    }
+    // ---------------------------------------------------
+
+    // --- RELASI-RELASI YANG SUDAH ANDA BUAT ---
 
     public function produk()
     {
@@ -68,5 +84,14 @@ class Mitra extends Authenticatable // <-- UBAH INI
     public function barterDiterima()
     {
         return $this->hasMany(Barter::class, 'penerima_mitra_id', 'mitra_id');
+    }
+
+    public function kategoriUsaha()
+    {
+        return $this->belongsTo(KategoriUsaha::class, 'kategori_usaha_id', 'kategori_usaha_id');
+    }
+
+    public function alasanBlokir() {
+        return $this->belongsTo(AlasanBlokirOption::class, 'alasan_blokir_option_id', 'alasan_id');
     }
 }

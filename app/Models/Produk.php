@@ -12,46 +12,57 @@ class Produk extends Model
     protected $table = 'produk';
     protected $primaryKey = 'produk_id';
 
-    // --- RELASI ---
+    // --- TAMBAHAN WAJIB (Berdasarkan Migration Anda) ---
+    protected $fillable = [
+        'mitra_id',
+        'kategori_id',
+        'nama_produk',
+        'deskripsi',
+        'foto_produk',
+        'harga_normal',
+        'harga_diskon',
+        'tipe_penawaran', // 'Jual-Cepat', 'Donasi'
+        'stok_awal',
+        'stok_tersisa',
+        'waktu_kadaluarsa',
+        'waktu_ambil_mulai',
+        'waktu_ambil_selesai',
+        'status_produk', // 'Tersedia', 'Habis', 'Ditarik'
+    ];
 
-    /**
-     * Satu Produk dimiliki oleh satu Mitra.
-     */
+    // Tipe data untuk kolom waktu (Penting untuk kalender)
+    protected $casts = [
+        'waktu_kadaluarsa' => 'datetime',
+        'waktu_ambil_mulai' => 'datetime',
+        'waktu_ambil_selesai' => 'datetime',
+    ];
+    // --- BATAS TAMBAHAN ---
+
+
+    // --- RELASI (Sudah Benar) ---
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
     }
 
-    /**
-     * Satu Produk termasuk dalam satu Kategori.
-     */
     public function kategori()
     {
         return $this->belongsTo(KategoriProduk::class, 'kategori_id', 'kategori_id');
     }
 
-    /**
-     * Satu Produk bisa ada di banyak Detail Transaksi.
-     */
     public function detailTransaksi()
     {
         return $this->hasMany(DetailTransaksi::class, 'produk_id', 'produk_id');
     }
 
-    /**
-     * Satu Produk bisa diminta dalam banyak Barter.
-     */
     public function barterDiminta()
     {
         return $this->hasMany(Barter::class, 'produk_diminta_id', 'produk_id');
     }
 
-    /**
-     * Relasi many-to-many ke Transaksi (melalui DetailTransaksi).
-     */
     public function transaksi()
     {
         return $this->belongsToMany(Transaksi::class, 'detail_transaksi', 'produk_id', 'transaksi_id')
-                    ->withPivot('jumlah', 'harga_saat_transaksi'); // Ambil data tambahan
+                    ->withPivot('jumlah', 'harga_saat_transaksi');
     }
 }

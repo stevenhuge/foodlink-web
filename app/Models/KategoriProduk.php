@@ -11,6 +11,7 @@ class KategoriProduk extends Model
 
     protected $table = 'kategori_produk';
     protected $primaryKey = 'kategori_id';
+    protected $fillable = ['nama_kategori'];
     public $timestamps = false; // Karena kita tidak menambah timestamps di migrasi
 
     // --- RELASI ---
