@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <h1>Selamat Datang di Dashboard Admin</h1>
+    <h1>Selamat Datang di Dashboard Admin wkwkwkw semua</h1>
     <p>Ini adalah halaman utama panel admin.</p>
 
     <h3>Statistik Platform</h3>
