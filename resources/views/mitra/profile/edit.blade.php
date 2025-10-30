@@ -1,4 +1,4 @@
-@extends('mitra.layouts.app')
+@extends('mitra.layouts.app') {{-- Pastikan nama layout Anda benar --}}
 @section('title', 'Edit Profil Saya')
 @section('content')
     <h1>Edit Profil Usaha</h1>
@@ -59,13 +59,16 @@
          {{-- Dropdown Kategori --}}
         <div style="margin-top: 10px;">
             <label for="kategori_usaha_id">Kategori Usaha</label><br>
-            <select id="kategori_usaha_id" name="kategori_usaha_id" required style="width: 318px; padding: 8px;">
+            <select id="kategori_usaha_id" name="kategori_usaha_id" required style="width: 318px; padding: 8px;"> {{-- Sesuaikan width jika perlu --}}
                 <option value="">-- Pilih Kategori --</option>
-                @foreach($kategoriUsaha as $kategori)
-                    <option value="{{ $kategori->kategori_usaha_id }}" {{ old('kategori_usaha_id', $mitra->kategori_usaha_id) == $kategori->kategori_usaha_id ? 'selected' : '' }}>
-                        {{ $kategori->nama_kategori }}
-                    </option>
-                @endforeach
+                {{-- Pastikan variabel $kategoriUsaha dikirim dari controller --}}
+                @isset($kategoriUsaha)
+                    @foreach($kategoriUsaha as $kategori)
+                        <option value="{{ $kategori->kategori_usaha_id }}" {{ old('kategori_usaha_id', $mitra->kategori_usaha_id) == $kategori->kategori_usaha_id ? 'selected' : '' }}>
+                            {{ $kategori->nama_kategori }}
+                        </option>
+                    @endforeach
+                @endisset
             </select>
              @error('kategori_usaha_id') <span style="color: red;">{{ $message }}</span> @enderror
         </div>

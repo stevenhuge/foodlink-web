@@ -23,19 +23,26 @@
                 <tr style=" /* ... style baris ... */ ">
                     <td>{{ $m->nama_mitra }}<br><small>{{ $m->email_bisnis }}</small></td>
                     <td>{{ $m->kategoriUsaha->nama_kategori ?? '-' }}</td>
-                    <td> /* ... status verifikasi ... */ </td>
+                    <td>{{ $m->status_verifikasi }}</td>
                     <td>
                          <span style="font-weight: bold; color: {{ $m->status_akun == 'Diblokir' ? 'red' : 'green' }};">
                             {{ $m->status_akun }}
                         </span>
                         {{-- Tampilkan alasan jika diblokir (dari relasi) --}}
                         @if($m->status_akun == 'Diblokir' && $m->alasanBlokir)
-                            <small style="display: block; cursor: help;" title="Alasan: {{ $m->alasanBlokir->alasan_text }}">(Lihat alasan)</small>
+                            <small style="display: block; cursor: help;" title="Alasan: {{ $m->alasanBlokir->alasan_text }}">{{ $m->alasanBlokir->alasan_text }}</small>
                         @endif
                     </td>
                     <td>{{ $m->created_at->format('d M Y') }}</td>
                     <td style="white-space: nowrap;">
                         {{-- ... Tombol Verifikasi/Tolak, Detail, Edit ... --}}
+                        @if ($m->status_verifikasi == 'Pending' && $m->status_akun == 'Aktif')
+                            <form method="POST" action="{{ route('admin.mitra.verify', $m->mitra_id) }}" style="display: inline;"> @csrf @method('PATCH') <button type="submit" style="color: green; background: #d4edda; border: 1px solid green; cursor: pointer; padding: 3px 6px; font-size: 0.9em;">Setujui</button> </form>
+                            <form method="POST" action="{{ route('admin.mitra.reject', $m->mitra_id) }}" style="display: inline;"> @csrf @method('PATCH') <button type="submit" style="color: red; background: #f8d7da; border: 1px solid red; cursor: pointer; padding: 3px 6px; font-size: 0.9em;">Tolak</button> </form>
+                        @endif
+
+                        <a href="{{ route('admin.mitra.show', $m->mitra_id) }}" style="background: grey; color: white; padding: 3px 8px; text-decoration: none; font-size: 0.9em; border-radius: 3px;"> Detail </a>
+                        <a href="{{ route('admin.mitra.edit', $m->mitra_id) }}" style="background: blue; color: white; padding: 3px 8px; text-decoration: none; font-size: 0.9em; border-radius: 3px;"> Edit </a>
 
                         {{-- === TOMBOL & FORM BLOKIR / AKTIFKAN === --}}
                         @if ($m->status_akun == 'Aktif')

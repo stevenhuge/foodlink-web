@@ -17,8 +17,9 @@ class ProfileController extends Controller
      */
     public function edit()
     {
-        $mitra = Auth::guard('mitra')->user(); // Ambil data mitra yang login
-        $kategoriUsaha = KategoriUsaha::orderBy('nama_kategori')->get(); // Ambil kategori
+        $mitra = Auth::guard('mitra')->user();
+        $kategoriUsaha = KategoriUsaha::orderBy('nama_kategori')->get();
+        // Pastikan nama view di sini TEPAT 'mitra.profile.edit'
         return view('mitra.profile.edit', compact('mitra', 'kategoriUsaha'));
     }
 

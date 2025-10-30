@@ -1,10 +1,8 @@
-@extends('admin.layouts.app')
-
-@section('title', 'Manajemen Mitra')
-
+@extends('mitra.layouts.app')
+@section('title', 'Marketplace Barter')
 @section('content')
-    <h1>Manajemen Mitra</h1>
-    <p>Daftar semua mitra yang terdaftar.</p>
+    <h1>Marketplace Barter</h1>
+    <p>Lihat produk dari mitra lain yang tersedia untuk dibarter.</p>
 
     {{-- Notifikasi Sukses/Error --}}
     @if (session('success'))
@@ -13,99 +11,61 @@
     @if (session('error'))
         <div class="error-msg">{{ session('error') }}</div>
     @endif
-    {{-- Tampilkan error validasi alasan blokir --}}
-    @if ($errors->has('alasan_blokir'))
-         <div class="error-msg">{{ $errors->first('alasan_blokir') }}</div>
-    @endif
 
-
-    <table>
+    {{-- Tabel Produk Marketplace --}}
+    <table> {{-- Hapus inline style agar ikut layout --}}
         <thead>
             <tr>
-                <th>Nama Mitra</th>
-                <th>Kategori Usaha</th>
-                <th>Status Verifikasi</th>
-                <th>Status Akun</th>
-                <th>Tgl. Daftar</th>
-                <th style="min-width: 250px;">Aksi</th>
+                <th>Foto</th>
+                <th>Nama Produk</th>
+                <th>Mitra Pemilik</th> {{-- Pastikan header ini ada --}}
+                <th>Harga Perkiraan</th>
+                <th>Stok</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($mitra as $m)
-                <tr style="
-                    @if($m->status_verifikasi == 'Pending') background: #fffbe6; @endif
-                    @if($m->status_akun == 'Diblokir') background: #e2e3e5; color: #6c757d; @endif
-                ">
-                    <td>{{ $m->nama_mitra }}<br><small>{{ $m->email_bisnis }}</small></td>
-                    <td>{{ $m->kategoriUsaha->nama_kategori ?? '-' }}</td>
+            @forelse ($produks as $produk)
+                <tr>
+                    {{-- Foto Produk --}}
                     <td>
-                        <span style="font-weight: bold; color: {{ $m->status_akun == 'Diblokir' ? '#6c757d' : ($m->status_verifikasi == 'Verified' ? 'green' : ($m->status_verifikasi == 'Rejected' ? 'red' : 'orange')) }};">
-                            {{ $m->status_verifikasi }}
-                        </span>
-                    </td>
-                    <td>
-                         <span style="font-weight: bold; color: {{ $m->status_akun == 'Diblokir' ? 'red' : 'green' }};">
-                            {{ $m->status_akun }}
-                        </span>
-                        {{-- Tampilkan alasan jika diblokir --}}
-                        @if($m->status_akun == 'Diblokir' && $m->alasan_blokir)
-                            <small style="display: block; cursor: help;" title="Alasan: {{ $m->alasan_blokir }}">(Lihat alasan)</small>
+                        @if($produk->foto_produk)
+                            <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        @else
+                            <div style="width: 60px; height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.8em; color: #666;">No Img</div>
                         @endif
                     </td>
-                    <td>{{ $m->created_at->format('d M Y') }}</td>
-                    <td style="white-space: nowrap;">
-                        {{-- Tombol Verifikasi/Tolak --}}
-                        @if ($m->status_verifikasi == 'Pending' && $m->status_akun == 'Aktif')
-                            <form method="POST" action="{{ route('admin.mitra.verify', $m->mitra_id) }}" style="display: inline;"> @csrf @method('PATCH') <button type="submit" style="color: green; background: #d4edda; border: 1px solid green; cursor: pointer; padding: 3px 6px; font-size: 0.9em;">Setujui</button> </form>
-                            <form method="POST" action="{{ route('admin.mitra.reject', $m->mitra_id) }}" style="display: inline;"> @csrf @method('PATCH') <button type="submit" style="color: red; background: #f8d7da; border: 1px solid red; cursor: pointer; padding: 3px 6px; font-size: 0.9em;">Tolak</button> </form>
-                        @endif
+                    {{-- Nama Produk --}}
+                    <td>{{ $produk->nama_produk }}</td>
 
-                        {{-- Tombol Detail & Edit --}}
-                        <a href="{{ route('admin.mitra.show', $m->mitra_id) }}" style="background: grey; color: white; padding: 3px 8px; text-decoration: none; font-size: 0.9em; border-radius: 3px;"> Detail </a>
-                        <a href="{{ route('admin.mitra.edit', $m->mitra_id) }}" style="background: blue; color: white; padding: 3px 8px; text-decoration: none; font-size: 0.9em; border-radius: 3px;"> Edit </a>
+                    {{-- === PERBAIKAN DI SINI === --}}
+                    {{-- Tampilkan nama mitra pemilik produk DARI relasi $produk->mitra --}}
+                    <td>{{ $produk->mitra->nama_mitra ?? 'N/A' }}</td>
+                    {{-- ======================== --}}
 
-                        {{-- === TOMBOL BLOKIR / AKTIFKAN DENGAN ALASAN === --}}
-                        @if ($m->status_akun == 'Aktif')
-                            <button onclick="confirmBlock('{{ route('admin.mitra.block', $m->mitra_id) }}', '{{ $m->nama_mitra }}')"
-                                    style="background: orange; color: white; border: none; padding: 3px 8px; cursor: pointer; font-size: 0.9em; border-radius: 3px;">
-                                Blokir
+                    {{-- Harga & Stok --}}
+                    <td>Rp {{ number_format($produk->harga_diskon) }}</td>
+                    <td>{{ $produk->stok_tersisa }}</td>
+
+                    {{-- Tombol Aksi (dengan Logika Cooldown) --}}
+                    <td>
+                        @if($pendingOffers->contains($produk->produk_id))
+                            <button style="background: grey; color: white; padding: 5px 8px; border: none; cursor: not-allowed; border-radius: 3px; font-size: 0.9em;" disabled>
+                                Diajukan (Cooldown)
                             </button>
-                        @else {{-- Jika status Diblokir --}}
-                            <form action="{{ route('admin.mitra.unblock', $m->mitra_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Anda yakin ingin mengaktifkan kembali akun {{ $m->nama_mitra }}?');">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" style="background: seagreen; color: white; border: none; padding: 3px 8px; cursor: pointer; font-size: 0.9em; border-radius: 3px;">Aktifkan</button>
-                            </form>
-                        @endif
-                        {{-- ============================================= --}}
-
-                        {{-- Tombol Hapus (Hanya SuperAdmin) --}}
-                        @if(auth()->guard('admin')->user()->role === 'SuperAdmin')
-                            <form action="{{ route('admin.mitra.destroy', $m->mitra_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Anda yakin ingin menghapus mitra {{ $m->nama_mitra }}? Tindakan ini tidak bisa dibatalkan.');"> @csrf @method('DELETE') <button type="submit" style="background: darkred; color: white; border: none; padding: 3px 8px; cursor: pointer; font-size: 0.9em; border-radius: 3px;">Hapus</button> </form>
+                        @else
+                            <a href="{{ route('mitra.barter.create', $produk->produk_id) }}" style="background: blue; color: white; padding: 5px 8px; text-decoration: none; border-radius: 3px; font-size: 0.9em;">
+                                Ajukan Barter
+                            </a>
                         @endif
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" style="text-align: center;">Belum ada mitra yang mendaftar.</td></tr>
+                {{-- Pesan "Kosong" --}}
+                <tr>
+                    <td colspan="6" style="text-align: center;">Tidak ada produk dari mitra lain yang tersedia untuk barter saat ini.</td>
+                </tr>
             @endforelse
         </tbody>
     </table>
-
-    {{-- Script JavaScript untuk Prompt Blokir (Letakkan di akhir @section('content')) --}}
-    <script>
-        function confirmBlock(actionUrl, mitraName) {
-            let reason = prompt(`Masukkan alasan memblokir akun ${mitraName} (minimal 10 karakter):`);
-            if (reason === null) { return false; }
-            reason = reason.trim();
-            if (reason.length < 10) { alert('Alasan terlalu pendek. Minimal 10 karakter.'); return false; }
-            if (reason.length > 500) { alert('Alasan terlalu panjang. Maksimal 500 karakter.'); return false; }
-
-            let form = document.createElement('form');
-            form.method = 'POST'; form.action = actionUrl; form.style.display = 'none';
-            let csrfInput = document.createElement('input'); csrfInput.type = 'hidden'; csrfInput.name = '_token'; csrfInput.value = '{{ csrf_token() }}'; form.appendChild(csrfInput);
-            let methodInput = document.createElement('input'); methodInput.type = 'hidden'; methodInput.name = '_method'; methodInput.value = 'PATCH'; form.appendChild(methodInput);
-            let reasonInput = document.createElement('input'); reasonInput.type = 'hidden'; reasonInput.name = 'alasan_blokir'; reasonInput.value = reason; form.appendChild(reasonInput);
-            document.body.appendChild(form); form.submit();
-        }
-    </script>
 @endsection

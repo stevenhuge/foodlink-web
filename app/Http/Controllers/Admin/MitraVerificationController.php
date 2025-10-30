@@ -23,12 +23,12 @@ class MitraVerificationController extends Controller
         return view('admin.mitra.index', compact('mitra', 'alasanBlokirOptions')); // Kirim $alasanBlokirOptions
     }
 
-    public function show(Mitra $mitra) { /* ... */ }
-    public function edit(Mitra $mitra) { /* ... */ }
-    public function update(Request $request, Mitra $mitra) { /* ... */ }
-    public function destroy(Mitra $mitra) { /* ... */ }
-    public function verify(Mitra $mitra) { /* ... */ }
-    public function reject(Mitra $mitra) { /* ... */ }
+    public function show(Mitra $mitra){ return view('admin.mitra.show', compact('mitra')); }
+    public function edit(Mitra $mitra){ $kategoriUsaha = KategoriUsaha::orderBy('nama_kategori')->get(); return view('admin.mitra.edit', compact('mitra', 'kategoriUsaha')); }
+    public function update(Request $request, Mitra $mitra){ /* ... kode update ... */ return redirect()->route('admin.mitra.index')->with('success', 'Data Mitra berhasil diupdate.'); }
+    public function destroy(Mitra $mitra){ /* ... kode destroy ... */ }
+    public function verify(Mitra $mitra){ $mitra->status_verifikasi = 'Verified'; $mitra->save(); return redirect()->route('admin.mitra.index')->with('success', $mitra->nama_mitra . ' berhasil diverifikasi.'); }
+    public function reject(Mitra $mitra){ $mitra->status_verifikasi = 'Rejected'; $mitra->save(); return redirect()->route('admin.mitra.index')->with('success', $mitra->nama_mitra . ' berhasil ditolak.'); }
 
     /**
      * Blokir akun Mitra dengan memilih alasan.

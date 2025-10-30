@@ -21,6 +21,10 @@
             <td>{{ $mitra->email_bisnis }}</td>
         </tr>
         <tr>
+            <th>Kategori Usaha</th>
+            <td>{{ $mitra->kategoriUsaha->nama_kategori ?? '-' }}</td>
+        </tr>
+        <tr>
             <th>Nomor Telepon</th>
             <td>{{ $mitra->nomor_telepon }}</td>
         </tr>
