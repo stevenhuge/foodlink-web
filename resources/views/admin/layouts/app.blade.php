@@ -96,7 +96,7 @@
                 <div class="position-sticky pt-3">
                     <!-- Brand Logo -->
                     <div class="text-center mb-4">
-                        <h4 class="brand-logo">
+                        <h4 class="brand-logo" style="color: white;">
                             <i class="fas fa-utensils me-2"></i>Foodlink Admin
                         </h4>
                     </div>
@@ -163,7 +163,7 @@
                         <div class="d-flex align-items-center">
                             <span class="me-3 text-muted d-none d-sm-block">
                                 <i class="fas fa-user-circle me-1"></i>
-                                {{ auth()->guard('admin')->user()->name ?? 'Admin' }}
+                                {{ Auth::user()->nama_lengkap }}
                             </span>
                             <form method="POST" action="{{ route('admin.logout') }}">
                                 @csrf
