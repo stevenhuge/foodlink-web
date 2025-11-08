@@ -1,90 +1,186 @@
 @extends('admin.layouts.app')
+{{-- Pastikan ini menunjuk ke layout admin Anda yang benar --}}
+
 @section('title', 'Manajemen Mitra')
+
 @section('content')
-    <h1>Manajemen Mitra</h1>
-    {{-- ... Notifikasi ... --}}
-    @if ($errors->has('alasan_blokir_option_id'))
-         <div class="error-msg">{{ $errors->first('alasan_blokir_option_id') }}</div>
-    @endif
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nama Mitra</th>
-                <th>Kategori Usaha</th>
-                <th>Status Verifikasi</th>
-                <th>Status Akun</th>
-                <th>Tgl. Daftar</th>
-                <th style="min-width: 250px;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($mitra as $m)
-                <tr style=" /* ... style baris ... */ ">
-                    <td>{{ $m->nama_mitra }}<br><small>{{ $m->email_bisnis }}</small></td>
-                    <td>{{ $m->kategoriUsaha->nama_kategori ?? '-' }}</td>
-                    <td>{{ $m->status_verifikasi }}</td>
-                    <td>
-                         <span style="font-weight: bold; color: {{ $m->status_akun == 'Diblokir' ? 'red' : 'green' }};">
-                            {{ $m->status_akun }}
-                        </span>
-                        {{-- Tampilkan alasan jika diblokir (dari relasi) --}}
-                        @if($m->status_akun == 'Diblokir' && $m->alasanBlokir)
-                            <small style="display: block; cursor: help;" title="Alasan: {{ $m->alasanBlokir->alasan_text }}">{{ $m->alasanBlokir->alasan_text }}</small>
-                        @endif
-                    </td>
-                    <td>{{ $m->created_at->format('d M Y') }}</td>
-                    <td style="white-space: nowrap;">
-                        {{-- ... Tombol Verifikasi/Tolak, Detail, Edit ... --}}
-                        @if ($m->status_verifikasi == 'Pending' && $m->status_akun == 'Aktif')
-                            <form method="POST" action="{{ route('admin.mitra.verify', $m->mitra_id) }}" style="display: inline;"> @csrf @method('PATCH') <button type="submit" style="color: green; background: #d4edda; border: 1px solid green; cursor: pointer; padding: 3px 6px; font-size: 0.9em;">Setujui</button> </form>
-                            <form method="POST" action="{{ route('admin.mitra.reject', $m->mitra_id) }}" style="display: inline;"> @csrf @method('PATCH') <button type="submit" style="color: red; background: #f8d7da; border: 1px solid red; cursor: pointer; padding: 3px 6px; font-size: 0.9em;">Tolak</button> </form>
-                        @endif
+    <!-- Header Halaman -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h3 mb-0 text-gray-800">Manajemen Mitra</h2>
+        {{-- <a href="#" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm me-1"></i> Tambah Mitra Baru
+        </a> --}}
+    </div>
 
-                        <a href="{{ route('admin.mitra.show', $m->mitra_id) }}" style="background: grey; color: white; padding: 3px 8px; text-decoration: none; font-size: 0.9em; border-radius: 3px;"> Detail </a>
-                        <a href="{{ route('admin.mitra.edit', $m->mitra_id) }}" style="background: blue; color: white; padding: 3px 8px; text-decoration: none; font-size: 0.9em; border-radius: 3px;"> Edit </a>
+    <!-- Card Utama untuk Tabel -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body">
 
-                        {{-- === TOMBOL & FORM BLOKIR / AKTIFKAN === --}}
-                        @if ($m->status_akun == 'Aktif')
-                            {{-- Tombol untuk menampilkan form blokir --}}
-                            <button onclick="toggleBlockForm('{{ $m->mitra_id }}')" style="background: orange; ..."> Blokir </button>
-                            {{-- Form Blokir (Tersembunyi Awalnya) --}}
-                            <form id="block-form-{{ $m->mitra_id }}" action="{{ route('admin.mitra.block', $m->mitra_id) }}" method="POST" style="display: none; margin-top: 5px; border: 1px solid orange; padding: 5px;" onsubmit="return confirm('Anda yakin ingin memblokir akun {{ $m->nama_mitra }}?');">
-                                @csrf @method('PATCH')
-                                <label for="alasan-{{ $m->mitra_id }}" style="font-size: 0.9em;">Pilih Alasan:</label><br>
-                                <select name="alasan_blokir_option_id" id="alasan-{{ $m->mitra_id }}" required style="width: 150px; font-size: 0.9em;">
-                                    <option value="">-- Pilih --</option>
-                                    {{-- Loop pilihan alasan dari Controller --}}
-                                    @foreach ($alasanBlokirOptions as $alasan)
-                                    <option value="{{ $alasan->alasan_id }}">{{ $alasan->alasan_text }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" style="background: orange; ...">Konfirmasi Blokir</button>
-                                <button type="button" onclick="toggleBlockForm('{{ $m->mitra_id }}')" style="background: grey; ...">Batal</button>
-                            </form>
-                        @else {{-- Jika status Diblokir --}}
-                            {{-- Tombol Aktifkan --}}
-                            <form action="{{ route('admin.mitra.unblock', $m->mitra_id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Anda yakin ingin mengaktifkan kembali akun {{ $m->nama_mitra }}?');">
-                                @csrf @method('PATCH')
-                                <button type="submit" style="background: seagreen; ...">Aktifkan</button>
-                            </form>
-                        @endif
-                        {{-- ============================================= --}}
+            <!-- Tampilkan error validasi spesifik (jika ada) -->
+            @if ($errors->has('alasan_blokir_option_id'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ $errors->first('alasan_blokir_option_id') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-                        {{-- ... Tombol Hapus (SuperAdmin) ... --}}
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="6" style="text-align: center;">Belum ada mitra yang mendaftar.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+            <!-- Wrapper Tabel Responsif -->
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle caption-top">
+                    {{-- <caption>Total Mitra: {{ $mitra->count() }}</caption> --}}
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nama Mitra</th>
+                            <th scope="col">Kategori Usaha</th>
+                            <th scope="col">Status Verifikasi</th>
+                            <th scope="col">Status Akun</th>
+                            <th scope="col">Tgl. Daftar</th>
+                            <th scope="col" style="min-width: 210px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($mitra as $m)
+                            <tr>
+                                <!-- Nama Mitra -->
+                                <td>
+                                    <strong class="text-dark">{{ $m->nama_mitra }}</strong><br>
+                                    <small class="text-muted">{{ $m->email_bisnis }}</small>
+                                </td>
 
-    {{-- Script JavaScript untuk toggle form blokir --}}
-    <script>
-        function toggleBlockForm(mitraId) {
-            const form = document.getElementById(`block-form-${mitraId}`);
-            if (form) { form.style.display = form.style.display === 'none' ? 'block' : 'none'; }
-        }
-    </script>
+                                <!-- Kategori -->
+                                <td>{{ $m->kategoriUsaha->nama_kategori ?? '-' }}</td>
+
+                                <!-- Status Verifikasi (dengan Badges) -->
+                                <td>
+                                    @if($m->status_verifikasi == 'Pending')
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    @elseif($m->status_verifikasi == 'Disetujui')
+                                        <span class="badge bg-success">Disetujui</span>
+                                    @elseif($m->status_verifikasi == 'Ditolak')
+                                        <span class="badge bg-danger">Ditolak</span>
+                                    @else
+                                        <span class="badge bg-secondary">{{ $m->status_verifikasi }}</span>
+                                    @endif
+                                </td>
+
+                                <!-- Status Akun (dengan Badges) -->
+                                <td>
+                                    <span class="badge {{ $m->status_akun == 'Diblokir' ? 'bg-danger' : 'bg-success' }}">
+                                        {{ $m->status_akun }}
+                                    </span>
+                                    @if($m->status_akun == 'Diblokir' && $m->alasanBlokir)
+                                        <small class="d-block text-danger mt-1" style="cursor: help;" title="Alasan: {{ $m->alasanBlokir->alasan_text }}">
+                                            <i class="fas fa-info-circle me-1"></i>{{ $m->alasanBlokir->alasan_text }}
+                                        </small>
+                                    @endif
+                                </td>
+
+                                <!-- Tanggal Daftar -->
+                                <td>{{ $m->created_at->format('d M Y') }}</td>
+
+                                <!-- Tombol Aksi -->
+                                <td class="text-nowrap">
+
+                                    <!-- Aksi Verifikasi (jika pending) -->
+                                    @if ($m->status_verifikasi == 'Pending' && $m->status_akun == 'Aktif')
+                                        <form method="POST" action="{{ route('admin.mitra.verify', $m->mitra_id) }}" class="d-inline" onsubmit="return confirm('Setujui verifikasi mitra {{ $m->nama_mitra }}?');">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-success btn-sm" title="Setujui Verifikasi">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.mitra.reject', $m->mitra_id) }}" class="d-inline" onsubmit="return confirm('Tolak verifikasi mitra {{ $m->nama_mitra }}?');">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Tolak Verifikasi">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    <!-- Aksi Detail & Edit -->
+                                    <a href="{{ route('admin.mitra.show', $m->mitra_id) }}" class="btn btn-info btn-sm text-white" title="Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.mitra.edit', $m->mitra_id) }}" class="btn btn-primary btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
+                                    <!-- Aksi Blokir / Aktifkan -->
+                                    @if ($m->status_akun == 'Aktif')
+                                        <!-- Tombol Pemicu Modal -->
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#blockMitraModal-{{ $m->mitra_id }}" title="Blokir Akun">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    @else
+                                        <!-- Form Aktifkan -->
+                                        <form action="{{ route('admin.mitra.unblock', $m->mitra_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin ingin mengaktifkan kembali akun {{ $m->nama_mitra }}?');">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-success btn-sm" title="Aktifkan Akun">
+                                                <i class="fas fa-check-circle"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    <!-- Tombol Hapus (jika diperlukan) -->
+                                    {{-- ... --}}
+                                </td>
+                            </tr>
+
+                            <!-- [MODAL] Blokir Mitra (dibuat unik per mitra) -->
+                            @if ($m->status_akun == 'Aktif')
+                            <div class="modal fade" id="blockMitraModal-{{ $m->mitra_id }}" tabindex="-1" aria-labelledby="blockMitraModalLabel-{{ $m->mitra_id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="blockMitraModalLabel-{{ $m->mitra_id }}">Blokir Akun: {{ $m->nama_mitra }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <!-- Form di dalam Modal -->
+                                        <form action="{{ route('admin.mitra.block', $m->mitra_id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <div class="modal-body">
+                                                <p>Anda yakin ingin memblokir akun <strong>{{ $m->nama_mitra }}</strong>?</p>
+                                                <div class="mb-3">
+                                                    <label for="alasan-{{ $m->mitra_id }}" class="form-label">Pilih Alasan Blokir:</label>
+                                                    <select name="alasan_blokir_option_id" id="alasan-{{ $m->mitra_id }}" class="form-select" required>
+                                                        <option value="" disabled selected>-- Pilih Alasan --</option>
+                                                        {{-- Loop pilihan alasan dari Controller --}}
+                                                        @foreach ($alasanBlokirOptions as $alasan)
+                                                            <option value="{{ $alasan->alasan_id }}">{{ $alasan->alasan_text }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-danger">Ya, Blokir Akun</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                            <!-- [AKHIR MODAL] -->
+
+                        @empty
+                            <!-- Tampilan Jika Tabel Kosong -->
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="fas fa-info-circle me-2"></i> Belum ada mitra yang mendaftar.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div> <!-- End .table-responsive -->
+
+        </div> <!-- End .card-body -->
+    </div> <!-- End .card -->
+
+    <!-- Script JS tidak lagi diperlukan karena kita menggunakan Modal Bootstrap -->
+    {{-- <script> ... </script> --}}
+
 @endsection

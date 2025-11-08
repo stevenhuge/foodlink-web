@@ -44,38 +44,45 @@ class AlasanBlokirController extends Controller
 
     /**
      * Menampilkan form edit alasan.
-     * $alasanBlokirOption akan otomatis di-resolve oleh Laravel (Route Model Binding)
+     * * PERBAIKAN: Nama variabel diubah dari $alasanBlokirOption menjadi $alasan_blokir
+     * agar cocok dengan parameter route model binding (yang default-nya snake_case).
      */
-    public function edit(AlasanBlokirOption $alasanBlokirOption)
+    public function edit(AlasanBlokirOption $alasan_blokir)
     {
-        return view('admin.alasan-blokir.edit', compact('alasanBlokirOption'));
+        // PERBAIKAN: Kirim variabel dengan nama $alasan_blokir ke view
+        return view('admin.alasan-blokir.edit', compact('alasan_blokir'));
     }
 
     /**
      * Mengupdate alasan yang ada.
+     * * PERBAIKAN: Nama variabel diubah menjadi $alasan_blokir
      */
-    public function update(Request $request, AlasanBlokirOption $alasanBlokirOption)
+    public function update(Request $request, AlasanBlokirOption $alasan_blokir)
     {
         $validated = $request->validate([
-            'alasan_text' => 'required|string|max:255|unique:alasan_blokir_options,alasan_text,' . $alasanBlokirOption->alasan_id . ',alasan_id',
+            // PERBAIKAN: Gunakan ID dari $alasan_blokir
+            'alasan_text' => 'required|string|max:255|unique:alasan_blokir_options,alasan_text,' . $alasan_blokir->alasan_id . ',alasan_id',
         ],[
             'alasan_text.required' => 'Teks alasan wajib diisi.',
             'alasan_text.unique' => 'Teks alasan ini sudah ada.',
         ]);
 
-        $alasanBlokirOption->update($validated);
+        // PERBAIKAN: Update model $alasan_blokir
+        $alasan_blokir->update($validated);
 
         return redirect()->route('admin.alasan-blokir.index')->with('success', 'Alasan blokir berhasil diperbarui.');
     }
 
     /**
      * Menghapus alasan.
+     * * PERBAIKAN: Nama variabel diubah menjadi $alasan_blokir
      */
-    public function destroy(AlasanBlokirOption $alasanBlokirOption)
+    public function destroy(AlasanBlokirOption $alasan_blokir)
     {
          try {
             // Relasi di tabel mitra di set 'set null', jadi bisa dihapus
-            $alasanBlokirOption->delete();
+            // PERBAIKAN: Hapus model $alasan_blokir
+            $alasan_blokir->delete();
             return redirect()->route('admin.alasan-blokir.index')->with('success', 'Alasan blokir berhasil dihapus.');
          } catch (\Illuminate\Database\QueryException $e) {
              return redirect()->route('admin.alasan-blokir.index')->with('error', 'Gagal menghapus alasan: ' . $e->getMessage());
