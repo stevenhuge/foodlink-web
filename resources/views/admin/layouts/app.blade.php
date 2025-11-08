@@ -160,7 +160,7 @@
                         </button>
 
                         <!-- User Info & Logout -->
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center ms-auto"> {{-- Diubah: ms-auto agar ke kanan --}}
                             <span class="me-3 text-muted d-none d-sm-block">
                                 <i class="fas fa-user-circle me-1"></i>
                                 {{ Auth::user()->nama_lengkap }}
@@ -186,7 +186,7 @@
                             <div class="alert alert-success alert-custom-success alert-dismissible fade show" role="alert">
                                 <i class="fas fa-check-circle me-2"></i>
                                 {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> {{-- Diubah: aria-label --}}
                             </div>
                         @endif
 
@@ -194,7 +194,7 @@
                             <div class="alert alert-danger alert-custom-error alert-dismissible fade show" role="alert">
                                 <i class="fas fa-exclamation-circle me-2"></i>
                                 {{ session('error') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> {{-- Diubah: aria-label --}}
                             </div>
                         @endif
 
@@ -215,22 +215,19 @@
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function(alert) {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
+                    // Pastikan elemen masih ada di DOM
+                    if (alert.parentElement) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
                 });
             }, 5000);
         });
 
-        // Mobile sidebar toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggles = document.querySelectorAll('[data-bs-toggle="collapse"]');
-            sidebarToggles.forEach(function(toggle) {
-                toggle.addEventListener('click', function() {
-                    const target = document.querySelector(toggle.getAttribute('data-bs-target'));
-                    target.classList.toggle('show');
-                });
-            });
-        });
+        // Mobile sidebar toggle - Menggunakan Bootstrap's default behavior
+        // Script custom toggle tidak diperlukan jika menggunakan data-bs-toggle="collapse"
     </script>
+
+    @stack('scripts')
 </body>
 </html>
