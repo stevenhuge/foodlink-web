@@ -1,4 +1,5 @@
 <?php
+// app/Models/Transaksi.php
 
 namespace App\Models;
 
@@ -13,40 +14,35 @@ class Transaksi extends Model
     protected $primaryKey = 'transaksi_id';
 
     const CREATED_AT = 'waktu_pemesanan';
-    const UPDATED_AT = null; // Tidak ada updated_at di migrasi
-
-    // --- RELASI ---
+    const UPDATED_AT = null;
 
     /**
-     * Satu Transaksi dimiliki oleh satu User.
+     * === PERBAIKAN DI SINI ===
+     * Izinkan 'total_harga' (kolom lama) untuk diisi.
      */
-    public function user()
-    {
+    protected $fillable = [
+        'user_id',
+        'mitra_id',
+        'total_harga', // <-- TAMBAHKAN INI
+        'total_harga_poin',
+        'kode_unik_pengambilan',
+        'status',
+    ];
+    // =======================
+
+
+    // --- RELASI (Tidak berubah) ---
+    public function user() {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
-
-    /**
-     * Satu Transaksi dimiliki oleh satu Mitra.
-     */
-    public function mitra()
-    {
+    public function mitra() {
         return $this->belongsTo(Mitra::class, 'mitra_id', 'mitra_id');
     }
-
-    /**
-     * Satu Transaksi memiliki banyak Detail Transaksi.
-     */
-    public function detailTransaksi()
-    {
+    public function detailTransaksi() {
         return $this->hasMany(DetailTransaksi::class, 'transaksi_id', 'transaksi_id');
     }
-
-    /**
-     * Relasi many-to-many ke Produk (melalui DetailTransaksi).
-     */
-    public function produk()
-    {
+    public function produk() {
         return $this->belongsToMany(Produk::class, 'detail_transaksi', 'transaksi_id', 'produk_id')
-                    ->withPivot('jumlah', 'harga_saat_transaksi'); // Ambil data tambahan
+                    ->withPivot('jumlah', 'harga_saat_transaksi');
     }
 }
