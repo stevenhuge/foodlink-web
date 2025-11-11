@@ -1,5 +1,6 @@
 <?php
 // app/Http/Controllers/Api/TransaksiController.php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -7,16 +8,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Produk;
-use App\Models\Transaksi;       // <-- Gunakan model Anda
-use App\Models\DetailTransaksi; // <-- Gunakan model Anda
+use App\Models\Transaksi;
+use App\Models\DetailTransaksi;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class TransaksiController extends Controller
 {
-    /**
-     * Fitur 4: Membeli Produk (Checkout menggunakan Poin)
-     * Endpoint: POST /api/transaksi/checkout
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -53,7 +51,11 @@ class TransaksiController extends Controller
                     $hargaSatuanPoin = $produk->harga_diskon;
                     $totalHargaPoin += ($hargaSatuanPoin * $item['jumlah']);
 
-                    $itemsToProcess[] = [ /* ... */ ];
+                    $itemsToProcess[] = [
+                        'produk' => $produk,
+                        'jumlah' => $item['jumlah'],
+                        'harga_satuan' => $hargaSatuanPoin
+                    ];
                 }
 
                 if ($user->poin_reward < $totalHargaPoin) {
@@ -63,26 +65,36 @@ class TransaksiController extends Controller
                 $user->decrement('poin_reward', $totalHargaPoin);
 
                 // === PERBAIKAN DI SINI ===
-                // Isi kedua kolom 'total_harga' (lama) dan 'total_harga_poin' (baru)
                 $order = Transaksi::create([
                     'user_id' => $user->user_id,
                     'mitra_id' => $mitra_id,
-                    'total_harga' => $totalHargaPoin, // <-- TAMBAHKAN INI
+                    'total_harga' => $totalHargaPoin,
                     'total_harga_poin' => $totalHargaPoin,
                     'kode_unik_pengambilan' => 'FD-' . Str::upper(Str::random(8)),
-                    'status' => 'dibayar',
+                    'status_pemesanan' => 'paid', // <-- Menggunakan kolom dan value Anda
                 ]);
                 // =========================
 
                 foreach ($itemsToProcess as $item) {
-                    // ... (logika mengurangi stok & buat detail transaksi) ...
+                    $produk = $item['produk'];
+                    $produk->decrement('stok_tersisa', $item['jumlah']);
+                    if($produk->stok_tersisa <= 0) {
+                        $produk->status_produk = 'Habis';
+                        $produk->save();
+                    }
+                    DetailTransaksi::create([
+                        'transaksi_id' => $order->transaksi_id,
+                        'produk_id' => $produk->produk_id,
+                        'jumlah' => $item['jumlah'],
+                        'harga_saat_transaksi' => $item['harga_satuan'],
+                    ]);
                 }
 
                 return $order;
             });
 
             return response()->json([
-                'message' => 'Pembelian berhasil!',
+                'message' => 'Pembelian berhasil! Tunjukkan kode pengambilan ke Mitra.',
                 'order' => $result->load('detailTransaksi')
             ], 201);
 
@@ -91,21 +103,22 @@ class TransaksiController extends Controller
         }
     }
 
-    /**
-     * Riwayat Transaksi User
-     * Endpoint: GET /api/transaksi/riwayat
-     */
     public function riwayat(Request $request)
     {
-        $orders = Transaksi::where('user_id', $request->user()->user_id)
-                           // Gunakan nama relasi Anda: 'detailTransaksi'
+        $user_id = $request->user()->user_id;
+        $orders = Transaksi::where('user_id', $user_id)
                            ->with('detailTransaksi.produk', 'mitra')
-                           // Gunakan custom timestamp Anda: 'waktu_pemesanan'
                            ->orderBy('waktu_pemesanan', 'desc')
                            ->get();
-
         return response()->json($orders);
     }
 
-    // ... (fungsi show, update, destroy tidak diubah) ...
+    public function show(string $id)
+    {
+        $transaksi = Transaksi::with('detailTransaksi.produk', 'mitra')
+                              ->where('transaksi_id', $id)
+                              ->where('user_id', Auth::id())
+                              ->firstOrFail();
+        return response()->json($transaksi);
+    }
 }

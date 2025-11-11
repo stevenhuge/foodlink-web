@@ -223,6 +223,12 @@
                             Pesanan
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('mitra.riwayat.index') }}" class="nav-link">
+                            <i class="fas fa-fw fa-history"></i>
+                            Riwayat Transaksi
+                        </a>
+                    </li>
                 </ul>
                 <hr>
                 <div class="sidebar-logout-form">

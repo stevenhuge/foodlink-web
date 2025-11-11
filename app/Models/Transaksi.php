@@ -17,16 +17,16 @@ class Transaksi extends Model
     const UPDATED_AT = null;
 
     /**
-     * === PERBAIKAN DI SINI ===
-     * Izinkan 'total_harga' (kolom lama) untuk diisi.
+     * === PASTIKAN INI ADA ===
+     * 'status_pemesanan' WAJIB ada di sini agar 'create()' berfungsi.
      */
     protected $fillable = [
         'user_id',
         'mitra_id',
-        'total_harga', // <-- TAMBAHKAN INI
+        'total_harga',
         'total_harga_poin',
         'kode_unik_pengambilan',
-        'status',
+        'status_pemesanan', // <-- PASTIKAN INI ADA
     ];
     // =======================
 
