@@ -1,5 +1,5 @@
 <?php
-
+// app/Models/User.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,63 +11,39 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * Tentukan primary key kustom.
-     */
     protected $primaryKey = 'user_id';
 
-    /**
-     * Atribut yang dapat diisi.
-     * (Sesuaikan 'name' menjadi 'nama_lengkap' dan 'password' menjadi 'password_hash')
-     */
     protected $fillable = [
         'nama_lengkap',
         'email',
         'password_hash',
         'nomor_telepon',
+        'poin_reward', // <-- TAMBAHKAN INI
     ];
 
-    /**
-     * Atribut yang disembunyikan.
-     */
-    protected $hidden = [
-        'password_hash',
-        'remember_token',
-    ];
+    protected $hidden = [ 'password_hash', 'remember_token', ];
+    protected $casts = [ 'email_verified_at' => 'datetime', ];
 
-    /**
-     * Atribut yang harus di-cast.
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        // Jika Anda mengganti 'password' di $hidden,
-        // pastikan 'password_hash' ada di sini jika Anda butuh cast
-    ];
-
-    /**
-     * Override method untuk mendapatkan nama kolom password.
-     * INI SANGAT PENTING
-     */
-    public function getAuthPassword()
-    {
+    public function getAuthPassword() {
         return $this->password_hash;
     }
 
-    // --- RELASI-RELASI YANG SUDAH DIBUAT ---
-
-    /**
-     * Satu User memiliki banyak Transaksi.
-     */
-    public function transaksi()
-    {
+    // Relasi Transaksi (Pembelian)
+    public function transaksi() {
         return $this->hasMany(Transaksi::class, 'user_id', 'user_id');
     }
 
-    /**
-     * Satu User bisa mengajukan banyak Barter.
-     */
-    public function barterDiajukan()
-    {
+    // Relasi Barter (Sudah ada)
+    public function barterDiajukan() {
         return $this->hasMany(Barter::class, 'pengaju_user_id', 'user_id');
+    }
+
+    // --- RELASI BARU ---
+    /**
+     * Satu User memiliki banyak riwayat Top-Up.
+     */
+    public function topups()
+    {
+        return $this->hasMany(TopupTransaction::class, 'user_id', 'user_id');
     }
 }

@@ -10,11 +10,12 @@ use App\Http\Controllers\Admin\AlasanBlokirController;
 
 // --- CONTROLLER UNTUK MITRA ---
 use App\Http\Controllers\Mitra\Auth\RegisterController;
-use App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController as MitraLoginController; // Alias tetap
+use App\Http\Controllers\Mitra\Auth\AuthenticatedSessionController as MitraLoginController;
 use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\ProdukController;
 use App\Http\Controllers\Mitra\BarterController;
 use App\Http\Controllers\Mitra\ProfileController;
+use App\Http\Controllers\Mitra\RiwayatTransaksiController; // Pastikan ini ada
 
 use Illuminate\Support\Facades\Route;
 
@@ -24,19 +25,14 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->group(function () {
-
-    // --- Rute Tamu Admin (Login) ---
+    // ... (Semua Rute Admin Anda, tidak perlu diubah) ...
     Route::middleware('guest:admin')->group(function () {
         Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
         Route::post('login', [AuthenticatedSessionController::class, 'store']);
     });
-
-    // --- Rute Admin Terproteksi (WAJIB LOGIN) ---
     Route::middleware('auth:admin')->group(function () {
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
         Route::get('dashboard', [DashboardController::class, 'index'])->middleware('role.admin:Admin,SuperAdmin')->name('dashboard');
-
-        // GRUP KHUSUS SUPERADMIN
         Route::middleware('role.admin:SuperAdmin')->group(function () {
             Route::resource('admins', AdminManagementController::class);
             Route::get('kategori-usaha', [KategoriUsahaController::class, 'index'])->name('kategori-usaha.index');
@@ -46,20 +42,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('mitra/{mitra}', [MitraVerificationController::class, 'destroy'])->name('mitra.destroy');
             Route::resource('alasan-blokir', AlasanBlokirController::class)->except(['show']);
         });
-
-        // GRUP ADMIN & SUPERADMIN
         Route::middleware('role.admin:Admin,SuperAdmin')->group(function () {
-             // === SEMUA RUTE KATEGORI USAHA SEKARANG DI SINI ===
-             Route::get('kategori-usaha', [KategoriUsahaController::class, 'index'])->name('kategori-usaha.index'); // <-- Pindah ke sini
+             Route::get('kategori-usaha', [KategoriUsahaController::class, 'index'])->name('kategori-usaha.index');
              Route::get('kategori-usaha/create', [KategoriUsahaController::class, 'create'])->name('kategori-usaha.create');
              Route::post('kategori-usaha', [KategoriUsahaController::class, 'store'])->name('kategori-usaha.store');
-             Route::get('kategori-usaha/{kategori_usaha}/edit', [KategoriUsahaController::class, 'edit'])->name('kategori-usaha.edit'); // <-- Pindah ke sini
-             Route::put('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'update'])->name('kategori-usaha.update'); // <-- Pindah ke sini
-             Route::delete('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'destroy'])->name('kategori-usaha.destroy'); // <-- Pindah ke sini
-             // ===============================================
+             Route::get('kategori-usaha/{kategori_usaha}/edit', [KategoriUsahaController::class, 'edit'])->name('kategori-usaha.edit');
+             Route::put('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'update'])->name('kategori-usaha.update');
+             Route::delete('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'destroy'])->name('kategori-usaha.destroy');
         });
-
-        // GRUP MANAJEMEN MITRA (ADMIN & SUPERADMIN)
         Route::prefix('mitra')->name('mitra.')->middleware('role.admin:Admin,SuperAdmin')->group(function() {
             Route::get('/', [MitraVerificationController::class, 'index'])->name('index');
             Route::get('/{mitra}', [MitraVerificationController::class, 'show'])->name('show');
@@ -85,7 +75,6 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
     Route::middleware('guest:mitra')->group(function () {
         Route::get('register', [RegisterController::class, 'create'])->name('register');
         Route::post('register', [RegisterController::class, 'store']);
-        // Pastikan kedua rute login ini ada dan benar
         Route::get('login', [MitraLoginController::class, 'create'])->name('login');
         Route::post('login', [MitraLoginController::class, 'store']);
     });
@@ -114,5 +103,16 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
         // Rute Edit Profil Mitra
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        // Rute Riwayat Transaksi
+        Route::get('riwayat-transaksi', [RiwayatTransaksiController::class, 'index'])
+             ->name('riwayat.index');
+        Route::get('riwayat-transaksi/{id}', [RiwayatTransaksiController::class, 'show'])
+             ->name('riwayat.show');
+
+        // === TAMBAHAN BARU: RUTE UNTUK KONFIRMASI ===
+        Route::patch('riwayat-transaksi/{id}/konfirmasi', [RiwayatTransaksiController::class, 'konfirmasi'])
+             ->name('riwayat.konfirmasi');
+        // ============================================
     });
 });

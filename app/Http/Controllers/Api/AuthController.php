@@ -1,35 +1,42 @@
 <?php
-
+// app/Http/Controllers/Api/AuthController.php
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini
 
 class AuthController extends Controller
 {
-    // Fungsi Register User
+    /**
+     * Fitur 1: Register User
+     * Endpoint: POST /api/register
+     */
     public function register(Request $request)
     {
         $fields = $request->validate([
             'nama_lengkap' => 'required|string',
             'email' => 'required|string|unique:users,email',
-            'password' => 'required|string|confirmed'
+            'password' => 'required|string|confirmed|min:8'
         ]);
 
         $user = User::create([
             'nama_lengkap' => $fields['nama_lengkap'],
             'email' => $fields['email'],
             'password_hash' => bcrypt($fields['password']),
+            'poin_reward' => 0, // <-- Set poin awal
         ]);
 
         $token = $user->createToken('token-foodlink')->plainTextToken;
-
         return response()->json(['user' => $user, 'token' => $token], 201);
     }
 
-    // Fungsi Login User
+    /**
+     * Fitur 1: Login User
+     * Endpoint: POST /api/login
+     */
     public function login(Request $request)
     {
         $fields = $request->validate([
@@ -44,7 +51,28 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('token-foodlink')->plainTextToken;
-
         return response()->json(['user' => $user, 'token' => $token], 200);
+    }
+
+    // --- FUNGSI BARU ---
+
+    /**
+     * Logout User
+     * Endpoint: POST /api/logout (Middleware auth:sanctum)
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logout berhasil'], 200);
+    }
+
+    /**
+     * Melihat profil user (termasuk poin)
+     * Endpoint: GET /api/profile (Middleware auth:sanctum)
+     */
+    public function profile(Request $request)
+    {
+        // Mengembalikan data user yang sedang login (termasuk poin_reward)
+        return response()->json($request->user());
     }
 }

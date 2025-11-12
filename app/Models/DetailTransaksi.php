@@ -1,4 +1,5 @@
 <?php
+// app/Models/DetailTransaksi.php
 
 namespace App\Models;
 
@@ -13,7 +14,20 @@ class DetailTransaksi extends Model
     protected $primaryKey = 'detail_id';
     public $timestamps = false; // Tidak ada timestamps di migrasi
 
-    // --- RELASI ---
+    /**
+     * === TAMBAHKAN INI JIKA BELUM ADA ===
+     * Izinkan field ini untuk diisi saat 'create()'
+     */
+    protected $fillable = [
+        'transaksi_id',
+        'produk_id',
+        'jumlah',
+        'harga_saat_transaksi',
+    ];
+    // ===================================
+
+
+    // --- RELASI (Biarkan seperti yang sudah Anda buat) ---
 
     /**
      * Satu Detail Transaksi milik satu Transaksi.
