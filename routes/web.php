@@ -123,6 +123,9 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
         // === TAMBAHAN BARU: RUTE UNTUK KONFIRMASI ===
         Route::patch('riwayat-transaksi/{id}/konfirmasi', [RiwayatTransaksiController::class, 'konfirmasi'])
              ->name('riwayat.konfirmasi');
+
+        Route::patch('riwayat-transaksi/{id}/batalkan', [RiwayatTransaksiController::class, 'batalkan'])
+             ->name('riwayat.batalkan');
         // ============================================
     });
 });
