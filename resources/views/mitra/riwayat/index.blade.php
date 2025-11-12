@@ -36,7 +36,6 @@
                             <th>Detail Produk</th>
                             <th>Total Poin</th>
                             <th>Status</th>
-                            <th data-orderable="false">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,7 +45,8 @@
                                 $status = strtolower($transaksi->status_pemesanan);
                             @endphp
 
-                            <tr>
+                            @if ($status === "selesai" || $status === "dibatalkan")
+                                <tr>
                                 <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
                                 <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>
                                 <td>{{ $transaksi->user->nama_lengkap ?? 'User Dihapus' }}</td>
@@ -69,11 +69,8 @@
                                         <span class="badge bg-secondary" style="text-transform: capitalize;">{{ $transaksi->status_pemesanan }}</span>
                                     @endif
                                 </td>
-
-                                <td class="text-nowrap">
-                                    {{-- ... (Tombol aksi Anda) ... --}}
-                                </td>
                             </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>

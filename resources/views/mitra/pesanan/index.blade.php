@@ -1,7 +1,13 @@
 @extends('mitra.layouts.app')
 {{-- Sesuaikan dengan layout Mitra Anda --}}
 
-@section('title', 'Riwayat Transaksi')
+@section('title', 'Pesanan Masuk') {{-- Judul sudah benar --}}
+
+{{-- === 1. PERUBAIKAN: Tambahkan CSS DataTables === --}}
+@section('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+@endsection
+{{-- ============================================= --}}
 
 @section('content')
 
@@ -13,22 +19,18 @@
         <div class="card-body">
 
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                {{-- ... (Pesan sukses Anda) ... --}}
             @endif
             @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+                {{-- ... (Pesan error Anda) ... --}}
             @endif
 
             <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle caption-top">
+
+                {{-- === 2. PERUBAIKAN: Tambahkan ID unik pada tabel === --}}
+                <table class="table table-hover table-striped align-middle caption-top" id="pesananTable">
+                {{-- ================================================= --}}
+
                     <thead class="table-light">
                         <tr>
                             <th>Waktu Pesan</th>
@@ -42,40 +44,32 @@
                     </thead>
                     <tbody>
                         @forelse ($transaksis as $transaksi)
-                            {{-- Ubah nilai status ke huruf kecil HANYA untuk perbandingan --}}
                             @php
                                 $status = strtolower($transaksi->status_pemesanan);
                             @endphp
 
+                            {{-- Logika @if ($status === 'paid') Anda sudah benar untuk halaman ini --}}
                             @if ($status === 'paid')
                                 <tr>
-                                <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
-                                <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>
-                                <td>{{ $transaksi->user->nama_lengkap ?? 'User Dihapus' }}</td>
-                                <td>
-                                    @foreach($transaksi->detailTransaksi as $detail)
-                                        <div class="details small">
-                                            {{ $detail->jumlah }}x {{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}
-                                        </div>
-                                    @endforeach
-                                </td>
-                                <td>{{ number_format($transaksi->total_harga_poin) }}</td>
+                                    <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
+                                    <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>
+                                    <td>{{ $transaksi->user->nama_lengkap ?? 'User Dihapus' }}</td>
+                                    <td>
+                                        @foreach($transaksi->detailTransaksi as $detail)
+                                            <div class="details small">
+                                                {{ $detail->jumlah }}x {{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}
+                                            </div>
+                                        @endforeach
+                                    </td>
+                                    <td>{{ number_format($transaksi->total_harga_poin) }}</td>
 
-                                <td>
-                                    @if($status == 'paid')
+                                    <td>
+                                        {{-- Ini akan selalu "Belum Diambil" karena @if di atas --}}
                                         <span class="badge bg-warning text-dark">Belum Diambil</span>
-                                    @elseif($status == 'selesai')
-                                        <span class="badge bg-success">Selesai</span>
-                                    @elseif($status == 'batal')
-                                        <span class="badge bg-danger">Dibatalkan</span>
-                                    @else
-                                        <span class="badge bg-secondary" style="text-transform: capitalize;">{{ $transaksi->status_pemesanan }}</span>
-                                    @endif
-                                </td>
+                                    </td>
 
-                                <td class="text-nowrap">
-
-                                    @if($status == 'paid')
+                                    <td class="text-nowrap">
+                                        {{-- ... (Tombol aksi Anda sudah benar) ... --}}
                                         <form action="{{ route('mitra.riwayat.konfirmasi', $transaksi->transaksi_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin pesanan ini SUDAH DIAMBIL?');">
                                             @csrf
                                             @method('PATCH')
@@ -91,19 +85,53 @@
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </form>
-                                        @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
                             @endif
                         @empty
                             <tr>
                                 <td colspan="7" class="text-center py-4">
-                                    <i class="fas fa-info-circle me-2"></i> Belum ada riwayat transaksi.
+                                    {{--
+                                        Kita ubah pesannya sedikit karena @forelse
+                                        mungkin bingung dengan @if di dalamnya
+                                    --}}
+                                    <i class="fas fa-info-circle me-2"></i> Tidak ada pesanan masuk saat ini.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div> </div> </div> @endsection
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            {{-- === 3. PERUBAIKAN: Gunakan ID "pesananTable" === --}}
+            $('#pesananTable').DataTable({
+            {{-- =============================================== --}}
+                "order": [[ 0, "desc" ]],
+                "language": {
+                    "search": "Cari:",
+                    "lengthMenu": "Tampilkan _MENU_ data",
+                    "zeroRecords": "Data tidak ditemukan",
+                    "info": "Menampilkan halaman _PAGE_ dari _PAGES_",
+                    "infoEmpty": "Tidak ada data tersedia",
+                    "infoFiltered": "(difilter dari _MAX_ total data)",
+                    "paginate": {
+                        "first":      "Pertama",
+                        "last":       "Terakhir",
+                        "next":       "Berikutnya",
+                        "previous":   "Sebelumnya"
+                    },
+                }
+            });
+        });
+    </script>
+@endsection
