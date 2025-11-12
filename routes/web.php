@@ -126,6 +126,12 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
 
         Route::patch('riwayat-transaksi/{id}/batalkan', [RiwayatTransaksiController::class, 'batalkan'])
              ->name('riwayat.batalkan');
-        // ============================================
+
+        Route::patch('riwayat-transaksi/{id}/batalkan', [RiwayatTransaksiController::class, 'batalkan'])
+             ->name('riwayat.batalkan');
+
+        Route::get('riwayat-transaksi/export/excel', [RiwayatTransaksiController::class, 'exportExcel'])
+             ->name('riwayat.export.excel');
+
     });
 });

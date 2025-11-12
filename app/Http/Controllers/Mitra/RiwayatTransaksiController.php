@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use App\Models\Produk;
-use App\Models\User; // <-- 1. TAMBAHKAN IMPORT USER
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; // <-- 2. TAMBAHKAN IMPORT DB
+use Illuminate\Support\Facades\DB;
+use App\Exports\RiwayatTransaksiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RiwayatTransaksiController extends Controller
 {
@@ -117,5 +119,16 @@ class RiwayatTransaksiController extends Controller
             return redirect()->route('mitra.riwayat.index')
                              ->with('error', 'Gagal membatalkan transaksi: ' . $e->getMessage());
         }
+    }
+
+
+    public function exportExcel()
+    {
+        $mitraId = Auth::guard('mitra')->id();
+
+        $fileName = 'riwayat_transaksi_mitra_' . date('Y-m-d') . '.xlsx';
+
+        // Panggil Class Export yang tadi kita buat
+        return Excel::download(new RiwayatTransaksiExport($mitraId), $fileName);
     }
 }
