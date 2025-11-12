@@ -20,6 +20,15 @@ class RiwayatTransaksiController extends Controller
         return view('mitra.riwayat.index', compact('transaksis'));
     }
 
+    public function index2() {
+        $mitraId = Auth::guard('mitra')->id();
+        $transaksis = Transaksi::where('mitra_id', $mitraId)
+                            ->with('user', 'detailTransaksi.produk')
+                            ->orderBy('waktu_pemesanan', 'desc')
+                            ->get();
+        return view('mitra.pesanan.index', compact('transaksis'));
+    }
+
     public function show($id)
     {
         $mitraId = Auth::guard('mitra')->id();

@@ -3,7 +3,7 @@
 @section('title', 'Riwayat Transaksi')
 
 @section('content')
-    <h1>Riwayat Transaksi</h1>
+    <h1>Pesanan</h1>
     <p>Daftar pesanan yang masuk melalui aplikasi mobile.</p>
 
     @if (session('success'))
@@ -47,8 +47,8 @@
                     $status = strtolower($transaksi->status_pemesanan);
                 @endphp
 
-                @if ($status === 'selesai' || $status === 'dibatalkan')
-                     <tr>
+                @if ($status === 'paid')
+                    <tr>
                     <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
                     <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>
                     <td>{{ $transaksi->user->nama_lengkap ?? 'User Dihapus' }}</td>
