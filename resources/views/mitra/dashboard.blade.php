@@ -7,7 +7,7 @@
     <!-- START: Header & Welcome Message -->
     <div class="text-center mb-5">
         <!-- Menggunakan warna gelap yang tegas dan font-weight tebal -->
-        <h1 class="display-5 text-dark fw-bold">Dashboard Mitra - Contoh aku rubah disini</h1>
+        <h1 class="display-5 text-dark fw-bold">Dashboard Mitra</h1>
         <p class="lead text-muted">Selamat datang, {{ $mitra->nama_mitra }}. Kelola produk surplus Anda dengan mudah.</p>
     </div>
     <!-- END: Header & Welcome Message -->
