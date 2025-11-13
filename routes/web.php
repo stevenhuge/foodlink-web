@@ -60,6 +60,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('/{mitra}/block', [MitraVerificationController::class, 'block'])->name('block');
             Route::patch('/{mitra}/unblock', [MitraVerificationController::class, 'unblock'])->name('unblock');
         });
+        Route::prefix('users')->name('users.')->middleware('role.admin:Admin,SuperAdmin')->group(function() {
+            Route::get('/', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('index');
+            Route::get('/{user}/edit', [App\Http\Controllers\Admin\UserManagementController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [App\Http\Controllers\Admin\UserManagementController::class, 'update'])->name('update');
+            Route::patch('/{user}/block', [App\Http\Controllers\Admin\UserManagementController::class, 'block'])->name('block');
+            Route::patch('/{user}/unblock', [App\Http\Controllers\Admin\UserManagementController::class, 'unblock'])->name('unblock');
+        });
     });
 });
 
@@ -110,9 +117,21 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
         Route::get('riwayat-transaksi/{id}', [RiwayatTransaksiController::class, 'show'])
              ->name('riwayat.show');
 
+        Route::get('pesanan', [RiwayatTransaksiController::class, 'index2'])
+             ->name('pesanan.index');
+
         // === TAMBAHAN BARU: RUTE UNTUK KONFIRMASI ===
         Route::patch('riwayat-transaksi/{id}/konfirmasi', [RiwayatTransaksiController::class, 'konfirmasi'])
              ->name('riwayat.konfirmasi');
-        // ============================================
+
+        Route::patch('riwayat-transaksi/{id}/batalkan', [RiwayatTransaksiController::class, 'batalkan'])
+             ->name('riwayat.batalkan');
+
+        Route::patch('riwayat-transaksi/{id}/batalkan', [RiwayatTransaksiController::class, 'batalkan'])
+             ->name('riwayat.batalkan');
+
+        Route::get('riwayat-transaksi/export/excel', [RiwayatTransaksiController::class, 'exportExcel'])
+             ->name('riwayat.export.excel');
+
     });
 });

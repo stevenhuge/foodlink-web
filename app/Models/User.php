@@ -18,7 +18,9 @@ class User extends Authenticatable
         'email',
         'password_hash',
         'nomor_telepon',
-        'poin_reward', // <-- TAMBAHKAN INI
+        'poin_reward',
+        'status_akun',
+        'alasan_blokir',
     ];
 
     protected $hidden = [ 'password_hash', 'remember_token', ];

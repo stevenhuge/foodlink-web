@@ -119,6 +119,14 @@
                                 Manajemen Mitra
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+                                href="{{ route('admin.users.index') }}">
+                                <i class="fas fa-store"></i>
+                                Manajemen User
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.kategori-usaha.*') ? 'active' : '' }}"
                                href="{{ route('admin.kategori-usaha.index') }}">
@@ -137,6 +145,7 @@
                                 Manajemen Admin
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.alasan-blokir.*') ? 'active' : '' }}"
                                href="{{ route('admin.alasan-blokir.index') }}">

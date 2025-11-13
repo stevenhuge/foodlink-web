@@ -80,12 +80,13 @@
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
             <h3 class="mb-0 text-dark">Riwayat Transaksi</h3>
             <!-- Tombol aksi untuk navigasi ke halaman riwayat lengkap -->
-            <a href="#" class="btn btn-outline-primary btn-sm fw-bold">Lihat Semua Riwayat</a>
+            <a href="{{ route('mitra.riwayat.index') }}" class="btn btn-outline-primary btn-sm fw-bold">Lihat Semua Riwayat</a>
         </div>
 
         <div class="card p-4 shadow-sm border-0 bg-light">
-            <p class="text-muted mb-0">Belum ada riwayat transaksi yang tercatat.</p>
-            <p class="text-muted small"><em>(Semua produk yang telah diambil/dibarter oleh pengguna akan muncul di sini...)</em></p>
+            <table>
+                <th>Sigma</th>
+            </table>
         </div>
     </div>
     <!-- END: Riwayat Transaksi Section -->
