@@ -28,6 +28,7 @@ class Admin extends Authenticatable
         'username',
         'password_hash',
         'role',
+        'saldo_pemasukan',
     ];
 
     /**
@@ -70,4 +71,18 @@ class Admin extends Authenticatable
         return $this->hasRole('SuperAdmin');
     }
     // -----------------------------------------------------------------
+
+    // Relasi: 1 Admin (SuperAdmin) bisa punya banyak rekening
+    public function rekeningBanks() {
+        return $this->morphMany(RekeningBank::class, 'rekeningable');
+    }
+    // Relasi: 1 Admin bisa punya banyak request penarikan
+    public function penarikanDana() {
+        return $this->morphMany(PenarikanDana::class, 'penarikanable');
+    }
+    // Relasi: 1 Admin bisa punya banyak log pemasukan
+    public function logKeuangan() {
+        return $this->morphMany(LogKeuangan::class, 'penerima');
+    }
+    
 }

@@ -37,6 +37,7 @@ class Mitra extends Authenticatable
         'status_akun',
         'alasan_blokir_option_id',
         'kategori_usaha_id', // <-- Tambahkan ini untuk relasi kategori usaha
+        'saldo_pemasukan',
     ];
 
     /**
@@ -93,5 +94,18 @@ class Mitra extends Authenticatable
 
     public function alasanBlokir() {
         return $this->belongsTo(AlasanBlokirOption::class, 'alasan_blokir_option_id', 'alasan_id');
+    }
+
+    // Relasi: 1 Mitra bisa punya banyak rekening
+    public function rekeningBanks() {
+        return $this->morphMany(RekeningBank::class, 'rekeningable');
+    }
+    // Relasi: 1 Mitra bisa punya banyak request penarikan
+    public function penarikanDana() {
+        return $this->morphMany(PenarikanDana::class, 'penarikanable');
+    }
+    // Relasi: 1 Mitra bisa punya banyak log pemasukan
+    public function logKeuangan() {
+        return $this->morphMany(LogKeuangan::class, 'penerima');
     }
 }

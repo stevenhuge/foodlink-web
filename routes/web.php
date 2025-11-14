@@ -41,6 +41,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'destroy'])->name('kategori-usaha.destroy');
             Route::delete('mitra/{mitra}', [MitraVerificationController::class, 'destroy'])->name('mitra.destroy');
             Route::resource('alasan-blokir', AlasanBlokirController::class)->except(['show']);
+            Route::get('pemasukan', [App\Http\Controllers\SuperAdmin\PemasukanController::class, 'index'])->name('pemasukan.index');
+
+            // CRUD Rekening Bank milik SuperAdmin
+            Route::resource('rekening-bank', App\Http\Controllers\SuperAdmin\RekeningBankController::class);
+
+            // Proses request penarikan dana oleh SuperAdmin (untuk dirinya sendiri)
+            Route::post('pemasukan/tarik', [App\Http\Controllers\SuperAdmin\PemasukanController::class, 'storePenarikan'])
+                ->name('pemasukan.tarik');
+
+            // Halaman untuk me-review penarikan dana dari para MITRA
+            Route::get('review-penarikan', [App\Http\Controllers\SuperAdmin\ReviewPenarikanController::class, 'index'])
+                ->name('review.penarikan.index');
+            Route::patch('review-penarikan/{penarikan}', [App\Http\Controllers\SuperAdmin\ReviewPenarikanController::class, 'update'])
+                ->name('review.penarikan.update');
         });
         Route::middleware('role.admin:Admin,SuperAdmin')->group(function () {
              Route::get('kategori-usaha', [KategoriUsahaController::class, 'index'])->name('kategori-usaha.index');
@@ -132,6 +146,16 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
 
         Route::get('riwayat-transaksi/export/excel', [RiwayatTransaksiController::class, 'exportExcel'])
              ->name('riwayat.export.excel');
+
+        Route::get('pemasukan', [App\Http\Controllers\Mitra\PemasukanController::class, 'index'])
+         ->name('pemasukan.index');
+
+        // CRUD Rekening Bank milik Mitra
+        Route::resource('rekening-bank', App\Http\Controllers\Mitra\RekeningBankController::class);
+
+        // Proses request penarikan dana oleh Mitra
+        Route::post('pemasukan/tarik', [App\Http\Controllers\Mitra\PemasukanController::class, 'storePenarikan'])
+            ->name('pemasukan.tarik');
 
     });
 });
