@@ -27,8 +27,6 @@ class Transaksi extends Model
         'total_harga_poin',
         'kode_unik_pengambilan',
         'status_pemesanan', // <-- PASTIKAN INI ADA
-        'biaya_layanan_user',
-        'potongan_pajak_mitra',
     ];
     // =======================
 

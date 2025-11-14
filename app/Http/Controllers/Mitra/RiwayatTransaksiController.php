@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use App\Models\Transaksi;
 use App\Models\Produk;
 use App\Models\User;
+use App\Models\Admin;
+use App\Models\Mitra;
+use App\Models\LogKeuangan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exports\RiwayatTransaksiExport;
@@ -53,20 +56,73 @@ class RiwayatTransaksiController extends Controller
 
     public function konfirmasi($id)
     {
-        // ... (Fungsi konfirmasi() Anda tidak berubah)
-        // Pastikan Anda menggunakan strtolower() di sini
         $mitraId = Auth::guard('mitra')->id();
-        $transaksi = Transaksi::where('transaksi_id', $id)
-                             ->where('mitra_id', $mitraId)
-                             ->firstOrFail();
-        if (strtolower($transaksi->status_pemesanan) == 'paid') {
-            $transaksi->status_pemesanan = 'selesai';
-            $transaksi->save();
+
+        try {
+            $result = DB::transaction(function () use ($id, $mitraId) {
+
+                // 1. Cari transaksi, pastikan milik Mitra & status 'paid'
+                $transaksi = Transaksi::where('transaksi_id', $id)
+                                     ->where('mitra_id', $mitraId)
+                                     ->lockForUpdate()
+                                     ->firstOrFail();
+
+                if (strtolower($transaksi->status_pemesanan) != 'paid') {
+                    throw new \Exception('Transaksi ini sudah diproses (selesai atau batal).');
+                }
+
+                // 2. Cari Mitra dan SuperAdmin
+                $mitra = $transaksi->mitra; // Relasi sudah ada
+                $superAdmin = Admin::lockForUpdate()->where('role', 'SuperAdmin')->first();
+                if (!$superAdmin) {
+                    throw new \Exception("Kesalahan Sistem: SuperAdmin tidak ditemukan.");
+                }
+
+                // 3. PINDAHKAN SALDO
+                // Tambah Saldo Mitra
+                $mitra->increment('saldo_pemasukan', $transaksi->pendapatan_bersih_mitra);
+
+                // Tambah Saldo SuperAdmin (Pajak + Biaya Layanan)
+                $pendapatanSuperAdmin = $transaksi->potongan_pajak_mitra + $transaksi->biaya_layanan_user;
+                $superAdmin->increment('saldo_pemasukan', $pendapatanSuperAdmin);
+
+                // 4. BUAT LOG KEUANGAN (Baru pindah ke sini)
+                LogKeuangan::create([
+                    'transaksi_id' => $transaksi->transaksi_id,
+                    'penerima_type' => get_class($mitra),
+                    'penerima_id' => $mitra->mitra_id,
+                    'tipe' => 'penjualan_bersih',
+                    'jumlah' => $transaksi->pendapatan_bersih_mitra
+                ]);
+                LogKeuangan::create([
+                    'transaksi_id' => $transaksi->transaksi_id,
+                    'penerima_type' => get_class($superAdmin),
+                    'penerima_id' => $superAdmin->admin_id,
+                    'tipe' => 'pajak_mitra',
+                    'jumlah' => $transaksi->potongan_pajak_mitra
+                ]);
+                LogKeuangan::create([
+                    'transaksi_id' => $transaksi->transaksi_id,
+                    'penerima_type' => get_class($superAdmin),
+                    'penerima_id' => $superAdmin->admin_id,
+                    'tipe' => 'biaya_layanan',
+                    'jumlah' => $transaksi->biaya_layanan_user
+                ]);
+
+                // 5. Update status transaksi
+                $transaksi->status_pemesanan = 'selesai';
+                $transaksi->save();
+
+                return $transaksi; // Berhasil
+            });
+
             return redirect()->route('mitra.riwayat.index')
-                             ->with('success', 'Transaksi ' . $transaksi->kode_unik_pengambilan . ' telah dikonfirmasi (Selesai).');
+                             ->with('success', 'Transaksi ' . $result->kode_unik_pengambilan . ' telah dikonfirmasi (Selesai). Pemasukan telah ditambahkan ke saldo Anda.');
+
+        } catch (\Exception $e) {
+            return redirect()->route('mitra.riwayat.index')
+                             ->with('error', 'Gagal konfirmasi transaksi: ' . $e->getMessage());
         }
-        return redirect()->route('mitra.riwayat.index')
-                         ->with('error', 'Transaksi ini sudah dikonfirmasi sebelumnya.');
     }
 
     /**
@@ -76,46 +132,44 @@ class RiwayatTransaksiController extends Controller
     {
         $mitraId = Auth::guard('mitra')->id();
 
-        // Kita gunakan DB Transaction untuk memastikan SEMUA query berhasil
-        // atau tidak sama sekali (mencegah error poin hilang tapi status tidak berubah)
         try {
 
             $result = DB::transaction(function () use ($id, $mitraId) {
 
-                // 1. Cari transaksi, pastikan milik Mitra & lock untuk update
+                // 1. Cari transaksi
                 $transaksi = Transaksi::where('transaksi_id', $id)
                                      ->where('mitra_id', $mitraId)
-                                     ->lockForUpdate() // Kunci baris ini agar tidak ada proses lain
+                                     ->lockForUpdate()
                                      ->firstOrFail();
 
-                // 2. Hanya batalkan jika statusnya 'paid' (Belum Diambil)
                 if (strtolower($transaksi->status_pemesanan) != 'paid') {
-                    throw new \Exception('Transaksi ini tidak dapat dibatalkan (mungkin sudah selesai atau sudah dibatalkan).');
+                    throw new \Exception('Transaksi ini tidak dapat dibatalkan.');
                 }
 
-                // 3. Cari User (Pembeli) dan lock juga
+                // 2. Cari User
                 $user = User::lockForUpdate()->findOrFail($transaksi->user_id);
 
-                // 4. KEMBALIKAN POIN KE USER
-                $user->increment('poin_reward', $transaksi->total_harga_poin);
+                // 3. KEMBALIKAN POIN KE USER (PERBAIKAN)
+                // Kembalikan harga produk DAN biaya layanan
+                $totalRefund = $transaksi->total_harga_poin + $transaksi->biaya_layanan_user;
+                $user->increment('poin_reward', $totalRefund);
 
-                // 5. UBAH STATUS TRANSAKSI
+                // 4. UBAH STATUS TRANSAKSI
                 $transaksi->status_pemesanan = 'batal';
                 $transaksi->save();
 
-                foreach ($transaksi->detailTransaksi as $detail) {
-                Produk::where('produk_id', $detail->produk_id)->increment('stok_tersisa', $detail->jumlah);
-                }
+                // (Opsional: Kembalikan Stok Produk)
+                // foreach ($transaksi->detailTransaksi as $detail) {
+                //     $detail->produk()->increment('stok_tersisa', $detail->jumlah);
+                // }
 
-                return $transaksi; // Kembalikan transaksi yang berhasil
+                return $transaksi;
             });
 
-            // Jika transaksi sukses
             return redirect()->route('mitra.riwayat.index')
                              ->with('success', 'Transaksi ' . $result->kode_unik_pengambilan . ' berhasil dibatalkan. Poin telah dikembalikan ke user.');
 
         } catch (\Exception $e) {
-            // Jika terjadi error di dalam transaction
             return redirect()->route('mitra.riwayat.index')
                              ->with('error', 'Gagal membatalkan transaksi: ' . $e->getMessage());
         }
