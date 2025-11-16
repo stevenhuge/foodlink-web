@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Admin;
 use App\Models\Mitra;
 use App\Models\LogKeuangan;
+use App\Models\AlasanBlokirOption; // Pastikan ini ada
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exports\RiwayatTransaksiExport;
@@ -26,9 +27,7 @@ class RiwayatTransaksiController extends Controller
                             ->orderBy('waktu_pemesanan', 'desc')
                             ->get();
 
-        // Ambil alasan blokir (jika Anda masih menggunakannya di file lain)
-        // Jika tidak, baris ini bisa dihapus
-        $alasanBlokirOptions = \App\Models\AlasanBlokirOption::orderBy('alasan_text')->get();
+        $alasanBlokirOptions = AlasanBlokirOption::orderBy('alasan_text')->get();
 
         return view('mitra.riwayat.index', compact('transaksis', 'alasanBlokirOptions'));
     }
@@ -37,16 +36,14 @@ class RiwayatTransaksiController extends Controller
     {
         $mitraId = Auth::guard('mitra')->id();
         $transaksis = Transaksi::where('mitra_id', $mitraId)
+                            ->where('status_pemesanan', 'paid') // Filter 'paid'
                             ->with('user', 'detailTransaksi.produk')
                             ->orderBy('waktu_pemesanan', 'desc')
                             ->get();
 
-        // Ambil alasan blokir (jika Anda masih menggunakannya di file lain)
-        // Jika tidak, baris ini bisa dihapus
-        $alasanBlokirOptions = \App\Models\AlasanBlokirOption::orderBy('alasan_text')->get();
+        $alasanBlokirOptions = AlasanBlokirOption::orderBy('alasan_text')->get();
 
         return view('mitra.pesanan.index', compact('transaksis', 'alasanBlokirOptions'));
-
     }
 
     public function show($id)
@@ -61,7 +58,7 @@ class RiwayatTransaksiController extends Controller
         try {
             $result = DB::transaction(function () use ($id, $mitraId) {
 
-                // 1. Cari transaksi, pastikan milik Mitra & status 'paid'
+                // 1. Cari transaksi
                 $transaksi = Transaksi::where('transaksi_id', $id)
                                      ->where('mitra_id', $mitraId)
                                      ->lockForUpdate()
@@ -72,71 +69,80 @@ class RiwayatTransaksiController extends Controller
                 }
 
                 // 2. Cari Mitra dan SuperAdmin
-                $mitra = $transaksi->mitra; // Relasi sudah ada
+                $mitra = Mitra::lockForUpdate()->find($transaksi->mitra_id);
                 $superAdmin = Admin::lockForUpdate()->where('role', 'SuperAdmin')->first();
                 if (!$superAdmin) {
                     throw new \Exception("Kesalahan Sistem: SuperAdmin tidak ditemukan.");
                 }
 
-                // 3. PINDAHKAN SALDO
-                // Tambah Saldo Mitra
-                $mitra->increment('saldo_pemasukan', $transaksi->pendapatan_bersih_mitra);
+                // === 3. LOGIKA KEUANGAN DENGAN FALLBACK ===
 
-                // Tambah Saldo SuperAdmin (Pajak + Biaya Layanan)
-                $pendapatanSuperAdmin = $transaksi->potongan_pajak_mitra + $transaksi->biaya_layanan_user;
+                // Ambil nilai dari DB
+                $pendapatanBersih = $transaksi->pendapatan_bersih_mitra;
+                $potonganPajak = $transaksi->potongan_pajak_mitra;
+                $biayaLayanan = $transaksi->biaya_layanan_user;
+
+                // CEK APAKAH INI DATA LAMA (NILAINYA 0)
+                // Kita cek berdasarkan 'pendapatanBersih'. Jika 0, kita hitung ulang semua.
+                if ($pendapatanBersih <= 0 && $transaksi->total_harga_poin > 0)
+                {
+                    // Ini adalah "DATA LAMA". Hitung ulang manual.
+                    $potonganPajak = (int) ceil($transaksi->total_harga_poin * 0.005);
+                    $pendapatanBersih = $transaksi->total_harga_poin - $potonganPajak;
+                    $biayaLayanan = (int) ceil($transaksi->total_harga_poin * 0.002);
+                }
+
+                $pendapatanSuperAdmin = $potonganPajak + $biayaLayanan;
+
+                // 4. PINDAHKAN SALDO (Gunakan nilai yang sudah divalidasi)
+                $mitra->increment('saldo_pemasukan', $pendapatanBersih);
                 $superAdmin->increment('saldo_pemasukan', $pendapatanSuperAdmin);
 
-                // 4. BUAT LOG KEUANGAN (Baru pindah ke sini)
+                // 5. BUAT LOG KEUANGAN
                 LogKeuangan::create([
                     'transaksi_id' => $transaksi->transaksi_id,
-                    'penerima_type' => get_class($mitra),
+                    'penerima_type' => Mitra::class,
                     'penerima_id' => $mitra->mitra_id,
                     'tipe' => 'penjualan_bersih',
-                    'jumlah' => $transaksi->pendapatan_bersih_mitra
+                    'jumlah' => $pendapatanBersih // Pakai nilai terhitung
                 ]);
                 LogKeuangan::create([
                     'transaksi_id' => $transaksi->transaksi_id,
-                    'penerima_type' => get_class($superAdmin),
+                    'penerima_type' => Admin::class,
                     'penerima_id' => $superAdmin->admin_id,
                     'tipe' => 'pajak_mitra',
-                    'jumlah' => $transaksi->potongan_pajak_mitra
+                    'jumlah' => $potonganPajak // Pakai nilai terhitung
                 ]);
                 LogKeuangan::create([
                     'transaksi_id' => $transaksi->transaksi_id,
-                    'penerima_type' => get_class($superAdmin),
+                    'penerima_type' => Admin::class,
                     'penerima_id' => $superAdmin->admin_id,
                     'tipe' => 'biaya_layanan',
-                    'jumlah' => $transaksi->biaya_layanan_user
+                    'jumlah' => $biayaLayanan // Pakai nilai terhitung
                 ]);
 
-                // 5. Update status transaksi
+                // 6. Update status transaksi
                 $transaksi->status_pemesanan = 'selesai';
                 $transaksi->save();
 
                 return $transaksi; // Berhasil
             });
 
-            return redirect()->route('mitra.riwayat.index')
-                             ->with('success', 'Transaksi ' . $result->kode_unik_pengambilan . ' telah dikonfirmasi (Selesai). Pemasukan telah ditambahkan ke saldo Anda.');
+            return redirect()->route('mitra.pesanan.index')
+                             ->with('success', 'Transaksi ' . $result->kode_unik_pengambilan . ' telah dikonfirmasi. Pemasukan telah ditambahkan ke saldo.');
 
         } catch (\Exception $e) {
-            return redirect()->route('mitra.riwayat.index')
+            return redirect()->route('mitra.pesanan.index')
                              ->with('error', 'Gagal konfirmasi transaksi: ' . $e->getMessage());
         }
     }
 
-    /**
-     * === 3. FUNGSI BARU UNTUK MEMBATALKAN PESANAN ===
-     */
     public function batalkan($id)
     {
         $mitraId = Auth::guard('mitra')->id();
-
         try {
-
             $result = DB::transaction(function () use ($id, $mitraId) {
 
-                // 1. Cari transaksi
                 $transaksi = Transaksi::where('transaksi_id', $id)
                                      ->where('mitra_id', $mitraId)
                                      ->lockForUpdate()
@@ -146,43 +152,35 @@ class RiwayatTransaksiController extends Controller
                     throw new \Exception('Transaksi ini tidak dapat dibatalkan.');
                 }
 
-                // 2. Cari User
                 $user = User::lockForUpdate()->findOrFail($transaksi->user_id);
 
-                // 3. KEMBALIKAN POIN KE USER (PERBAIKAN)
-                // Kembalikan harga produk DAN biaya layanan
-                $totalRefund = $transaksi->total_harga_poin + $transaksi->biaya_layanan_user;
+                // HITUNG ULANG BIAYA LAYANAN (JIKA DATA LAMA)
+                $biayaLayanan = $transaksi->biaya_layanan_user;
+                if ($biayaLayanan <= 0 && $transaksi->total_harga_poin > 0) {
+                     $biayaLayanan = (int) ceil($transaksi->total_harga_poin * 0.002);
+                }
+
+                $totalRefund = $transaksi->total_harga_poin + $biayaLayanan;
                 $user->increment('poin_reward', $totalRefund);
 
-                // 4. UBAH STATUS TRANSAKSI
                 $transaksi->status_pemesanan = 'batal';
                 $transaksi->save();
-
-                // (Opsional: Kembalikan Stok Produk)
-                // foreach ($transaksi->detailTransaksi as $detail) {
-                //     $detail->produk()->increment('stok_tersisa', $detail->jumlah);
-                // }
 
                 return $transaksi;
             });
 
-            return redirect()->route('mitra.riwayat.index')
+            return redirect()->route('mitra.pesanan.index')
                              ->with('success', 'Transaksi ' . $result->kode_unik_pengambilan . ' berhasil dibatalkan. Poin telah dikembalikan ke user.');
 
         } catch (\Exception $e) {
-            return redirect()->route('mitra.riwayat.index')
+            return redirect()->route('mitra.pesanan.index')
                              ->with('error', 'Gagal membatalkan transaksi: ' . $e->getMessage());
         }
     }
 
-
     public function exportExcel()
     {
-        $mitraId = Auth::guard('mitra')->id();
-
         $fileName = 'riwayat_transaksi_mitra_' . date('Y-m-d') . '.xlsx';
-
-        // Panggil Class Export yang tadi kita buat
-        return Excel::download(new RiwayatTransaksiExport($mitraId), $fileName);
+        return Excel::download(new RiwayatTransaksiExport, $fileName);
     }
 }
