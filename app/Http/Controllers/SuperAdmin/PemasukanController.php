@@ -47,20 +47,22 @@ class PemasukanController extends Controller
     /**
      * Memproses permintaan penarikan dana oleh SuperAdmin.
      */
+    // app/Http/Controllers/SuperAdmin/PemasukanController.php
+
     public function storePenarikan(Request $request)
     {
         $admin = Auth::guard('admin')->user();
 
         $request->validate([
             'jumlah' => [
-                'required', 'integer', 'min:50000',
+                'required', 'integer', 'min:20000', // <-- UBAH DI SINI
                 'max:' . $admin->saldo_pemasukan,
             ],
             'rekening_bank_id' => [
                 'required', 'integer',
                 Rule::exists('rekening_bank', 'rekening_id')->where(function ($query) use ($admin) {
                     $query->where('rekeningable_id', $admin->admin_id)
-                          ->where('rekeningable_type', Admin::class);
+                        ->where('rekeningable_type', Admin::class);
                 }),
             ]
         ], [
@@ -73,32 +75,27 @@ class PemasukanController extends Controller
                 $jumlah = $request->input('jumlah');
                 $rekeningId = $request->input('rekening_bank_id');
 
-                // 1. Ambil dan Kunci Rekening Bank
                 $rekening = RekeningBank::lockForUpdate()->find($rekeningId);
-
-                // 2. Kurangi saldo SuperAdmin
                 $admin->decrement('saldo_pemasukan', $jumlah);
-
-                // 3. TAMBAHKAN SALDO KE REKENING BANK
                 $rekening->increment('saldo', $jumlah);
 
-                // 4. Buat catatan penarikan
                 PenarikanDana::create([
                     'penarikanable_id' => $admin->admin_id,
                     'penarikanable_type' => Admin::class,
                     'rekening_bank_id' => $rekeningId,
                     'jumlah' => $jumlah,
+                    'potongan_pajak' => 0, // SuperAdmin tidak kena pajak
                     'status' => 'Selesai',
                     'catatan_admin' => 'Penarikan oleh SuperAdmin.'
                 ]);
             });
 
             return redirect()->route('admin.pemasukan.index')
-                             ->with('success', 'Penarikan dana sebesar ' . number_format($request->input('jumlah')) . ' Poin berhasil.');
+                            ->with('success', 'Penarikan dana sebesar ' . number_format($request->input('jumlah')) . ' Poin berhasil.');
 
         } catch (\Exception $e) {
             return redirect()->route('admin.pemasukan.index')
-                             ->with('error', 'Gagal memproses penarikan: ' . $e->getMessage());
+                            ->with('error', 'Gagal memproses penarikan: ' . $e->getMessage());
         }
     }
 }

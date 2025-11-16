@@ -3,7 +3,6 @@
 
 @section('title', 'Manajemen Pemasukan')
 
-{{-- CSS untuk DataTables --}}
 @section('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <style>
@@ -19,18 +18,15 @@
             <i class="fas fa-tasks fa-sm me-1"></i> Review Penarikan Mitra
         </a>
     </div>
-
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            {{ session('success') }}
+            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Error!</strong>
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Error!</strong>
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -39,10 +35,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-
     <div class="row">
         <div class="col-lg-5">
-
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Saldo Pemasukan (Pajak & Layanan)</h6>
@@ -60,7 +54,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Tarik Dana (Pribadi)</h6>
@@ -71,8 +64,8 @@
                         <div class="mb-3">
                             <label for="jumlah" class="form-label">Jumlah Penarikan (Poin)</label>
                             <input type="number" name="jumlah" id="jumlah" class="form-control"
-                                   max="{{ $saldoSaatIni }}" min="50000"
-                                   placeholder="Min. 50.000" required>
+                                   max="{{ $saldoSaatIni }}" min="20000"
+                                   placeholder="Min. 20.000" required>
                             <div class="form-text">Saldo tersedia: {{ number_format($saldoSaatIni) }} Poin</div>
                         </div>
                         <div class="mb-3">
@@ -93,17 +86,15 @@
                                 <a href="{{ route('admin.rekening-bank.index') }}">Kelola Rekening Bank Anda</a>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100" {{ $rekeningBank->isEmpty() || $saldoSaatIni < 50000 ? 'disabled' : '' }}>
+                        <button type="submit" class="btn btn-primary w-100" {{ $rekeningBank->isEmpty() || $saldoSaatIni < 20000 ? 'disabled' : '' }}>
                             Tarik Dana
                         </button>
                     </form>
                 </div>
             </div>
         </div>
-
         <div class="col-lg-7">
             <div class="card shadow-sm border-0 mb-4">
-
                 <div class="card-header bg-white border-0 py-3">
                     <ul class="nav nav-tabs card-header-tabs" id="pemasukanTab" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -130,8 +121,7 @@
                                             <th>Waktu</th>
                                             <th>Tipe Pemasukan</th>
                                             <th>Jumlah (Poin)</th>
-                                            <th>Dari Transaksi (User)</th>
-                                        </tr>
+                                            <th>Sumber Pemasukan</th> </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($rincianPemasukan as $log)
@@ -142,20 +132,31 @@
                                                         <span class="badge bg-info">Pajak Mitra (0.5%)</span>
                                                     @elseif($log->tipe == 'biaya_layanan')
                                                         <span class="badge bg-primary">Biaya Layanan (0.2%)</span>
+                                                    @elseif($log->tipe == 'pajak_penarikan_mitra')
+                                                        <span class="badge bg-warning text-dark">Pajak Penarikan (2.5%)</span>
                                                     @else
                                                         <span class="badge bg-secondary">{{ $log->tipe }}</span>
                                                     @endif
                                                 </td>
                                                 <td class="fw-bold text-success">+ {{ number_format($log->jumlah) }}</td>
+
+                                                {{-- === PERBAIKAN LOGIKA TAMPILAN DI SINI === --}}
                                                 <td class="small">
-                                                    @if($log->transaksi)
-                                                        ID: {{ $log->transaksi->kode_unik_pengambilan }}
+                                                    @if ($log->transaksi)
+                                                        Trx: {{ $log->transaksi->kode_unik_pengambilan }}
                                                         <br>
-                                                        ({{ $log->transaksi->user->nama_lengkap ?? 'User Dihapus' }})
+                                                        (User: {{ $log->transaksi->user->nama_lengkap ?? 'N/A' }})
+
+                                                    @elseif ($log->penarikanDana)
+                                                        Penarikan ID: {{ $log->penarikanDana->penarikan_id }}
+                                                        <br>
+                                                        (Mitra: {{ $log->penarikanDana->penarikanable->nama_mitra ?? 'N/A' }})
+
                                                     @else
                                                         -
                                                     @endif
                                                 </td>
+                                                {{-- === AKHIR PERBAIKAN === --}}
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -197,7 +198,6 @@
                                 </table>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -206,47 +206,25 @@
 
 @endsection
 
-{{-- Script JS untuk DataTables --}}
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
     <script>
         $(document).ready(function() {
-
-            // Inisialisasi Tabel 1 (Rincian Pemasukan)
             var rincianTable = $('#rincianPemasukanTable').DataTable({
                 "order": [[ 0, "desc" ]],
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_ data",
-                    "zeroRecords": "Data tidak ditemukan",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Tidak ada data",
-                    "paginate": { "next": "Berikutnya", "previous": "Sebelumnya" }
-                }
+                "language": { "search": "Cari:", /*...dll...*/ }
             });
-
-            // Inisialisasi Tabel 2 (Riwayat Penarikan)
             var riwayatTable = $('#riwayatPenarikanTable').DataTable({
                 "order": [[ 0, "desc" ]],
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_",
-                    "zeroRecords": "Belum ada riwayat penarikan."
-                }
-            });
-
-            /**
-             * PERBAIKAN PENTING UNTUK TABS:
-             * Menggambar ulang tabel saat tab diklik, agar lebar kolomnya pas.
-             */
-            $('button[data-bs-target="#riwayat-penarikan-tab-pane"]').on('shown.bs.tab', function(e) {
-                riwayatTable.columns.adjust().draw();
+                "language": { "search": "Cari:", /*...dll...*/ }
             });
             $('button[data-bs-target="#rincian-pemasukan-tab-pane"]').on('shown.bs.tab', function(e) {
                 rincianTable.columns.adjust().draw();
+            });
+            $('button[data-bs-target="#riwayat-penarikan-tab-pane"]').on('shown.bs.tab', function(e) {
+                riwayatTable.columns.adjust().draw();
             });
         });
     </script>

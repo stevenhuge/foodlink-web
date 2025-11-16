@@ -7,9 +7,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PenarikanDana;
 use App\Models\Mitra;
-use App\Models\Admin; // <-- Pastikan Admin di-import
+use App\Models\Admin;
 use App\Models\RekeningBank;
-use App\Models\LogKeuangan; // <-- TAMBAHKAN IMPORT INI
+use App\Models\LogKeuangan;
 use Illuminate\Support\Facades\DB;
 
 class ReviewPenarikanController extends Controller
@@ -37,9 +37,9 @@ class ReviewPenarikanController extends Controller
             'catatan_admin' => 'nullable|string|max:255',
         ]);
 
-        // ... (Validasi tidak berubah) ...
         if ($penarikan->penarikanable_type != Mitra::class || $penarikan->status != 'Pending') {
-             return redirect()->route('admin.review.penarikan.index')
+             // === PERBAIKAN 1 === (Redirect jika validasi gagal)
+             return redirect()->route('admin.pemasukan.index')
                              ->with('error', 'Aksi tidak valid atau sudah diproses.');
         }
 
@@ -68,16 +68,17 @@ class ReviewPenarikanController extends Controller
                     // 6. Buat Log Keuangan untuk Pajak
                     LogKeuangan::create([
                         'transaksi_id' => null,
+                        'penarikan_id' => $penarikan->penarikan_id,
                         'penerima_type' => Admin::class,
                         'penerima_id' => $superAdmin->admin_id,
                         'tipe' => 'pajak_penarikan_mitra',
                         'jumlah' => $pajakPenarikan
                     ]);
 
-                    // 7. Update status penarikan (DAN SIMPAN POTONGAN PAJAKNYA)
+                    // 7. Update status penarikan
                     $penarikan->update([
                         'status' => 'Selesai',
-                        'potongan_pajak' => $pajakPenarikan, // <-- SIMPAN PAJAK DI SINI
+                        'potongan_pajak' => $pajakPenarikan,
                         'catatan_admin' => $catatan ?? 'Disetujui. Dikenakan biaya admin 2.5%.'
                     ]);
 
@@ -93,15 +94,18 @@ class ReviewPenarikanController extends Controller
             });
 
             if ($action == 'approve') {
-                 return redirect()->route('admin.review.penarikan.index')
+                 // === PERBAIKAN 2 === (Redirect jika sukses setuju)
+                 return redirect()->route('admin.pemasukan.index')
                                  ->with('success', 'Penarikan dana berhasil disetujui (Pajak 2.5% diterapkan).');
             } else {
+                 // (Redirect jika sukses tolak, boleh ke halaman review lagi)
                  return redirect()->route('admin.review.penarikan.index')
                                  ->with('success', 'Penarikan dana berhasil ditolak dan saldo telah dikembalikan ke Mitra.');
             }
 
         } catch (\Exception $e) {
-            return redirect()->route('admin.review.penarikan.index')
+            // === PERBAIKAN 3 === (Redirect jika ada error)
+            return redirect()->route('admin.pemasukan.index')
                              ->with('error', 'Gagal memproses aksi: ' . $e->getMessage());
         }
     }

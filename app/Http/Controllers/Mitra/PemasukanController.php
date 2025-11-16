@@ -63,6 +63,8 @@ class PemasukanController extends Controller
     /**
      * Memproses permintaan penarikan dana oleh Mitra.
      */
+    // app/Http/Controllers/Mitra/PemasukanController.php
+
     public function storePenarikan(Request $request)
     {
         $mitra = Auth::guard('mitra')->user();
@@ -71,16 +73,15 @@ class PemasukanController extends Controller
             'jumlah' => [
                 'required',
                 'integer',
-                'min:50000', // Minimal penarikan 50rb
-                'max:' . $mitra->saldo_pemasukan, // Tidak boleh > saldo
+                'min:20000', // <-- UBAH DI SINI (dari 50000)
+                'max:' . $mitra->saldo_pemasukan,
             ],
             'rekening_bank_id' => [
                 'required',
                 'integer',
-                // Validasi bahwa rekening_id yang dipilih adalah BENAR milik mitra ini
                 Rule::exists('rekening_bank', 'rekening_id')->where(function ($query) use ($mitra) {
                     $query->where('rekeningable_id', $mitra->mitra_id)
-                          ->where('rekeningable_type', Mitra::class); // Pastikan namespace 'App\Models\Mitra'
+                        ->where('rekeningable_type', Mitra::class);
                 }),
             ]
         ], [
@@ -91,27 +92,24 @@ class PemasukanController extends Controller
         try {
             DB::transaction(function () use ($request, $mitra) {
                 $jumlah = $request->input('jumlah');
-
-                // 1. Kurangi saldo Mitra
                 $mitra->decrement('saldo_pemasukan', $jumlah);
 
-                // 2. Buat catatan penarikan
-                // Status 'Pending' karena harus di-review SuperAdmin
                 PenarikanDana::create([
                     'penarikanable_id' => $mitra->mitra_id,
-                    'penarikanable_type' => Mitra::class, // Pastikan namespace 'App\Models\Mitra'
+                    'penarikanable_type' => Mitra::class,
                     'rekening_bank_id' => $request->input('rekening_bank_id'),
                     'jumlah' => $jumlah,
-                    'status' => 'Pending', // <-- Status Pending
+                    'potongan_pajak' => 0, // Akan dihitung SuperAdmin saat approve
+                    'status' => 'Pending',
                 ]);
             });
 
             return redirect()->route('mitra.pemasukan.index')
-                             ->with('success', 'Permintaan penarikan sebesar ' . number_format($request->input('jumlah')) . ' Poin telah diajukan dan sedang diproses.');
+                            ->with('success', 'Permintaan penarikan sebesar ' . number_format($request->input('jumlah')) . ' Poin telah diajukan.');
 
         } catch (\Exception $e) {
             return redirect()->route('mitra.pemasukan.index')
-                             ->with('error', 'Gagal memproses penarikan: ' . $e->getMessage());
+                            ->with('error', 'Gagal memproses penarikan: ' . $e->getMessage());
         }
     }
 }

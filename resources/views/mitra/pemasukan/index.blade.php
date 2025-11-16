@@ -7,7 +7,10 @@
 @section('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <style>
-        .tab-content { padding-top: 1rem; }
+        /* Perbaikan kecil agar tab DataTables pas */
+        .tab-content {
+            padding-top: 1rem;
+        }
     </style>
 @endsection
 
@@ -54,7 +57,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Ajukan Penarikan Dana</h6>
@@ -65,8 +67,8 @@
                         <div class="mb-3">
                             <label for="jumlah" class="form-label">Jumlah Penarikan (Poin)</label>
                             <input type="number" name="jumlah" id="jumlah" class="form-control"
-                                   max="{{ $saldoSaatIni }}" min="50000"
-                                   placeholder="Min. 50.000" required>
+                                   max="{{ $saldoSaatIni }}" min="20000"
+                                   placeholder="Min. 20.000" required>
                             <div class="form-text">Saldo tersedia: {{ number_format($saldoSaatIni) }} Poin</div>
                         </div>
                         <div class="mb-3">
@@ -87,7 +89,7 @@
                                 <a href="{{ route('mitra.rekening-bank.index') }}">Kelola Rekening Bank Anda</a>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100" {{ $rekeningBank->isEmpty() || $saldoSaatIni < 50000 ? 'disabled' : '' }}>
+                        <button type="submit" class="btn btn-primary w-100" {{ $rekeningBank->isEmpty() || $saldoSaatIni < 20000 ? 'disabled' : '' }}>
                             Ajukan Penarikan
                         </button>
                     </form>
@@ -111,7 +113,6 @@
                         </li>
                     </ul>
                 </div>
-
                 <div class="card-body">
                     <div class="tab-content" id="pemasukanTabContent">
 
@@ -136,17 +137,26 @@
                                                 <td class="text-danger">- {{ number_format($penarikan->potongan_pajak) }}</td>
                                                 <td class="fw-bold">{{ number_format($penarikan->jumlah - $penarikan->potongan_pajak) }}</td>
                                                 <td class="small">{{ $penarikan->rekeningBank->nama_bank }} - {{ $penarikan->rekeningBank->nomor_rekening }}</td>
+
+                                                {{-- === PERUBAHAN DI SINI === --}}
                                                 <td>
                                                     @if($penarikan->status == 'Pending')
                                                         <span class="badge bg-warning text-dark">Pending</span>
+
                                                     @elseif($penarikan->status == 'Selesai')
                                                         <span class="badge bg-success">Selesai</span>
+
                                                     @elseif($penarikan->status == 'Ditolak')
-                                                        <span class="badge bg-danger" title="Alasan: {{ $penarikan->catatan_admin }}">Ditolak</span>
+                                                        <span class="badge bg-danger">Ditolak</span>
+                                                        <small class="d-block text-muted fst-italic">
+                                                            {{ $penarikan->catatan_admin ?? 'Tidak ada alasan' }}
+                                                        </small>
+
                                                     @else
                                                         <span class="badge bg-secondary">{{ $penarikan->status }}</span>
                                                     @endif
                                                 </td>
+                                                {{-- === AKHIR PERUBAHAN === --}}
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -168,20 +178,17 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- === PERBAIKAN LOGIKA FALLBACK DI SINI === --}}
                                         @foreach ($rincianTransaksi as $tx)
                                             @php
-                                                // Cek apakah ini data lama (nilainya 0)
+                                                // Logika Fallback (Tidak Berubah)
                                                 $totalPoin = $tx->total_harga_poin;
                                                 $pendapatanBersih = $tx->pendapatan_bersih_mitra;
                                                 $potonganPajak = $tx->potongan_pajak_mitra;
 
                                                 if ($pendapatanBersih <= 0 && $totalPoin > 0 && $tx->status_pemesanan != 'batal') {
-                                                    // Ini data lama, hitung ulang manual
                                                     $potonganPajak = (int) ceil($totalPoin * 0.005);
                                                     $pendapatanBersih = $totalPoin - $potonganPajak;
                                                 } elseif ($tx->status_pemesanan == 'batal') {
-                                                    // Jika dibatalkan, tampilkan 0
                                                     $potonganPajak = 0;
                                                     $pendapatanBersih = 0;
                                                 }
@@ -203,16 +210,15 @@
                                                 <td class="fw-bold">{{ number_format($pendapatanBersih) }}</td>
                                             </tr>
                                         @endforeach
-                                        {{-- === AKHIR PERBAIKAN === --}}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
 @endsection
 
@@ -220,34 +226,16 @@
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
     <script>
         $(document).ready(function() {
-
-            // Inisialisasi Tabel 1 (Riwayat Penarikan)
             var riwayatTable = $('#riwayatPenarikanTable').DataTable({
                 "order": [[ 0, "desc" ]],
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_",
-                    "zeroRecords": "Belum ada riwayat penarikan."
-                }
+                "language": { "search": "Cari:", "zeroRecords": "Belum ada riwayat penarikan.", /*...dll...*/ }
             });
-
-            // Inisialisasi Tabel 2 (Rincian Transaksi)
             var rincianTable = $('#rincianTransaksiTable').DataTable({
                 "order": [[ 0, "desc" ]],
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_ data",
-                    "zeroRecords": "Data tidak ditemukan",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Tidak ada data",
-                    "paginate": { "next": "Berikutnya", "previous": "Sebelumnya" }
-                }
+                "language": { "search": "Cari:", "zeroRecords": "Data tidak ditemukan", /*...dll...*/ }
             });
-
-            // Skrip untuk 'redraw' DataTables di dalam Tab
             $('button[data-bs-target="#rincian-transaksi-tab-pane"]').on('shown.bs.tab', function(e) {
                 rincianTable.columns.adjust().draw();
             });
