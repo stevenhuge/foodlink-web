@@ -7,10 +7,7 @@
 @section('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <style>
-        /* Perbaikan kecil agar tab DataTables pas */
-        .tab-content {
-            padding-top: 1rem;
-        }
+        .tab-content { padding-top: 1rem; }
     </style>
 @endsection
 
@@ -19,7 +16,6 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h3 mb-0 text-gray-800">Manajemen Pemasukan</h2>
     </div>
-
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i>
@@ -39,10 +35,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-
     <div class="row">
         <div class="col-lg-5">
-
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Saldo Anda</h6>
@@ -100,7 +94,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-lg-7">
             <div class="card shadow-sm border-0 mb-4">
 
@@ -128,17 +121,20 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Tanggal</th>
-                                            <th>Jumlah (Poin)</th>
+                                            <th>Jumlah (A)</th>
+                                            <th>Pajak (B)</th>
+                                            <th>Bersih (A - B)</th>
                                             <th>Rekening Tujuan</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- Kita HAPUS @empty agar DataTables tidak error --}}
                                         @foreach ($riwayatPenarikan as $penarikan)
                                             <tr>
                                                 <td>{{ $penarikan->created_at->format('d M Y') }}</td>
                                                 <td>{{ number_format($penarikan->jumlah) }}</td>
+                                                <td class="text-danger">- {{ number_format($penarikan->potongan_pajak) }}</td>
+                                                <td class="fw-bold">{{ number_format($penarikan->jumlah - $penarikan->potongan_pajak) }}</td>
                                                 <td class="small">{{ $penarikan->rekeningBank->nama_bank }} - {{ $penarikan->rekeningBank->nomor_rekening }}</td>
                                                 <td>
                                                     @if($penarikan->status == 'Pending')
@@ -172,7 +168,24 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {{-- === PERBAIKAN LOGIKA FALLBACK DI SINI === --}}
                                         @foreach ($rincianTransaksi as $tx)
+                                            @php
+                                                // Cek apakah ini data lama (nilainya 0)
+                                                $totalPoin = $tx->total_harga_poin;
+                                                $pendapatanBersih = $tx->pendapatan_bersih_mitra;
+                                                $potonganPajak = $tx->potongan_pajak_mitra;
+
+                                                if ($pendapatanBersih <= 0 && $totalPoin > 0 && $tx->status_pemesanan != 'batal') {
+                                                    // Ini data lama, hitung ulang manual
+                                                    $potonganPajak = (int) ceil($totalPoin * 0.005);
+                                                    $pendapatanBersih = $totalPoin - $potonganPajak;
+                                                } elseif ($tx->status_pemesanan == 'batal') {
+                                                    // Jika dibatalkan, tampilkan 0
+                                                    $potonganPajak = 0;
+                                                    $pendapatanBersih = 0;
+                                                }
+                                            @endphp
                                             <tr>
                                                 <td>{{ $tx->waktu_pemesanan->format('d M Y, H:i') }}</td>
                                                 <td>{{ $tx->user->nama_lengkap ?? 'User Dihapus' }}</td>
@@ -185,11 +198,12 @@
                                                         <span class="badge bg-warning text-dark">Belum Diambil</span>
                                                     @endif
                                                 </td>
-                                                <td>{{ number_format($tx->total_harga_poin) }}</td>
-                                                <td class="text-danger">- {{ number_format($tx->potongan_pajak_mitra) }}</td>
-                                                <td class="fw-bold">{{ number_format($tx->pendapatan_bersih_mitra) }}</td>
+                                                <td>{{ number_format($totalPoin) }}</td>
+                                                <td class="text-danger">- {{ number_format($potonganPajak) }}</td>
+                                                <td class="fw-bold">{{ number_format($pendapatanBersih) }}</td>
                                             </tr>
                                         @endforeach
+                                        {{-- === AKHIR PERBAIKAN === --}}
                                     </tbody>
                                 </table>
                             </div>
@@ -200,9 +214,8 @@
         </div>
     </div>
 
-    @endsection
+@endsection
 
-{{-- === PERUBAHAN SCRIPT JS === --}}
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -234,15 +247,12 @@
                 }
             });
 
-            /**
-             * PERBAIKAN PENTING UNTUK TABS:
-             * DataTables tidak bisa menghitung lebar kolom jika tabelnya
-             * tersembunyi (display: none) di dalam tab.
-             * * Script ini akan "menggambar ulang" tabel rincian
-             * TEPAT SETELAH tab-nya diklik dan ditampilkan.
-             */
+            // Skrip untuk 'redraw' DataTables di dalam Tab
             $('button[data-bs-target="#rincian-transaksi-tab-pane"]').on('shown.bs.tab', function(e) {
                 rincianTable.columns.adjust().draw();
+            });
+            $('button[data-bs-target="#riwayat-penarikan-tab-pane"]').on('shown.bs.tab', function(e) {
+                riwayatTable.columns.adjust().draw();
             });
         });
     </script>

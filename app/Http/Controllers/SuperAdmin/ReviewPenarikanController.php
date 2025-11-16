@@ -6,7 +6,10 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PenarikanDana;
-use App\Models\Mitra; // <-- Pastikan import model Mitra
+use App\Models\Mitra;
+use App\Models\Admin; // <-- Pastikan Admin di-import
+use App\Models\RekeningBank;
+use App\Models\LogKeuangan; // <-- TAMBAHKAN IMPORT INI
 use Illuminate\Support\Facades\DB;
 
 class ReviewPenarikanController extends Controller
@@ -16,9 +19,8 @@ class ReviewPenarikanController extends Controller
      */
     public function index()
     {
-        // Ambil semua request penarikan HANYA DARI MITRA
-        $penarikanMitra = PenarikanDana::where('penarikanable_type', Mitra::class) // <-- Pastikan namespace 'App\Models\Mitra'
-                                      ->with('penarikanable', 'rekeningBank') // Ambil relasi Mitra & Rekening
+        $penarikanMitra = PenarikanDana::where('penarikanable_type', Mitra::class)
+                                      ->with('penarikanable', 'rekeningBank')
                                       ->orderBy('created_at', 'desc')
                                       ->get();
 
@@ -35,16 +37,10 @@ class ReviewPenarikanController extends Controller
             'catatan_admin' => 'nullable|string|max:255',
         ]);
 
-        // 1. Pastikan ini penarikan dari Mitra
-        if ($penarikan->penarikanable_type != Mitra::class) { // <-- Pastikan namespace 'App\Models\Mitra'
+        // ... (Validasi tidak berubah) ...
+        if ($penarikan->penarikanable_type != Mitra::class || $penarikan->status != 'Pending') {
              return redirect()->route('admin.review.penarikan.index')
-                             ->with('error', 'Aksi ini hanya untuk penarikan Mitra.');
-        }
-
-        // 2. Pastikan statusnya masih Pending
-        if ($penarikan->status != 'Pending') {
-            return redirect()->route('admin.review.penarikan.index')
-                             ->with('error', 'Status penarikan ini sudah diproses.');
+                             ->with('error', 'Aksi tidak valid atau sudah diproses.');
         }
 
         $action = $request->input('action');
@@ -54,21 +50,41 @@ class ReviewPenarikanController extends Controller
             DB::transaction(function () use ($penarikan, $action, $catatan) {
 
                 if ($action == 'approve') {
-                    // SuperAdmin menyetujui.
-                    // (Asumsi: SuperAdmin sudah transfer manual ke rekening Mitra)
-                    // Kita hanya update statusnya.
+
+                    $superAdmin = Admin::lockForUpdate()->where('role', 'SuperAdmin')->firstOrFail();
+                    $rekening = RekeningBank::lockForUpdate()->findOrFail($penarikan->rekening_bank_id);
+
+                    // 3. Hitung Pajak & Jumlah Bersih
+                    $jumlahPenarikan = $penarikan->jumlah;
+                    $pajakPenarikan = (int) ceil($jumlahPenarikan * 0.025); // Pajak 2.5%
+                    $jumlahMasukRekening = $jumlahPenarikan - $pajakPenarikan; // Uang bersih untuk Mitra
+
+                    // 4. Tambahkan Saldo ke Rekening Bank Mitra
+                    $rekening->increment('saldo', $jumlahMasukRekening);
+
+                    // 5. Tambahkan Saldo (Pajak) ke Pemasukan SuperAdmin
+                    $superAdmin->increment('saldo_pemasukan', $pajakPenarikan);
+
+                    // 6. Buat Log Keuangan untuk Pajak
+                    LogKeuangan::create([
+                        'transaksi_id' => null,
+                        'penerima_type' => Admin::class,
+                        'penerima_id' => $superAdmin->admin_id,
+                        'tipe' => 'pajak_penarikan_mitra',
+                        'jumlah' => $pajakPenarikan
+                    ]);
+
+                    // 7. Update status penarikan (DAN SIMPAN POTONGAN PAJAKNYA)
                     $penarikan->update([
                         'status' => 'Selesai',
-                        'catatan_admin' => $catatan ?? 'Penarikan disetujui.'
+                        'potongan_pajak' => $pajakPenarikan, // <-- SIMPAN PAJAK DI SINI
+                        'catatan_admin' => $catatan ?? 'Disetujui. Dikenakan biaya admin 2.5%.'
                     ]);
 
                 } elseif ($action == 'reject') {
-                    // SuperAdmin menolak.
-                    // 1. Kembalikan saldo ke Mitra
-                    $mitra = $penarikan->penarikanable; // 'penarikanable' adalah model Mitra
+                    // (Logika Tolak tidak berubah)
+                    $mitra = $penarikan->penarikanable;
                     $mitra->increment('saldo_pemasukan', $penarikan->jumlah);
-
-                    // 2. Update status penarikan
                     $penarikan->update([
                         'status' => 'Ditolak',
                         'catatan_admin' => $catatan ?? 'Penarikan ditolak.'
@@ -78,7 +94,7 @@ class ReviewPenarikanController extends Controller
 
             if ($action == 'approve') {
                  return redirect()->route('admin.review.penarikan.index')
-                                 ->with('success', 'Penarikan dana berhasil disetujui.');
+                                 ->with('success', 'Penarikan dana berhasil disetujui (Pajak 2.5% diterapkan).');
             } else {
                  return redirect()->route('admin.review.penarikan.index')
                                  ->with('success', 'Penarikan dana berhasil ditolak dan saldo telah dikembalikan ke Mitra.');

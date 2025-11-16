@@ -25,7 +25,8 @@ class PenarikanDana extends Model
         'rekening_bank_id',
         'jumlah',
         'status',
-        'catatan_admin'
+        'catatan_admin',
+        'potongan_pajak',
     ];
 
     // Ini dari langkah sebelumnya, biarkan saja
