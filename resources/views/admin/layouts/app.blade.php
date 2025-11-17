@@ -139,6 +139,14 @@
                         {{-- SuperAdmin Only Links --}}
                         @if(auth()->guard('admin')->user() && auth()->guard('admin')->user()->role === 'SuperAdmin')
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.pemasukan.*') ? 'active' : '' }}"
+                               href="{{ route('admin.pemasukan.index') }}">
+                                <i class="fas fa-chart-line"></i>
+                                Pemasukan
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.admins.*') ? 'active' : '' }}"
                                href="{{ route('admin.admins.index') }}">
                                 <i class="fas fa-users-cog"></i>

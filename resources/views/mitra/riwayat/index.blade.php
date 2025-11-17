@@ -45,7 +45,7 @@
                                 $status = strtolower($transaksi->status_pemesanan);
                             @endphp
 
-                            @if ($status === "selesai" || $status === "dibatalkan")
+                            @if ($status === "selesai" || $status === "batal")
                                 <tr>
                                 <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
                                 <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>

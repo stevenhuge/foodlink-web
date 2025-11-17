@@ -10,6 +10,9 @@ use App\Models\User;
 use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
+use App\Models\Mitra;         // <-- TAMBAHAN
+use App\Models\Admin;        // <-- TAMBAHAN
+use App\Models\LogKeuangan;  // <-- TAMBAHAN
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,12 +32,13 @@ class TransaksiController extends Controller
         try {
             $result = DB::transaction(function () use ($user, $items) {
 
-                $totalHargaPoin = 0;
+                $totalHargaProduk = 0;
                 $mitra_id = null;
                 $itemsToProcess = [];
 
                 $user = User::lockForUpdate()->find($user->user_id);
 
+                // 1. Loop validasi
                 foreach ($items as $item) {
                     $produk = Produk::lockForUpdate()->find($item['produk_id']);
 
@@ -49,7 +53,7 @@ class TransaksiController extends Controller
                     }
 
                     $hargaSatuanPoin = $produk->harga_diskon;
-                    $totalHargaPoin += ($hargaSatuanPoin * $item['jumlah']);
+                    $totalHargaProduk += ($hargaSatuanPoin * $item['jumlah']);
 
                     $itemsToProcess[] = [
                         'produk' => $produk,
@@ -58,23 +62,46 @@ class TransaksiController extends Controller
                     ];
                 }
 
-                if ($user->poin_reward < $totalHargaPoin) {
-                    throw new \Exception("Poin Anda tidak cukup (Poin: {$user->poin_reward}, Dibutuhkan: {$totalHargaPoin}).");
+                // --- LOGIKA KEUANGAN (HANYA MENCATAT) ---
+
+                // 2. Ambil model Mitra (hanya untuk cek)
+                $mitra = Mitra::find($mitra_id);
+                if (!$mitra) {
+                     throw new \Exception("Mitra (ID: $mitra_id) tidak ditemukan.");
                 }
 
-                $user->decrement('poin_reward', $totalHargaPoin);
+                // 3. Hitung Pajak
+                $biayaLayananUser = (int) ceil($totalHargaProduk * 0.002);
+                $totalFinalUser = $totalHargaProduk + $biayaLayananUser;
 
-                // === PERBAIKAN DI SINI ===
+                // 4. Cek Poin User
+                if ($user->poin_reward < $totalFinalUser) {
+                    throw new \Exception("Poin Anda tidak cukup (Poin: {$user->poin_reward}, Dibutuhkan: {$totalFinalUser}).");
+                }
+
+                // 5. Hitung Pemasukan (Hanya untuk disimpan)
+                $potonganPajakMitra = (int) ceil($totalHargaProduk * 0.005);
+                $pendapatanBersihMitra = $totalHargaProduk - $potonganPajakMitra;
+
+                // 6. Kurangi Poin User (INI TETAP DILAKUKAN)
+                $user->decrement('poin_reward', $totalFinalUser);
+
+                // 7. Buat Transaksi (Menyimpan catatan pajak)
                 $order = Transaksi::create([
                     'user_id' => $user->user_id,
                     'mitra_id' => $mitra_id,
-                    'total_harga' => $totalHargaPoin,
-                    'total_harga_poin' => $totalHargaPoin,
+                    'total_harga' => $totalHargaProduk,
+                    'total_harga_poin' => $totalHargaProduk,
                     'kode_unik_pengambilan' => 'FD-' . Str::upper(Str::random(8)),
-                    'status_pemesanan' => 'paid', // <-- Menggunakan kolom dan value Anda
+                    'status_pemesanan' => 'paid',
+                    'biaya_layanan_user' => $biayaLayananUser,
+                    'potongan_pajak_mitra' => $potonganPajakMitra,
+                    'pendapatan_bersih_mitra' => $pendapatanBersihMitra,
                 ]);
-                // =========================
 
+                // === LOGIKA PENAMBAHAN SALDO & LOG DIHAPUS DARI SINI ===
+
+                // 8. Kurangi Stok & Buat Detail
                 foreach ($itemsToProcess as $item) {
                     $produk = $item['produk'];
                     $produk->decrement('stok_tersisa', $item['jumlah']);
@@ -105,20 +132,22 @@ class TransaksiController extends Controller
 
     public function riwayat(Request $request)
     {
+        // ... (Fungsi ini tidak perlu diubah) ...
         $user_id = $request->user()->user_id;
         $orders = Transaksi::where('user_id', $user_id)
-                           ->with('detailTransaksi.produk', 'mitra')
-                           ->orderBy('waktu_pemesanan', 'desc')
-                           ->get();
+                            ->with('detailTransaksi.produk', 'mitra')
+                            ->orderBy('waktu_pemesanan', 'desc')
+                            ->get();
         return response()->json($orders);
     }
 
     public function show(string $id)
     {
+        // ... (Fungsi ini tidak perlu diubah) ...
         $transaksi = Transaksi::with('detailTransaksi.produk', 'mitra')
-                              ->where('transaksi_id', $id)
-                              ->where('user_id', Auth::id())
-                              ->firstOrFail();
+                                ->where('transaksi_id', $id)
+                                ->where('user_id', Auth::id())
+                                ->firstOrFail();
         return response()->json($transaksi);
     }
 }

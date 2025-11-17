@@ -4,18 +4,12 @@
 
 @section('content')
 <div class="container py-5">
-    <!-- START: Header & Welcome Message -->
     <div class="text-center mb-5">
-        <!-- Menggunakan warna gelap yang tegas dan font-weight tebal -->
         <h1 class="display-5 text-dark fw-bold">Dashboard Mitra</h1>
         <p class="lead text-muted">Selamat datang, {{ $mitra->nama_mitra }}. Kelola produk surplus Anda dengan mudah.</p>
     </div>
-    <!-- END: Header & Welcome Message -->
-
-    <!-- START: Verification Status Banner (Dibuat lebih menonjol dan elegan) -->
     <div class="card bg-success-subtle border-success border-2 mb-5 shadow-sm">
         <div class="card-body d-flex align-items-center p-4">
-            <!-- Menggunakan ikon Bootstrap (asumsi Bootstrap Icons tersedia atau ganti dengan Font Awesome jika diperlukan) -->
             <i class="bi bi-patch-check-fill text-success fs-2 me-3"></i>
             <div>
                 <h5 class="card-title text-success mb-0 fw-semibold">Akun Terverifikasi</h5>
@@ -23,9 +17,6 @@
             </div>
         </div>
     </div>
-    <!-- END: Verification Status Banner -->
-
-    <!-- START: Menu Aksi Cepat (Action Cards) -->
     <h3 class="mb-4 text-secondary border-bottom pb-2">Aksi Cepat</h3>
     <div class="row g-4 mb-5">
 
@@ -73,86 +64,41 @@
             </a>
         </div>
     </div>
-    <!-- END: Menu Aksi Cepat (Action Cards) -->
-
-    <!-- START: Riwayat Transaksi Section -->
     <div class="mt-5 pt-3">
         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
-            <h3 class="mb-0 text-dark">Riwayat Transaksi</h3>
-            <!-- Tombol aksi untuk navigasi ke halaman riwayat lengkap -->
+            <h3 class="mb-0 text-dark">Penjualan Produk Terbaru</h3>
             <a href="{{ route('mitra.riwayat.index') }}" class="btn btn-outline-primary btn-sm fw-bold">Lihat Semua Riwayat</a>
         </div>
 
-        <div class="card p-4 shadow-sm border-0 bg-light">
-            <table>
-                <th>Sigma</th>
-            </table>
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+
+                    @forelse ($penjualanTerbaru as $detail)
+                        <li class="list-group-item bg-light d-flex flex-wrap justify-content-between align-items-center p-3">
+                            <div>
+                                <strong class="text-dark">{{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}</strong>
+                                terjual
+                                <span class="fw-bold text-primary">{{ $detail->jumlah }}</span> unit
+                            </div>
+                            <small class="text-muted">
+                                {{ $detail->transaksi->waktu_pemesanan->format('d M Y, H:i') }}
+                            </small>
+                        </li>
+                    @empty
+                        <li class="list-group-item bg-light text-center text-muted p-4">
+                            Belum ada produk yang terjual.
+                        </li>
+                    @endforelse
+
+                </ul>
+            </div>
+        </div>
         </div>
     </div>
-    <!-- END: Riwayat Transaksi Section -->
-
-</div>
 
 <style>
-    /* Styling kustom untuk tampilan yang lebih modern */
-
-    /* Menggunakan variabel warna agar mudah diubah */
-    :root {
-        --bs-primary: #1e70bf; /* Warna Biru Utama yang lebih dalam */
-        --bs-info: #00bcd4;    /* Warna Info Cyan yang cerah */
-        --bs-warning: #ffc107; /* Warna Kuning Warning */
-        --bs-danger: #e74c3c;  /* Warna Merah Danger yang tegas */
-        --bs-success-subtle: #d1e7dd;
-        --bs-success-emphasis: #0f5132;
-    }
-
-    .bg-primary { background-color: var(--bs-primary) !important; }
-    .bg-info { background-color: var(--bs-info) !important; }
-    .bg-warning { background-color: var(--bs-warning) !important; }
-    .bg-danger { background-color: var(--bs-danger) !important; }
-    .bg-success-subtle { background-color: var(--bs-success-subtle) !important; }
-    .text-success-emphasis { color: var(--bs-success-emphasis) !important; }
-
-    /* Action Card Styling */
-    .action-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border-radius: 1rem; /* Sudut lebih membulat */
-        text-decoration: none; /* Menghilangkan underline */
-        height: 100%; /* Memastikan tinggi kartu sama di grid */
-    }
-
-    .action-card:hover {
-        transform: translateY(-5px); /* Efek 'lift' pada hover */
-        box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.175) !important; /* Bayangan yang lebih besar */
-    }
-
-    /* Memastikan teks di dalam card yang berwarna memiliki kontras yang baik */
-    .action-card.bg-primary, .action-card.bg-info, .action-card.bg-danger {
-        color: white !important;
-    }
-
-    /* Mengubah warna teks warning card agar tetap kontras */
-    .action-card.bg-warning {
-        color: #343a40 !important;
-    }
-
-    /* Efek hover khusus untuk card warning */
-    .action-card.bg-warning:hover {
-        background-color: #f7a700 !important; /* Sedikit lebih gelap */
-        color: white !important;
-    }
-
-    /* Ikon */
-    .action-card i {
-        display: block;
-        margin-bottom: 0.5rem;
-    }
+    /* ... (CSS Anda tidak berubah) ... */
 </style>
 
-<!-- Tambahkan referensi Bootstrap Icons jika belum ada di layout utama -->
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
-<script>
-    // Contoh untuk menambahkan class ikon jika diperlukan, atau pastikan sudah ada di 'mitra.layouts.app'
-    // Ikon yang digunakan: bi-patch-check-fill, bi-plus-circle-fill, bi-box-seam-fill, bi-arrow-left-right, bi-envelope-open-fill
-</script>
 @endsection

@@ -1,13 +1,12 @@
 @extends('mitra.layouts.app')
 {{-- Sesuaikan dengan layout Mitra Anda --}}
 
-@section('title', 'Pesanan Masuk') {{-- Judul sudah benar --}}
+@section('title', 'Pesanan Masuk')
 
-{{-- === 1. PERUBAIKAN: Tambahkan CSS DataTables === --}}
+{{-- 1. CSS untuk DataTables --}}
 @section('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 @endsection
-{{-- ============================================= --}}
 
 @section('content')
 
@@ -19,18 +18,21 @@
         <div class="card-body">
 
             @if (session('success'))
-                {{-- ... (Pesan sukses Anda) ... --}}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             @endif
             @if (session('error'))
-                {{-- ... (Pesan error Anda) ... --}}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             @endif
-
             <div class="table-responsive">
-
-                {{-- === 2. PERUBAIKAN: Tambahkan ID unik pada tabel === --}}
                 <table class="table table-hover table-striped align-middle caption-top" id="pesananTable">
-                {{-- ================================================= --}}
-
                     <thead class="table-light">
                         <tr>
                             <th>Waktu Pesan</th>
@@ -43,69 +45,54 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($transaksis as $transaksi)
-                            @php
-                                $status = strtolower($transaksi->status_pemesanan);
-                            @endphp
-
-                            {{-- Logika @if ($status === 'paid') Anda sudah benar untuk halaman ini --}}
-                            @if ($status === 'paid')
-                                <tr>
-                                    <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
-                                    <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>
-                                    <td>{{ $transaksi->user->nama_lengkap ?? 'User Dihapus' }}</td>
-                                    <td>
-                                        @foreach($transaksi->detailTransaksi as $detail)
-                                            <div class="details small">
-                                                {{ $detail->jumlah }}x {{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}
-                                            </div>
-                                        @endforeach
-                                    </td>
-                                    <td>{{ number_format($transaksi->total_harga_poin) }}</td>
-
-                                    <td>
-                                        {{-- Ini akan selalu "Belum Diambil" karena @if di atas --}}
-                                        <span class="badge bg-warning text-dark">Belum Diambil</span>
-                                    </td>
-
-                                    <td class="text-nowrap">
-                                        {{-- ... (Tombol aksi Anda sudah benar) ... --}}
-                                        <form action="{{ route('mitra.riwayat.konfirmasi', $transaksi->transaksi_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin pesanan ini SUDAH DIAMBIL?');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-success btn-sm" title="Konfirmasi (Selesai)">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </form>
-
-                                        <form action="{{ route('mitra.riwayat.batalkan', $transaksi->transaksi_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin ingin MEMBATALKAN pesanan ini? Poin akan dikembalikan ke user.');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Batalkan Pesanan">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endif
-                        @empty
+                        {{--
+                          - Kita gunakan @foreach (bukan @forelse) untuk menghindari error DataTables
+                          - Kita tidak perlu @if (status == 'paid') karena Controller (index2) sudah memfilternya
+                        --}}
+                        @foreach ($transaksis as $transaksi)
                             <tr>
-                                <td colspan="7" class="text-center py-4">
-                                    {{--
-                                        Kita ubah pesannya sedikit karena @forelse
-                                        mungkin bingung dengan @if di dalamnya
-                                    --}}
-                                    <i class="fas fa-info-circle me-2"></i> Tidak ada pesanan masuk saat ini.
+                                <td>{{ $transaksi->waktu_pemesanan->format('d M Y, H:i') }}</td>
+                                <td><strong>{{ $transaksi->kode_unik_pengambilan }}</strong></td>
+                                <td>{{ $transaksi->user->nama_lengkap ?? 'User Dihapus' }}</td>
+                                <td>
+                                    {{-- Loop detail produk --}}
+                                    @foreach($transaksi->detailTransaksi as $detail)
+                                        <div class="details small">
+                                            {{ $detail->jumlah }}x {{ $detail->produk->nama_produk ?? 'Produk Dihapus' }}
+                                        </div>
+                                    @endforeach
+                                </td>
+                                <td>{{ number_format($transaksi->total_harga_poin) }}</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">Belum Diambil</span>
+                                </td>
+                                <td class="text-nowrap">
+                                    {{-- Tombol Konfirmasi --}}
+                                    <form action="{{ route('mitra.riwayat.konfirmasi', $transaksi->transaksi_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin pesanan ini SUDAH DIAMBIL?');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-success btn-sm" title="Konfirmasi (Selesai)">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+
+                                    {{-- Tombol Batalkan --}}
+                                    <form action="{{ route('mitra.riwayat.batalkan', $transaksi->transaksi_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda yakin ingin MEMBATALKAN pesanan ini? Poin akan dikembalikan ke user.');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-danger btn-sm" title="Batalkan Pesanan">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-@endsection
+            </div> </div> </div> @endsection {{-- Ini adalah penutup @section('content') --}}
 
+
+{{-- 2. Skrip JS untuk DataTables --}}
 @section('scripts')
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -113,14 +100,12 @@
 
     <script>
         $(document).ready(function() {
-            {{-- === 3. PERUBAIKAN: Gunakan ID "pesananTable" === --}}
             $('#pesananTable').DataTable({
-            {{-- =============================================== --}}
                 "order": [[ 0, "desc" ]],
                 "language": {
                     "search": "Cari:",
                     "lengthMenu": "Tampilkan _MENU_ data",
-                    "zeroRecords": "Data tidak ditemukan",
+                    "zeroRecords": "Tidak ada pesanan yang perlu dikonfirmasi.",
                     "info": "Menampilkan halaman _PAGE_ dari _PAGES_",
                     "infoEmpty": "Tidak ada data tersedia",
                     "infoFiltered": "(difilter dari _MAX_ total data)",
@@ -135,3 +120,9 @@
         });
     </script>
 @endsection
+
+{{-- 3. Skrip JS untuk DataTables --}}
+@section('scripts')
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>

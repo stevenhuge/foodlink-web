@@ -207,6 +207,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('mitra.pemasukan.index') }}" class="nav-link {{ request()->routeIs('mitra.pemasukan.index') ? 'active' : '' }}">
+                            <i class="fas fa-fw fa-home"></i>
+                            Pemasukan
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('mitra.profile.edit') }}" class="nav-link {{ request()->routeIs('mitra.profile.edit') ? 'active' : '' }}">
                             <i class="fas fa-fw fa-user-edit"></i>
                             Edit Profil
