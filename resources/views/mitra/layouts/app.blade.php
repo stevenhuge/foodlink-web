@@ -206,6 +206,8 @@
                             Dashboard
                         </a>
                     </li>
+
+                    @if (auth('mitra')->user()->status_verifikasi == "Verified")
                     <li class="nav-item">
                         <a href="{{ route('mitra.pemasukan.index') }}" class="nav-link {{ request()->routeIs('mitra.pemasukan.index') ? 'active' : '' }}">
                             <i class="fas fa-fw fa-home"></i>
@@ -236,6 +238,8 @@
                             Riwayat Transaksi
                         </a>
                     </li>
+                    @endif
+
                 </ul>
                 <hr>
                 <div class="sidebar-logout-form">
