@@ -39,18 +39,45 @@ class UserManagementController extends Controller
     /**
      * Memperbarui data user di database.
      */
+
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        // 1. Validasi Data Masuk
+        $validatedData = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
+            'nomor_telepon' => 'required|string|max:20',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+            // Pengecualian ID saat update email
             'email' => 'required|email|max:255|unique:users,email,' . $user->user_id . ',user_id',
             'poin_reward' => 'required|integer|min:0',
+
+            // Menggunakan min:8 untuk input password (plainteks)
+            'password_hash' => 'nullable|string|min:8',
         ]);
 
-        $user->update($request->all());
+        // 2. Memproses Password (Opsional)
 
+        // Periksa apakah input password_hash diisi oleh user
+        if (!empty($validatedData['password_hash'])) {
+            // Jika diisi, hash password plainteks sebelum diupdate
+            $user->password_hash = Hash::make($validatedData['password_hash']);
+
+            // Hapus password_hash dari $validatedData karena sudah dimasukkan secara manual ke $user
+            unset($validatedData['password_hash']);
+        } else {
+            // Jika tidak diisi (kosong), HAPUS password_hash dari array data yang akan diupdate.
+            // Ini memastikan field password_hash TIDAK dikirim sebagai null ke database.
+            unset($validatedData['password_hash']);
+        }
+
+        // 3. Update data yang tersisa
+        // Menggunakan fill() dan save() atau update()
+        $user->fill($validatedData);
+        $user->save();
+
+        // 4. Redirect dan Notifikasi
         return redirect()->route('admin.users.index')
-                         ->with('success', 'Data user berhasil diperbarui.');
+            ->with('success', 'Data user berhasil diperbarui.');
     }
 
     /**

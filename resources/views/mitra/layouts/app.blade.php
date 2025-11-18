@@ -171,15 +171,21 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('mitra.produk.index') }}" class="nav-link {{ request()->routeIs('mitra.produk.index') ? 'active' : '' }}">
                             <i class="fas fa-fw fa-box-open"></i>
                             Produk Saya
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('mitra.pesanan.index') }}" class="nav-link {{ request()->routeIs('mitra.pesanan.index') ? 'active' : '' }}">
                             <i class="fas fa-fw fa-receipt"></i>
                             Pesanan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('mitra.riwayat.index') }}" class="nav-link {{ request()->routeIs('mitra.riwayat.index') ? 'active' : '' }}">
+                            <i class="fas fa-fw fa-history"></i>
+                            Riwayat Transaksi
                         </a>
                     </li>
                 </ul>

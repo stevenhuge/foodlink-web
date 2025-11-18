@@ -18,15 +18,18 @@ class AuthController extends Controller
     {
         $fields = $request->validate([
             'nama_lengkap' => 'required|string',
+            // Validasi hanya boleh Laki-laki atau Perempuan
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string|confirmed|min:8'
         ]);
 
         $user = User::create([
             'nama_lengkap' => $fields['nama_lengkap'],
+            'jenis_kelamin' => $fields['jenis_kelamin'], // <-- Simpan ke DB
             'email' => $fields['email'],
             'password_hash' => bcrypt($fields['password']),
-            'poin_reward' => 0, // <-- Set poin awal
+            'poin_reward' => 0,
         ]);
 
         $token = $user->createToken('token-foodlink')->plainTextToken;
