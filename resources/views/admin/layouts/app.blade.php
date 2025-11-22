@@ -134,6 +134,13 @@
                                 Kategori Usaha
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.penyanggahan.*') ? 'active' : '' }}"
+                                href="{{ route('admin.penyanggahan.index') }}">
+                                <i class="fas fa-shield-alt"></i>
+                                Penyanggahan Mitra
+                            </a>
+                        </li>
                         @endif
 
                         {{-- SuperAdmin Only Links --}}

@@ -25,6 +25,15 @@
                          </div>
                     @endif
 
+                    @if (session('error_html'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-ban me-2"></i>
+                            {{-- GUNAKAN TANDA SERU (!) UNTUK MERENDER HTML --}}
+                            {!! session('error_html') !!}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
                     {{-- Form Login --}}
                     <form method="POST" action="{{ route('mitra.login') }}">
                         @csrf
