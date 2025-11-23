@@ -15,9 +15,12 @@ use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\ProdukController;
 use App\Http\Controllers\Mitra\BarterController;
 use App\Http\Controllers\Mitra\ProfileController;
+use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Mitra\RiwayatTransaksiController; // Pastikan ini ada
 
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +66,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
              Route::get('kategori-usaha/{kategori_usaha}/edit', [KategoriUsahaController::class, 'edit'])->name('kategori-usaha.edit');
              Route::put('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'update'])->name('kategori-usaha.update');
              Route::delete('kategori-usaha/{kategori_usaha}', [KategoriUsahaController::class, 'destroy'])->name('kategori-usaha.destroy');
+             Route::get('/penyanggahan', [App\Http\Controllers\Admin\PenyanggahanController::class, 'index'])->name('penyanggahan.index');
+             Route::put('/penyanggahan/{id}', [App\Http\Controllers\Admin\PenyanggahanController::class, 'update'])->name('penyanggahan.update');
         });
         Route::prefix('mitra')->name('mitra.')->middleware('role.admin:Admin,SuperAdmin')->group(function() {
             Route::get('/', [MitraVerificationController::class, 'index'])->name('index');
@@ -98,6 +103,8 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
         Route::post('register', [RegisterController::class, 'store']);
         Route::get('login', [MitraLoginController::class, 'create'])->name('login');
         Route::post('login', [MitraLoginController::class, 'store']);
+        Route::get('/penyanggahan-akun', [App\Http\Controllers\Mitra\BlokirController::class, 'publicIndex'])->name('blokir.public');
+        Route::post('/penyanggahan-akun', [App\Http\Controllers\Mitra\BlokirController::class, 'publicStore'])->name('blokir.public.store');
     });
 
     // --- Rute Mitra Terproteksi (Wajib Login & Akun Aktif) ---

@@ -64,7 +64,7 @@ class ProdukController extends Controller
 
             // --- PERUBAHAN DI SINI ---
             // Mengubah max:2048 (2MB) menjadi max:1024 (1MB)
-            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg|max:1024',
+            'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg|max:2024',
         ]);
 
         $mitraId = Auth::guard('mitra')->id();

@@ -33,6 +33,7 @@
                     <thead class="table-light">
                         <tr>
                             <th scope="col">Nama User</th>
+                            <th scope="col">Jenis Kelamin</th>
                             <th scope="col">Email</th>
                             <th scope="col">Poin Reward</th>
                             <th scope="col">Status Akun</th>
@@ -47,7 +48,7 @@
                                     <strong class="text-dark">{{ $user->nama_lengkap }}</strong><br>
                                     <small class="text-muted">{{ $user->nomor_telepon ?? '-' }}</small>
                                 </td>
-
+                                <td>{{ $user->jenis_kelamin }}</td>
                                 <td>{{ $user->email }}</td>
 
                                 <td>{{ $user->poin_reward ?? 0 }}</td>
