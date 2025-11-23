@@ -15,9 +15,12 @@ use App\Http\Controllers\Mitra\DashboardController as MitraDashboardController;
 use App\Http\Controllers\Mitra\ProdukController;
 use App\Http\Controllers\Mitra\BarterController;
 use App\Http\Controllers\Mitra\ProfileController;
+use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Mitra\RiwayatTransaksiController; // Pastikan ini ada
 
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 /*
 |--------------------------------------------------------------------------
