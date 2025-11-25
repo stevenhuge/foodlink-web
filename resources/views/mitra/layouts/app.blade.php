@@ -5,348 +5,317 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Mitra Dashboard') - Foodlink</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJc5fS5Q/O8YVlB+t7j6K/s5P2S7q8o2J+1P5V7l2gL1A0O4/kQ4/h5P+5j+4Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('css/custom-font.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <style>
-        /* Gaya Kustom untuk Tampilan Baru */
+        :root {
+            --sidebar-width: 260px;
+            --foodlink-primary: #2c5aa0; /* KEMBALI KE WARNA BIRU */
+            --content-bg: #f8f9fa;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6; /* Latar belakang body sedikit lebih cerah */
-            /* display: flex; */ /* Dihapus */
-            /* flex-direction: column; */ /* Dihapus */
-            /* min-height: 100vh; */ /* Dihapus */
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--content-bg);
+            overflow-x: hidden;
         }
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,.04);
-            background-color: #ffffff;
-            height: 56px;
-            /* flex-shrink: 0; */ /* Dihapus */
+
+        /* LAYOUT WRAPPER */
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
         }
-        .foodlink-brand {
+
+        /* SIDEBAR (DESKTOP) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--foodlink-primary); /* Gunakan warna Biru */
+            color: #fff;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 1030;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2); /* Garis pemisah lebih halus */
+        }
+
+        .sidebar-brand {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #007bff !important;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        /* Navbar user name */
-        .navbar-text b {
-            color: #343a40;
+
+        .sidebar-menu {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        /* MENU ITEM STYLING (Disesuaikan untuk BG Biru) */
+        .nav-link {
+            color: rgba(255,255,255,0.8); /* Teks putih agak transparan */
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            width: 24px;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        /* Hover Effect: Putih Transparan */
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Active State: Putih Transparan Lebih Tebal */
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.25);
+            color: #fff;
             font-weight: 600;
         }
 
-        /* --- STYLING LAYOUT BARU --- */
-
-        /* Wrapper utama untuk sidebar + konten */
-        .main-wrapper {
-            display: flex;
-            flex: 1;
-            /* overflow: hidden; */ /* Dihapus */
-            height: 100vh; /* Diubah: Mengisi tinggi viewport */
+        /* Section Header (MANAJEMEN, KEUANGAN, dll) */
+        .nav-section-header {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            letter-spacing: 0.5px;
         }
 
-        /* Sidebar Permanen (Desktop) */
-        .sidebar-permanent {
-            width: 260px;
-            flex-shrink: 0;
-            background-color: #2c3e50; /* Warna dark-blue-grey */
-            height: 100vh; /* Diubah: Tinggi penuh */
-            /* position: sticky; */ /* Dihapus */
-            /* top: 56px; */ /* Dihapus */
-            overflow-y: auto;
-            box-shadow: inset -3px 0px 5px -2px rgba(0,0,0,0.1); /* Shadow ke dalam */
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
         }
 
-        /* Konten Halaman Utama */
-        .page-content-wrapper {
+        /* CONTENT AREA */
+        .content-wrapper {
             flex-grow: 1;
-            overflow-y: auto;
-            /* padding: 1.5rem; */ /* Dihapus: Padding dipindahkan ke container-fluid */
-            background-color: #f4f7f6; /* Cocokkan dengan body */
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        .page-content-wrapper .container-fluid {
-            padding: 0;
-            margin-top: 0;
+        /* NAVBAR ATAS */
+        .top-navbar {
+            background-color: #fff;
+            height: 70px;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
         }
 
-        /* --- STYLING MENU SIDEBAR (Berlaku untuk Keduanya) --- */
+        /* RESPONSIVE MOBILE */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
 
-        /* Offcanvas (Mobile) */
-        .offcanvas-start {
-            background-color: #2c3e50; /* Cocokkan dengan sidebar permanen */
-        }
-        .offcanvas-header {
-            border-bottom: 1px solid #3b5068; /* Garis pemisah soft */
-        }
-        .offcanvas-title {
-            color: #ffffff !important; /* Judul putih */
-        }
+            .sidebar.show {
+                transform: translateX(0);
+            }
 
-        /* Menu Links */
-        .sidebar-menu {
-            padding-top: 0.5rem; /* Padding di atas list menu */
-        }
-        .sidebar-menu .nav-link {
-            color: #bdc3c7; /* Warna teks abu-abu muda (soft) */
-            padding: 0.85rem 1.25rem; /* Padding lebih besar */
-            border-radius: .375rem;
-            transition: all 0.2s ease-in-out;
-            font-weight: 500; /* Sedikit lebih tebal */
-            margin-bottom: 0.25rem; /* Jarak antar item */
-        }
-        .sidebar-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.05); /* Efek hover transparan */
-            color: #ffffff; /* Teks jadi putih */
-            transform: translateX(3px); /* Efek geser kecil */
-        }
-        .sidebar-menu .nav-link.active {
-            background-color: #007bff; /* Biru cerah */
-            color: #fff;
-            font-weight: 600; /* Lebih tebal saat aktif */
-            box-shadow: 0 4px 8px -2px rgba(0,123,255,0.3); /* Bayangan untuk link aktif */
-        }
-        .sidebar-menu .nav-link .fa-fw {
-            width: 1.25em;
-            margin-right: 0.5rem; /* Jarak ikon ke teks lebih besar */
-        }
+            .content-wrapper {
+                margin-left: 0;
+            }
 
-        /* Pemisah HR */
-        .sidebar-menu hr {
-            border-top: 1px solid #3b5068;
-            margin: 1rem 0.5rem;
-        }
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1025;
+                display: none;
+            }
 
-        /* Form Logout */
-        .sidebar-logout-form {
-            padding: 0 0.5rem; /* Samakan padding dgn menu */
+            .mobile-overlay.show {
+                display: block;
+            }
         }
-        .sidebar-logout-form .btn-logout {
-            width: 100%;
-            background-color: #e74c3c; /* Merah yang lebih soft */
-            border-color: #e74c3c;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-        }
-        .sidebar-logout-form .btn-logout:hover {
-            background-color: #c0392b; /* Merah lebih gelap saat hover */
-            border-color: #c0392b;
-        }
-
     </style>
     @yield('styles')
 </head>
 <body>
 
-    <!-- Navigasi Atas (Navbar) - DIPINDAHKAN KE DALAM .page-content-wrapper -->
-    <!-- <nav class="navbar ...">...</nav> -->
+<div class="main-wrapper">
 
-    <!-- Wrapper Utama: Sidebar + Konten -->
-    <div class="main-wrapper">
+    <div class="mobile-overlay" id="mobileOverlay"></div>
 
-        @auth('mitra')
-        <!-- Sidebar (Offcanvas) - HANYA untuk mobile/tablet (d-lg-none) -->
-        <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mitraSidebarOffcanvas" aria-labelledby="mitraSidebarOffcanvasLabel">
-            <div class="offcanvas-header text-white">
-                <h5 class="offcanvas-title foodlink-brand" id="mitraSidebarOffcanvasLabel">
-                    <i class="fas fa-store me-2"></i> Mitra Panel
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body d-flex flex-column p-3 sidebar-menu">
-                <!-- Menu Navigasi Utama (Mobile) -->
-                <ul class="nav nav-pills flex-column mb-auto">
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.dashboard') }}" class="nav-link {{ request()->routeIs('mitra.dashboard') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-home"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.profile.edit') }}" class="nav-link {{ request()->routeIs('mitra.profile.edit') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-user-edit"></i>
-                            Edit Profil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.produk.index') }}" class="nav-link {{ request()->routeIs('mitra.produk.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-box-open"></i>
-                            Produk Saya
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.pesanan.index') }}" class="nav-link {{ request()->routeIs('mitra.pesanan.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-receipt"></i>
-                            Pesanan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.riwayat.index') }}" class="nav-link {{ request()->routeIs('mitra.riwayat.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-history"></i>
-                            Riwayat Transaksi
-                        </a>
-                    </li>
-                </ul>
-                <hr>
-                <div class="sidebar-logout-form">
-                    <form method="POST" action="{{ route('mitra.logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-logout text-white">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">
+                <i class="fas fa-utensils"></i>
+                <span>FoodLink Mitra</span>
+            </a>
         </div>
 
-        <!-- Sidebar (Permanent) - HANYA untuk desktop (d-none d-lg-block) -->
-        <nav class="sidebar-permanent d-none d-lg-block">
-            <div class="d-flex flex-column p-3 sidebar-menu">
-                <!-- Menu Navigasi Utama (Desktop) -->
-                <ul class="nav nav-pills flex-column mb-auto">
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.dashboard') }}" class="nav-link {{ request()->routeIs('mitra.dashboard') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-home"></i>
-                            Dashboard
-                        </a>
-                    </li>
+        <div class="sidebar-menu">
+            <ul class="nav flex-column">
 
+                <li class="nav-item">
+                    <a href="{{ route('mitra.dashboard') }}" class="nav-link {{ request()->routeIs('mitra.dashboard') ? 'active' : '' }}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+
+                @auth('mitra')
                     @if (auth('mitra')->user()->status_verifikasi == "Verified")
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.pemasukan.index') }}" class="nav-link {{ request()->routeIs('mitra.pemasukan.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-home"></i>
-                            Pemasukan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.profile.edit') }}" class="nav-link {{ request()->routeIs('mitra.profile.edit') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-user-edit"></i>
-                            Edit Profil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.produk.index') }}" class="nav-link {{ request()->routeIs('mitra.produk.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-box-open"></i>
-                            Produk Saya
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.pesanan.index') }}" class="nav-link {{ request()->routeIs('mitra.pesanan.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-receipt"></i>
-                            Pesanan
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.riwayat.index') }}" class="nav-link {{ request()->routeIs('mitra.riwayat.index') ? 'active' : '' }}">
-                            <i class="fas fa-fw fa-history"></i>
-                            Riwayat Transaksi
-                        </a>
-                    </li>
+                        <div class="nav-section-header">Manajemen Produk</div>
+
+                        <li class="nav-item">
+                            <a href="{{ route('mitra.produk.index') }}" class="nav-link {{ request()->routeIs('mitra.produk.*') ? 'active' : '' }}">
+                                <i class="fas fa-box-open"></i> Produk Saya
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('mitra.pesanan.index') }}" class="nav-link {{ request()->routeIs('mitra.pesanan.*') ? 'active' : '' }}">
+                                <i class="fas fa-receipt"></i> Pesanan Masuk
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('mitra.barter.index') }}" class="nav-link {{ request()->routeIs('mitra.barter.*') ? 'active' : '' }}">
+                                <i class="fas fa-exchange-alt"></i> Barter Market
+                            </a>
+                        </li>
+
+                        <div class="nav-section-header">Keuangan & Laporan</div>
+
+                        <li class="nav-item">
+                            <a href="{{ route('mitra.pemasukan.index') }}" class="nav-link {{ request()->routeIs('mitra.pemasukan.*') ? 'active' : '' }}">
+                                <i class="fas fa-wallet"></i> Pemasukan
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('mitra.riwayat.index') }}" class="nav-link {{ request()->routeIs('mitra.riwayat.*') ? 'active' : '' }}">
+                                <i class="fas fa-history"></i> Riwayat Transaksi
+                            </a>
+                        </li>
                     @endif
 
-                </ul>
-                <hr>
-                <div class="sidebar-logout-form">
-                    <form method="POST" action="{{ route('mitra.logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-logout text-white">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </button>
-                    </form>
-                </div>
+                    <div class="nav-section-header">Pengaturan Akun</div>
+
+                    <li class="nav-item">
+                        <a href="{{ route('mitra.profile.edit') }}" class="nav-link {{ request()->routeIs('mitra.profile.edit') ? 'active' : '' }}">
+                            <i class="fas fa-user-cog"></i> Edit Profil
+                        </a>
+                    </li>
+                @endauth
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <form method="POST" action="{{ route('mitra.logout') }}">
+                @csrf
+                {{-- Tombol Logout dibuat transparan dengan border agar elegan di background biru --}}
+                <button type="submit" class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-2 border-0 bg-white bg-opacity-10">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+
+        <header class="top-navbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light border d-lg-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <h5 class="mb-0 d-none d-md-block fw-bold text-dark">
+                    @yield('title', 'Dashboard')
+                </h5>
             </div>
-        </nav>
-        @endauth
 
-        <!-- Konten Halaman Utama -->
-        <div class="page-content-wrapper">
-
-            <!-- Navigasi Atas (Navbar) - DIPINDAHKAN KE SINI -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
-                <div class="container-fluid px-4 px-lg-5">
-
-                    @auth('mitra')
-                        <!-- Tombol Hamburger (HANYA tampil di mobile/tablet) -->
-                        <button class="btn btn-outline-secondary me-2 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mitraSidebarOffcanvas" aria-controls="mitraSidebarOffcanvas">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                    @endauth
-
-                    <!-- Brand/Logo -->
-                    <a class="navbar-brand foodlink-brand" href="{{ auth('mitra')->check() ? route('mitra.dashboard') : '#' }}">
-                        @auth('mitra')
-                            <i class="fas fa-store me-2"></i>
-                        @else
-                            <i class="fas fa-store me-2"></i>
-                        @endauth
-                        Foodlink Mitra
-                    </a>
-
-                    <!-- Konten Navbar Kanan -->
-                    <div class="d-flex align-items-center ms-auto">
-                        @auth('mitra')
-                            <!-- Info User (HANYA untuk user login) -->
-                            <span class="navbar-text me-3 d-none d-sm-inline">
-                                Halo, <b>{{ auth('mitra')->user()->nama_mitra }}</b>
-                            </span>
-                        @else
-                            <!-- Tombol Login/Register (HANYA untuk tamu) -->
-                            <a class="btn btn-outline-primary me-2" href="{{ route('mitra.login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i> Login
-                            </a>
-                            <a class="btn btn-primary" href="{{ route('mitra.register') }}">
-                                <i class="fas fa-user-plus me-1"></i> Register
-                            </a>
-                        @endauth
+            <div class="d-flex align-items-center gap-3">
+                @auth('mitra')
+                <div class="d-flex align-items-center gap-2">
+                    <div class="text-end d-none d-sm-block">
+                        <div class="fw-bold text-dark small">{{ auth('mitra')->user()->nama_mitra }}</div>
+                        <div class="text-muted x-small" style="font-size: 11px;">{{ auth('mitra')->user()->email_bisnis }}</div>
+                    </div>
+                    {{-- Avatar dengan warna biru yang senada --}}
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 38px; height: 38px; background-color: #2c5aa0 !important;">
+                        {{ substr(auth('mitra')->user()->nama_mitra, 0, 1) }}
                     </div>
                 </div>
-            </nav>
-            <!-- AKHIR DARI NAVBAR YANG DIPINDAH -->
-
-
-            <!-- Pindahkan container-fluid ke sini agar padding-nya konsisten -->
-            <div class="container-fluid p-4"> <!-- Diubah: Ditambahkan padding 'p-4' -->
-
-                <!-- Tampilkan Pesan Sukses/Error -->
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <!-- Tampilkan Error Validasi -->
-                @if ($errors->any())
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="fas fa-times-circle me-2"></i><strong>Oops! Ada kesalahan:</strong>
-                        <ul class="mb-0 mt-2">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <!-- Konten Halaman Dinamis -->
-                <main>
-                    @yield('content')
-                </main>
+                @endauth
             </div>
-        </div> <!-- End .page-content-wrapper -->
+        </header>
 
-    </div> <!-- End .main-wrapper -->
+        <main class="p-4">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 border-start border-danger border-4" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @yield('content')
+        </main>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Simple Sidebar Toggle Script
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebarToggle');
+    const overlay = document.getElementById('mobileOverlay');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+    }
+
+    if(toggleBtn) {
+        toggleBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+    }
+</script>
+
 @yield('scripts')
 </body>
 </html>

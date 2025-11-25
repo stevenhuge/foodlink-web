@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PenyanggahanMitra;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BalasanSanggahanMail;
 use App\Models\Mitra;
 
 class PenyanggahanController extends Controller
@@ -38,5 +40,28 @@ class PenyanggahanController extends Controller
         }
 
         return redirect()->back()->with('success', 'Status sanggahan berhasil diperbarui.');
+    }
+
+    public function sendEmail(Request $request)
+    {
+        $request->validate([
+            'email_tujuan' => 'required|email',
+            'email_pengirim' => 'required|email', // Email admin yg ingin ditampilkan
+            'subjek' => 'required|string',
+            'pesan' => 'required|string',
+        ]);
+
+        try {
+            Mail::to($request->email_tujuan)
+                ->send(new BalasanSanggahanMail(
+                    $request->subjek,
+                    $request->pesan,
+                    $request->email_pengirim
+                ));
+
+            return redirect()->back()->with('success', 'Email balasan berhasil dikirim ke Mitra.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
+        }
     }
 }

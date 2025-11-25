@@ -28,7 +28,7 @@ class TransaksiController extends Controller
 
         $user = $request->user();
         $items = $request->input('items');
-
+        
         try {
             $result = DB::transaction(function () use ($user, $items) {
 

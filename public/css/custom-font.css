@@ -1,0 +1,32 @@
+/* public/css/custom-font.css */
+
+/* 1. Definisikan Font */
+@font-face {
+    font-family: 'MyFonts';
+    /* PENTING: Gunakan titik dua (..) untuk naik satu folder
+       dari folder 'css' ke 'public', lalu masuk ke 'fonts'
+    */
+    src: url('../fonts/Poppins-Regular.woff') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* 2. Timpa Variabel Bootstrap (Agar otomatis merata) */
+:root {
+    --bs-body-font-family: 'MyFonts', sans-serif;
+    --bs-font-sans-serif: 'MyFonts', sans-serif;
+    --foodlink-font: 'MyFonts', sans-serif;
+}
+
+/* 3. Paksa Penerapan ke Elemen HTML */
+body {
+    font-family: 'MyFonts', sans-serif !important;
+}
+
+/* Opsional: Memaksa elemen spesifik yang sering 'bandel' */
+h1, h2, h3, h4, h5, h6,
+p, span, a, li,
+button, .btn, input, textarea, select, .form-control,
+.navbar-brand, .sidebar-brand {
+    font-family: 'MyFonts', sans-serif !important;
+}

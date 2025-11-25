@@ -29,7 +29,34 @@
                         <td>{{ $item->mitra->email_bisnis }}</td>
                         <td>{{ $item->mitra->nomor_telepon }}</td>
                         <td>{{ $item->created_at->format('d M Y') }}</td>
-                        <td>{{ Str::limit($item->alasan_sanggah, 50) }}</td>
+                        <td>
+                            {{ Str::limit($item->alasan_sanggah, 50) }}
+
+                            @if(strlen($item->alasan_sanggah) > 50)
+                                <a href="#" class="text-primary text-decoration-none small fw-bold ms-1" data-bs-toggle="modal" data-bs-target="#modalAlasan{{ $item->sanggahan_id }}">
+                                    [Lihat Selengkapnya]
+                                </a>
+
+                                <div class="modal fade" id="modalAlasan{{ $item->sanggahan_id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fs-6 fw-bold">Alasan Sanggahan Lengkap</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="p-3 bg-light rounded border">
+                                                    <p class="mb-0 text-break" style="white-space: pre-wrap;">{{ $item->alasan_sanggah }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer py-1">
+                                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </td>
                         <td>
                             {{-- Tombol Modal Lihat Bukti --}}
                             <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalBukti{{ $item->sanggahan_id }}">
