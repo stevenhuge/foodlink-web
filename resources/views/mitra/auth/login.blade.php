@@ -54,14 +54,17 @@
             @enderror
         </div>
 
-        {{-- Remember Me --}}
+        {{-- Remember Me & Lupa Password --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="remember" id="remember">
                 <label class="form-check-label small text-muted" for="remember">Ingat Saya</label>
             </div>
-            {{-- Opsi: Link Lupa Password (jika ada fiturnya) --}}
-            {{-- <a href="#" class="small text-decoration-none">Lupa Password?</a> --}}
+
+            {{-- Link Lupa Password --}}
+            <a href="{{ route('mitra.password.request') }}" class="small text-decoration-none fw-bold text-primary">
+                Lupa Password?
+            </a>
         </div>
 
         {{-- Tombol Submit --}}

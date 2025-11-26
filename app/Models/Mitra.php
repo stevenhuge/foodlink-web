@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // <-- Pastikan ini ada
+use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\MitraResetPasswordNotification;
 
 class Mitra extends Authenticatable
 {
     // Tambahkan HasApiTokens di sini
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, CanResetPassword;
 
     /**
      * Tentukan tabel dan primary key.
@@ -64,6 +67,24 @@ class Mitra extends Authenticatable
         return null;
     }
     // ---------------------------------------------------
+
+    public function getEmailForPasswordReset()
+    {
+        return $this->email_bisnis;
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        // Gunakan Class Notifikasi Custom kita
+        $this->notify(new MitraResetPasswordNotification($token));
+    }
+
+    // Masukkan ini di dalam class Mitra
+    public function routeNotificationForMail($notification)
+    {
+        // Beritahu Laravel bahwa alamat email ada di kolom 'email_bisnis'
+        return $this->email_bisnis;
+    }
 
     // --- RELASI-RELASI YANG SUDAH ANDA BUAT ---
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\Mitra\BarterController;
 use App\Http\Controllers\Mitra\ProfileController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\Mitra\RiwayatTransaksiController; // Pastikan ini ada
+use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Support\Facades\Route;
 
@@ -99,12 +100,29 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
 
     // --- Rute Tamu Mitra (Login & Register) ---
     Route::middleware('guest:mitra')->group(function () {
+        Route::get('/test-email', function () {
+    try {
+        Mail::raw('Halo, ini tes email dari Foodlink apakah masuk Mailtrap?', function ($msg) {
+            $msg->to('tes@mitra.com') // Ganti dengan email tujuan sembarang
+                ->subject('Tes Koneksi Mailtrap');
+        });
+        return 'Email berhasil dikirim! Cek Mailtrap sekarang.';
+    } catch (\Exception $e) {
+        return 'Gagal kirim: ' . $e->getMessage();
+    }
+});
         Route::get('register', [RegisterController::class, 'create'])->name('register');
         Route::post('register', [RegisterController::class, 'store']);
         Route::get('login', [MitraLoginController::class, 'create'])->name('login');
         Route::post('login', [MitraLoginController::class, 'store']);
+
         Route::get('/penyanggahan-akun', [App\Http\Controllers\Mitra\BlokirController::class, 'publicIndex'])->name('blokir.public');
         Route::post('/penyanggahan-akun', [App\Http\Controllers\Mitra\BlokirController::class, 'publicStore'])->name('blokir.public.store');
+
+        Route::get('/forgot-password', [App\Http\Controllers\Mitra\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+        Route::post('/forgot-password', [App\Http\Controllers\Mitra\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+        Route::get('/reset-password/{token}', [App\Http\Controllers\Mitra\ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reset-password', [App\Http\Controllers\Mitra\ForgotPasswordController::class, 'reset'])->name('password.update');
     });
 
     // --- Rute Mitra Terproteksi (Wajib Login & Akun Aktif) ---

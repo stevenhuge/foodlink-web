@@ -30,7 +30,7 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Agar panah collapse ada di kanan */
+            justify-content: space-between;
         }
 
         .sidebar .nav-link:hover {
@@ -51,13 +51,13 @@
 
         /* Styling untuk Submenu */
         .sidebar .submenu {
-            background: rgba(0, 0, 0, 0.1); /* Sedikit lebih gelap */
+            background: rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             margin-top: 2px;
         }
 
         .sidebar .submenu .nav-link {
-            padding-left: 50px; /* Indentasi untuk anak menu */
+            padding-left: 50px;
             font-size: 0.95rem;
         }
 

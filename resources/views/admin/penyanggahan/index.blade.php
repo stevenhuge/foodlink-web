@@ -81,8 +81,6 @@
                         </td>
                     </tr>
 
-                    {{-- Modal Bukti --}}
-                    {{-- Modal Bukti --}}
                     <div class="modal fade" id="modalBukti{{ $item->sanggahan_id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -136,7 +134,6 @@
                                                                 </a>
                                                             </div>
 
-                                                        {{-- TAMPILAN DOKUMEN LAIN (DOCX, ZIP, dll) --}}
                                                         @else
                                                             <div class="card-body text-center d-flex flex-column justify-content-center align-items-center p-4 bg-light rounded-top">
                                                                 <i class="fas fa-file-alt fa-3x text-secondary mb-2"></i>
