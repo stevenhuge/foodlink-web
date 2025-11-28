@@ -47,7 +47,8 @@ class MitraResetPasswordNotification extends Notification
                     ->line('Anda menerima email ini karena kami menerima permintaan reset password untuk akun Anda.')
                     ->action('Reset Password', $url) // Tombol mengarah ke URL custom kita
                     ->line('Link ini akan kadaluwarsa dalam 60 menit.')
-                    ->line('Jika Anda tidak meminta reset password, abaikan email ini.');
+                    ->line('Jika Anda tidak meminta reset password, abaikan email ini.')
+                    ->salutation('Salam Hormat, Tim FoodLink');
     }
 
     /**

@@ -27,7 +27,7 @@
 
         .auth-container {
             width: 100%;
-            max-width: 420px; /* Lebar maksimal kotak login */
+            max-width: 620px; /* Lebar maksimal kotak login */
             padding: 15px;
         }
 
