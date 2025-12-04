@@ -191,6 +191,15 @@
                         </li>
 
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}"
+                               href="{{ route('admin.pengaturan.index') }}">
+                                <div>
+                                    <i class="fas fa-money-check-alt icon-left"></i> Pengaturan Pajak
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.alasan-blokir.*') ? 'active' : '' }}"
                                href="{{ route('admin.alasan-blokir.index') }}">
                                 <div>
@@ -213,7 +222,7 @@
                         <div class="d-flex align-items-center ms-auto">
                             <span class="me-3 text-muted d-none d-sm-block">
                                 <i class="fas fa-user-circle me-1"></i>
-                                {{ Auth::user()->nama_lengkap }}
+                                {{ Auth::guard('admin')->user()->nama_lengkap ?? 'Admin' }}
                             </span>
                             <form method="POST" action="{{ route('admin.logout') }}">
                                 @csrf

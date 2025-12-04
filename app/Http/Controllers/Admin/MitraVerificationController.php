@@ -25,7 +25,33 @@ class MitraVerificationController extends Controller
 
     public function show(Mitra $mitra){ return view('admin.mitra.show', compact('mitra')); }
     public function edit(Mitra $mitra){ $kategoriUsaha = KategoriUsaha::orderBy('nama_kategori')->get(); return view('admin.mitra.edit', compact('mitra', 'kategoriUsaha')); }
-    public function update(Request $request, Mitra $mitra){ /* ... kode update ... */ return redirect()->route('admin.mitra.index')->with('success', 'Data Mitra berhasil diupdate.'); }
+    public function update(Request $request, Mitra $mitra){
+        $validatedData = $request->validate([
+            'nama_mitra' => 'required|string|max:255',
+            // PERBAIKAN DI BAWAH INI:
+            // 1. Ubah 'mitras' menjadi 'mitra' (nama tabel)
+            // 2. Ubah 'email' menjadi 'email_bisnis' (nama kolom)
+            'email_bisnis' => 'required|email|max:255|unique:mitra,email_bisnis,' . $mitra->mitra_id . ',mitra_id',
+            'nomor_telepon' => 'required|string|max:20',
+            'alamat' => 'required|string|max:500',
+            'kategori_usaha_id' => 'required|integer|exists:kategori_usaha,kategori_usaha_id',
+            // Tambahkan validasi untuk field lain jika diperlukan (misal: deskripsi)
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        // Opsional: Cek jika ada password baru di request (karena di view ada input password)
+        if ($request->filled('password_baru')) {
+            $request->validate([
+                'password_baru' => 'confirmed|min:6', // Pastikan di view name-nya password_baru_confirmation
+            ]);
+            $mitra->password = Hash::make($request->password_baru);
+        }
+
+        $mitra->fill($validatedData);
+        $mitra->save();
+
+        return redirect()->route('admin.mitra.index')->with('success', 'Data Mitra berhasil diupdate.');
+    }
     public function destroy(Mitra $mitra){ /* ... kode destroy ... */ }
     public function verify(Mitra $mitra){ $mitra->status_verifikasi = 'Verified'; $mitra->save(); return redirect()->route('admin.mitra.index')->with('success', $mitra->nama_mitra . ' berhasil diverifikasi.'); }
     public function reject(Mitra $mitra){ $mitra->status_verifikasi = 'Rejected'; $mitra->save(); return redirect()->route('admin.mitra.index')->with('success', $mitra->nama_mitra . ' berhasil ditolak.'); }

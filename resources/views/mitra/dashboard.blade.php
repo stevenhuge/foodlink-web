@@ -3,7 +3,30 @@
 @section('title', 'Dashboard Mitra')
 
 @section('content')
-<div class="container py-4">
+    <div class="container py-4">
+
+        <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-white py-3 border-bottom-0">
+            <h5 class="fw-bold text-dark mb-0"><i class="fas fa-bell text-primary me-2"></i>Inbox Pengumuman</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                @forelse($notifikasi as $notif)
+                    <div class="list-group-item p-3">
+                        <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                            <h6 class="mb-1 fw-bold text-dark">{{ $notif->judul }}</h6>
+                            <small class="text-muted">{{ $notif->created_at->diffForHumans() }}</small>
+                        </div>
+                        <p class="mb-1 small text-secondary">{{ $notif->pesan }}</p>
+                    </div>
+                @empty
+                    <div class="text-center py-4 text-muted small">
+                        Belum ada pengumuman baru.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>

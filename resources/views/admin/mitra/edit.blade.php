@@ -12,7 +12,7 @@
 
     <!-- Card Utama untuk Form -->
     <div class="card border-0 shadow-sm rounded-3">
-
+        
         <form action="{{ route('admin.mitra.update', $mitra->mitra_id) }}" method="POST">
             @csrf
             @method('PUT')

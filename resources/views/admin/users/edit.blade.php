@@ -1,9 +1,23 @@
-@extends('admin.layouts.app') {{-- Sesuaikan layout admin Anda --}}
+@extends('admin.layouts.app')
 
 @section('title', 'Edit User')
 
 @section('content')
 <h1>Edit User: {{ $user->nama_lengkap }}</h1>
+
+@if(session('success'))
+  <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+@if($errors->any())
+  <div class="alert alert-danger">
+    <ul class="mb-0">
+      @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
+@endif
 
 <form action="{{ route('admin.users.update', $user->user_id) }}" method="POST">
     @csrf
@@ -45,7 +59,6 @@
 
     <div class="form-group mb-3">
         <label for="password_hash">Password</label>
-        {{-- Input form menggunakan nama kolom tabel --}}
         <input type="password" name="password_hash" id="password_hash"
             class="form-control @error('password_hash') is-invalid @enderror"
             placeholder="Minimal 8 karakter (Opsional)">

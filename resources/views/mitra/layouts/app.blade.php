@@ -223,15 +223,14 @@
                                 <i class="fas fa-history"></i> Riwayat Transaksi
                             </a>
                         </li>
+                        <div class="nav-section-header">Pengaturan Akun</div>
+
+                        <li class="nav-item">
+                            <a href="{{ route('mitra.profile.edit') }}" class="nav-link {{ request()->routeIs('mitra.profile.edit') ? 'active' : '' }}">
+                                <i class="fas fa-user-cog"></i> Edit Profil
+                            </a>
+                        </li>
                     @endif
-
-                    <div class="nav-section-header">Pengaturan Akun</div>
-
-                    <li class="nav-item">
-                        <a href="{{ route('mitra.profile.edit') }}" class="nav-link {{ request()->routeIs('mitra.profile.edit') ? 'active' : '' }}">
-                            <i class="fas fa-user-cog"></i> Edit Profil
-                        </a>
-                    </li>
                 @endauth
             </ul>
         </div>
