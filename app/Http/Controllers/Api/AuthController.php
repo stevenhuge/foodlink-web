@@ -73,9 +73,11 @@ class AuthController extends Controller
      * Melihat profil user (termasuk poin)
      * Endpoint: GET /api/profile (Middleware auth:sanctum)
      */
-    public function profile(Request $request)
-    {
-        // Mengembalikan data user yang sedang login (termasuk poin_reward)
-        return response()->json($request->user());
-    }
+    public function profile(Request $request) {
+    return response()->json([
+        'message' => 'Berhasil ambil data',
+        'user' => $request->user(), // <--- INI PENTING! Harus dibungkus key 'user'
+        'token' => null // Android butuh key token (boleh null)
+    ]);
+}
 }
