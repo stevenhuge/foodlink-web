@@ -7,7 +7,8 @@
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h3 mb-0 text-gray-800 fw-bold" style="color: var(--foodlink-primary);">Dashboard Overview</h1>
+            {{-- Mengubah inline style menjadi warna yang diminta --}}
+            <h1 class="h3 mb-0 text-gray-800 fw-bold" style="color: #4db43f;">Dashboard Overview</h1>
             <p class="text-muted mb-0 small">Ringkasan data dan aktivitas platform Foodlink hari ini.</p>
         </div>
         <div class="d-none d-sm-inline-block">
@@ -153,6 +154,7 @@
 
         <div class="col-lg-4 mb-4">
             <div class="card shadow-sm mb-4">
+                {{-- Class bg-primary akan di-override di CSS --}}
                 <div class="card-header py-3 bg-primary text-white border-0">
                     <h6 class="m-0 font-weight-bold"><i class="fas fa-info-circle me-2"></i>Informasi</h6>
                 </div>
@@ -187,19 +189,25 @@
         transform: translateY(-5px);
     }
 
+    /* --- PERUBAHAN WARNA UTAMA MENJADI #4db43f --- */
+
     /* Border Left Color Indicators */
-    .border-start-primary { border-left: 0.25rem solid #2c5aa0 !important; }
+    .border-start-primary { border-left: 0.25rem solid #4db43f !important; }
     .border-start-info { border-left: 0.25rem solid #36b9cc !important; }
     .border-start-warning { border-left: 0.25rem solid #f6c23e !important; }
 
     /* Text Colors */
-    .text-primary { color: #2c5aa0 !important; }
+    .text-primary { color: #4db43f !important; }
     .text-info { color: #36b9cc !important; }
     .text-warning { color: #f6c23e !important; }
     .text-gray-800 { color: #5a5c69 !important; }
 
+    /* Background Colors (Override Bootstrap bg-primary) */
+    .bg-primary { background-color: #4db43f !important; }
+
     /* Soft Background for Icons */
-    .bg-primary-light { background-color: rgba(44, 90, 160, 0.1); }
+    /* Menggunakan RGBA dari #4db43f (77, 180, 63) */
+    .bg-primary-light { background-color: rgba(77, 180, 63, 0.1); }
     .bg-info-light { background-color: rgba(54, 185, 204, 0.1); }
     .bg-warning-light { background-color: rgba(246, 194, 62, 0.1); }
     .bg-secondary-light { background-color: rgba(133, 135, 150, 0.1); }
@@ -221,7 +229,7 @@
     }
     .btn-quick-action:hover {
         background-color: #f8f9fa;
-        border-color: #2c5aa0 !important;
+        border-color: #4db43f !important; /* Update Border Hover */
         transform: translateX(5px);
     }
 </style>
