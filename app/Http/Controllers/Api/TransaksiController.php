@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/TransaksiController.php
 
 namespace App\Http\Controllers\Api;
 
@@ -11,12 +10,14 @@ use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
 use App\Models\Mitra;
-use App\Models\Setting; // <-- WAJIB: Untuk mengambil pajak dinamis
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TransaksiController extends Controller
 {
+    // --- 1. CHECKOUT / PEMBELIAN (SUDAH BENAR) ---
     public function store(Request $request)
     {
         $request->validate([
@@ -35,25 +36,23 @@ class TransaksiController extends Controller
                 $mitra_id = null;
                 $itemsToProcess = [];
 
-                // Lock user untuk update saldo nanti
+                // Lock user
                 $user = User::lockForUpdate()->find($user->user_id);
 
-                // 1. Loop validasi & Hitung Total Harga Produk Murni
                 foreach ($items as $item) {
                     $produk = Produk::lockForUpdate()->find($item['produk_id']);
 
-                    if (!$produk) { throw new \Exception("Produk ID {$item['produk_id']} tidak ditemukan."); }
-                    if ($produk->status_produk != 'Tersedia') { throw new \Exception("Produk '{$produk->nama_produk}' sedang tidak tersedia."); }
-                    if ($produk->stok_tersisa < $item['jumlah']) { throw new \Exception("Stok '{$produk->nama_produk}' tidak mencukupi (sisa: {$produk->stok_tersisa})."); }
+                    if (!$produk) { throw new \Exception("Produk tidak ditemukan."); }
+                    if ($produk->status_produk != 'Tersedia') { throw new \Exception("Produk '{$produk->nama_produk}' tidak tersedia."); }
+                    if ($produk->stok_tersisa < $item['jumlah']) { throw new \Exception("Stok '{$produk->nama_produk}' kurang."); }
 
-                    // Pastikan 1 Transaksi = 1 Mitra
                     if ($mitra_id === null) {
                         $mitra_id = $produk->mitra_id;
                     } elseif ($mitra_id != $produk->mitra_id) {
-                        throw new \Exception("Checkout hanya bisa untuk produk dari 1 Mitra yang sama.");
+                        throw new \Exception("Produk harus dari satu Mitra yang sama.");
                     }
 
-                    $hargaSatuanPoin = $produk->harga_diskon;
+                    $hargaSatuanPoin = $produk->harga_diskon >= 0 ? $produk->harga_diskon : $produk->harga_asli;
                     $totalHargaProduk += ($hargaSatuanPoin * $item['jumlah']);
 
                     $itemsToProcess[] = [
@@ -63,66 +62,39 @@ class TransaksiController extends Controller
                     ];
                 }
 
-                // 2. Cek Mitra
-                $mitra = Mitra::find($mitra_id);
-                if (!$mitra) {
-                     throw new \Exception("Mitra (ID: $mitra_id) tidak ditemukan.");
-                }
+                // Ambil Setting (Handle jika setting kosong)
+                $biayaLayananSetting = (int) (Setting::where('key', 'biaya_layanan_user')->value('value') ?? 500);
+                $persenPotonganMitra = (float) (Setting::where('key', 'biaya_mitra_persen')->value('value') ?? 5);
 
-                // === 3. LOGIKA PAJAK & BIAYA DINAMIS (UPDATED) ===
-
-                // Ambil setting dari database (Gunakan nilai default jika belum diset admin)
-                $biayaLayananSetting = (int) Setting::ambil('biaya_layanan_user', 2000); // Default Rp 2.000
-                $persenPotonganMitra = (float) Setting::ambil('biaya_mitra_persen', 5);  // Default 5%
-
-                // Hitung yang harus dibayar User (Harga Produk + Biaya Layanan Flat)
                 $totalFinalUser = $totalHargaProduk + $biayaLayananSetting;
-
-                // Hitung Potongan Mitra (Harga Produk * Persen)
                 $potonganPajakMitra = (int) ceil($totalHargaProduk * ($persenPotonganMitra / 100));
-
-                // Hitung Pendapatan Bersih Mitra (Harga Produk - Potongan)
                 $pendapatanBersihMitra = $totalHargaProduk - $potonganPajakMitra;
 
-                // =================================================
-
-                // 4. Cek Poin User (User membayar Total Final: Produk + Biaya Layanan)
                 if ($user->poin_reward < $totalFinalUser) {
-                    throw new \Exception("Poin Anda tidak cukup (Poin: {$user->poin_reward}, Dibutuhkan: {$totalFinalUser}).");
+                    throw new \Exception("Poin tidak cukup.");
                 }
 
-                // 6. Kurangi Poin User
                 $user->decrement('poin_reward', $totalFinalUser);
 
-                // 7. Buat Transaksi (SIMPAN NILAI PAJAK KE DB)
                 $order = Transaksi::create([
                     'user_id' => $user->user_id,
                     'mitra_id' => $mitra_id,
-                    'kode_unik_pengambilan' => 'FD-' . Str::upper(Str::random(8)),
-                    'status_pemesanan' => 'paid',
-
-                    // Total yang dibayar user (Poin berkurang segini)
+                    'kode_unik_pengambilan' => 'TRX-' . strtoupper(Str::random(6)),
+                    'status_pemesanan' => 'Paid', // Sesuaikan dengan enum database (Huruf Besar Awal)
+                    'waktu_pemesanan' => Carbon::now(), // Wajib diisi manual karena timestamps false
                     'total_harga' => $totalFinalUser,
-
-                    // Harga murni produk (Dasar perhitungan persentase mitra)
                     'total_harga_poin' => $totalHargaProduk,
-
-                    // Rincian Biaya (Penting untuk laporan & riwayat)
                     'biaya_layanan_user' => $biayaLayananSetting,
                     'potongan_pajak_mitra' => $potonganPajakMitra,
                     'pendapatan_bersih_mitra' => $pendapatanBersihMitra,
                 ]);
 
-                // 8. Kurangi Stok & Buat Detail
                 foreach ($itemsToProcess as $item) {
                     $produk = $item['produk'];
                     $produk->decrement('stok_tersisa', $item['jumlah']);
-
                     if($produk->stok_tersisa <= 0) {
-                        $produk->status_produk = 'Habis';
-                        $produk->save();
+                        $produk->update(['status_produk' => 'Habis']);
                     }
-
                     DetailTransaksi::create([
                         'transaksi_id' => $order->transaksi_id,
                         'produk_id' => $produk->produk_id,
@@ -135,31 +107,116 @@ class TransaksiController extends Controller
             });
 
             return response()->json([
-                'message' => 'Pembelian berhasil! Tunjukkan kode pengambilan ke Mitra.',
-                'order' => $result->load('detailTransaksi')
-            ], 201);
+                'message' => 'Transaksi Berhasil',
+                'transaksi_id' => $result->kode_unik_pengambilan,
+                'total_bayar' => $result->total_harga
+            ], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
+    // --- 2. RIWAYAT (SUDAH DIPERBAIKI) ---
     public function riwayat(Request $request)
     {
-        $user_id = $request->user()->user_id;
-        $orders = Transaksi::where('user_id', $user_id)
-                           ->with('detailTransaksi.produk', 'mitra')
-                           ->orderBy('waktu_pemesanan', 'desc')
-                           ->get();
-        return response()->json($orders);
+        try {
+            $user_id = $request->user()->user_id;
+
+            $orders = Transaksi::where('user_id', $user_id)
+                ->with(['detailTransaksi.produk', 'mitra'])
+                ->orderBy('waktu_pemesanan', 'desc') // PERBAIKAN 1: Gunakan waktu_pemesanan
+                ->get();
+
+            $formattedOrders = $orders->map(function ($item) {
+
+                // PERBAIKAN 2: Gunakan nama_mitra (bukan nama_toko)
+                $namaToko = $item->mitra ? $item->mitra->nama_mitra : 'Mitra Tidak Dikenal';
+
+                // Buat detail singkat
+                $detailString = "Item tidak tersedia";
+                if ($item->detailTransaksi && $item->detailTransaksi->isNotEmpty()) {
+                    $names = [];
+                    foreach($item->detailTransaksi as $dt) {
+                        if($dt->produk) $names[] = $dt->produk->nama_produk;
+                    }
+                    $detailString = implode(', ', array_slice($names, 0, 2));
+                    if (count($names) > 2) $detailString .= ", dll.";
+                    $detailString .= " (" . $item->detailTransaksi->sum('jumlah') . " item)";
+                }
+
+                // Status Logic
+                $status = 'PENDING';
+                // Cek Enum DB Anda: 'Paid','Siap Diambil','Selesai' dianggap sukses
+                if (in_array($item->status_pemesanan, ['Paid', 'Siap Diambil', 'Selesai'])) {
+                    $status = 'SUKSES';
+                } elseif ($item->status_pemesanan == 'Batal') {
+                    $status = 'GAGAL';
+                }
+
+                // PERBAIKAN 3: Gunakan waktu_pemesanan untuk tanggal
+                $tanggal = $item->waktu_pemesanan
+                    ? Carbon::parse($item->waktu_pemesanan)->translatedFormat('d M Y, H:i')
+                    : '-';
+
+                return [
+                    'id' => $item->transaksi_id,
+                    'kode_transaksi' => $item->kode_unik_pengambilan,
+                    'total_harga' => (int) $item->total_harga,
+                    'status' => $status,
+                    'created_at' => $tanggal,
+                    'mitra_nama' => $namaToko,
+                    'detail_singkat' => $detailString
+                ];
+            });
+
+            return response()->json($formattedOrders, 200);
+
+        } catch (\Exception $e) {
+            // Tangkap Error detail agar mudah debug di Android
+            return response()->json([
+                'message' => 'Gagal memuat history',
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
 
-    public function show(string $id)
+    // --- 3. DETAIL TRANSAKSI (SUDAH DIPERBAIKI) ---
+    public function show($kode_transaksi)
     {
-        $transaksi = Transaksi::with('detailTransaksi.produk', 'mitra')
-                              ->where('transaksi_id', $id)
-                              ->where('user_id', Auth::id())
-                              ->firstOrFail();
-        return response()->json($transaksi);
+        $user = Auth::user(); // Ambil user yg login
+
+        $transaksi = Transaksi::with(['detailTransaksi.produk', 'mitra'])
+            ->where('kode_unik_pengambilan', $kode_transaksi)
+            ->where('user_id', $user->user_id) // Pastikan milik user yg login
+            ->first();
+
+        if (!$transaksi) {
+            return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
+        }
+
+        return response()->json([
+            'kode_transaksi' => $transaksi->kode_unik_pengambilan,
+            'status' => $transaksi->status_pemesanan,
+            'mitra_nama' => $transaksi->mitra->nama_mitra ?? 'Mitra', // PERBAIKAN: nama_mitra
+            'alamat_mitra' => $transaksi->mitra->alamat ?? '-',
+            'tanggal' => Carbon::parse($transaksi->waktu_pemesanan)->translatedFormat('d F Y H:i'), // PERBAIKAN: waktu_pemesanan
+            'items' => $transaksi->detailTransaksi->map(function($d) {
+                return [
+                    'nama_produk' => $d->produk->nama_produk ?? 'Produk dihapus',
+                    'qty' => $d->jumlah,
+                    'harga' => $d->harga_saat_transaksi,
+                    'subtotal' => $d->jumlah * $d->harga_saat_transaksi,
+                    // Pastikan di tabel produk kolomnya 'foto_produk'
+                    'gambar' => $d->produk->foto_produk ?? null
+                ];
+            }),
+            'rincian_biaya' => [
+                'total_produk' => $transaksi->total_harga_poin,
+                'biaya_layanan' => $transaksi->biaya_layanan_user,
+                'total_bayar' => $transaksi->total_harga
+            ]
+        ]);
     }
 }

@@ -129,6 +129,38 @@
 </head>
 <body>
 
+<<<<<<< HEAD
+=======
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-sticky-custom py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+                <div class="rounded-circle bg-fl-green text-white d-flex align-items-center justify-content-center shadow-fl-soft fw-bold" style="width: 40px; height: 40px;">F</div>
+                <div class="lh-1">
+                    <div class="fw-semibold">FoodLink</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">Ekosistem Ekonomi Sirkular</div>
+                </div>
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none bg-white bg-opacity-50" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav gap-lg-4 text-sm mt-3 mt-lg-0 fw-medium">
+                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#fitur">Fitur</a></li>
+                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#cara">Cara Kerja</a></li>
+                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#manfaat">Manfaat</a></li>
+                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#kontak">Kontak</a></li>
+                </ul>
+            </div>
+
+            <div class="d-none d-lg-block">
+                <a href="#cta" class="btn btn-fl-primary shadow-sm text-decoration-none">Unduh Aplikasi</a>
+            </div>
+        </div>
+    </nav>
+
+>>>>>>> c95dd3d09969b592f82e92a9d0ef155ef561543f
     <div class="container py-4">
 
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent p-0">
@@ -449,9 +481,15 @@
                     </div>
                 </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
             </div>
 =======
 >>>>>>> 25c0b97 (update json get profile)
+=======
+=======
+            </div>
+>>>>>>> 0bff819802a04fcb220d58d1439cae40d856a154
+>>>>>>> c95dd3d09969b592f82e92a9d0ef155ef561543f
         </section>
 
         <div class="text-center mt-5 mb-5">
@@ -459,12 +497,21 @@
         </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     </div>
 
     <footer id="kontak" class="text-white pt-5 pb-4 px-4">
 =======
     </div> <footer id="kontak" class="text-white pt-5 pb-4 px-4">
 >>>>>>> 25c0b97 (update json get profile)
+=======
+    </div> <footer id="kontak" class="text-white pt-5 pb-4 px-4">
+=======
+    </div>
+
+    <footer id="kontak" class="text-white pt-5 pb-4 px-4">
+>>>>>>> 0bff819802a04fcb220d58d1439cae40d856a154
+>>>>>>> c95dd3d09969b592f82e92a9d0ef155ef561543f
         <div class="container">
             <div class="row g-5">
                 <div class="col-md-4">
