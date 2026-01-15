@@ -10,7 +10,7 @@
     {{-- <link href="{{ asset('css/custom-font.css') }}" rel="stylesheet"> --}}
     <style>
         :root {
-            --foodlink-primary: #2c5aa0;
+            --foodlink-primary: #4db43f;
             --foodlink-secondary: #f8f9fa;
             --foodlink-accent: #ff6b35;
         }

@@ -73,11 +73,55 @@ class AuthController extends Controller
      * Melihat profil user (termasuk poin)
      * Endpoint: GET /api/profile (Middleware auth:sanctum)
      */
-    public function profile(Request $request) {
-    return response()->json([
-        'message' => 'Berhasil ambil data',
-        'user' => $request->user(), // <--- INI PENTING! Harus dibungkus key 'user'
-        'token' => null // Android butuh key token (boleh null)
-    ]);
-}
+    // app/Http/Controllers/Api/AuthController.php
+
+    public function profile(Request $request)
+    {
+        // Ambil data user dari database berdasarkan user_id token yang login
+        $user = User::where('user_id', $request->user()->user_id)->first();
+
+        return response()->json([
+            'message' => 'Berhasil ambil data',
+            'user' => $user, // Laravel akan otomatis menyertakan semua kolom fillable
+            'token' => null
+        ]);
+    }
+
+    // buatkan untuk update profile
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $fields = $request->validate([
+            'nama_lengkap' => 'sometimes|required|string',
+            'jenis_kelamin' => 'sometimes|in:Laki-laki,Perempuan',
+            'email' => 'sometimes|required|string|email|unique:users,email,' . $user->user_id . ',user_id',
+            'nomor_telepon' => 'sometimes|required|string',
+            'password' => 'sometimes|required|string|confirmed|min:8'
+        ]);
+
+        if (isset($fields['nama_lengkap'])) {
+            $user->nama_lengkap = $fields['nama_lengkap'];
+        }
+        if (isset($fields['jenis_kelamin'])) {
+            $user->jenis_kelamin = $fields['jenis_kelamin'];
+        }
+        if (isset($fields['email'])) {
+            $user->email = $fields['email'];
+        }
+        if (isset($fields['nomor_telepon'])) {
+            $user->nomor_telepon = $fields['nomor_telepon'];
+        }
+        if (isset($fields['password'])) {
+            $user->password_hash = bcrypt($fields['password']);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui',
+            'user' => $user,
+            'token' => null
+        ]);
+    }
 }

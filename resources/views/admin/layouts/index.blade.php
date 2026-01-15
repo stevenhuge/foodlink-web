@@ -6,7 +6,7 @@
     <h1>Manajemen Admin</h1>
     <p>Hanya SuperAdmin yang dapat melihat halaman ini.</p>
 
-    <a href="{{ route('admin.admins.create') }}" style="background: #007bff; color: white; padding: 10px; text-decoration: none;">
+    <a href="{{ route('admin.admins.create') }}" style="background: #4db43f; color: white; padding: 10px; text-decoration: none;">
         + Tambah Admin Baru
     </a>
 

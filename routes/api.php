@@ -1,14 +1,14 @@
 <?php
-// routes/api.php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// --- TAMBAHKAN 'USE' STATMENTS YANG BENAR INI ---
+// --- DAFTAR CONTROLLER ---
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\TransaksiController;
-use App\Http\Controllers\Api\WalletController; // <-- Pastikan ini ada
+use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\MitraController; // <--- Baru ditambahkan
 
 /*
 |--------------------------------------------------------------------------
@@ -16,32 +16,51 @@ use App\Http\Controllers\Api\WalletController; // <-- Pastikan ini ada
 |--------------------------------------------------------------------------
 */
 
-// == Fitur 1: Auth (Login & Register) ==
+// ========================================================================
+// 1. RUTE PUBLIK (Tidak perlu login)
+// ========================================================================
+
+// Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// == Fitur 3: Melihat Produk (Publik) ==
-Route::get('/produk', [ProdukController::class, 'index']);
-Route::get('/produk/{produk}', [ProdukController::class, 'show']); // Gunakan route model binding
+// --- PRODUK ---
+// 1. Rute Flashsale (TARUH PALING ATAS di bagian Produk)
+Route::get('/produk/flashsale', [ProdukController::class, 'flashSale']);
+Route::get('/produk/donasi', [ProdukController::class, 'produkDonasi']);
 
-// == Rute Terproteksi (Wajib Login/Punya Token) ==
+// 2. Daftar semua produk
+Route::get('/produk', [ProdukController::class, 'index']);
+
+// 3. Detail produk (Parameter dinamis ditaruh paling bawah agar tidak bentrok)
+Route::get('/produk/{produk}', [ProdukController::class, 'show']);
+
+
+// Payment Gateway Webhook
+Route::post('/payment/webhook', [WalletController::class, 'webhookHandler'])->name('payment.webhook');
+
+// ========================================================================
+// 2. RUTE TERPROTEKSI (Wajib Login / Punya Token)
+// ========================================================================
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Auth & Profil
+    // --- User Profile & Logout ---
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
+    // Update profil user berdasarkan id nya
+    Route::put('/profile/update', [AuthController::class, 'updateProfile']);
 
-    // === PERBAIKAN DI SINI ===
-    Route::get('/profile', [AuthController::class, 'profile']); // Ganti . menjadi ::
-    // =========================
+    // --- Mitra / Toko (BARU) ---
+    // Mengambil daftar toko untuk ditampilkan di menu "Toko" Android
+    Route::get('/mitra', [MitraController::class, 'index']);
+    Route::get('/mitra/{id}/produk', [ProdukController::class, 'getByMitra']);
 
-    // == Fitur 5: Membayar (Top-Up Poin) ==
+    // --- Wallet / Dompet (Top Up Poin) ---
     Route::post('/wallet/topup', [WalletController::class, 'requestTopup']);
 
-    // == Fitur 4: Membeli Produk (Checkout pakai Poin) ==
+    // --- Transaksi (Belanja) ---
     Route::post('/transaksi/checkout', [TransaksiController::class, 'store']);
-    Route::get('/transaksi/riwayat', [TransaksiController::class, 'riwayat']);
-});
+    Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
+    Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
 
-// == Rute Eksternal (Untuk Payment Gateway) ==
-// Endpoint ini dipanggil oleh server Midtrans, bukan oleh Android
-Route::post('/payment/webhook', [WalletController::class, 'webhookHandler'])->name('payment.webhook');
+});
