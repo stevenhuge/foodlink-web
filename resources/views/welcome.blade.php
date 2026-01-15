@@ -115,22 +115,10 @@
             border-top-left-radius: 1.5rem;
             border-top-right-radius: 1.5rem; /* Optional symmetry */
         }
-<<<<<<< HEAD
-
-        /* NAVIGASI STICKY */
-        .navbar-sticky-custom {
-            background-color: rgba(245, 251, 246, 0.95); /* Warna sama dengan body tapi agak transparan */
-            backdrop-filter: blur(10px); /* Efek blur kaca */
-            border-bottom: 1px solid rgba(0,0,0,0.03); /* Garis tipis di bawah */
-        }
-=======
->>>>>>> 25c0b97 (update json get profile)
     </style>
 </head>
 <body>
 
-<<<<<<< HEAD
-=======
     <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-sticky-custom py-3">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-3" href="#">
@@ -160,7 +148,6 @@
         </div>
     </nav>
 
->>>>>>> c95dd3d09969b592f82e92a9d0ef155ef561543f
     <div class="container py-4">
 
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent p-0">
