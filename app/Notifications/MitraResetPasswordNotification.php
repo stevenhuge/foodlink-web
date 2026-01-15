@@ -34,18 +34,14 @@ class MitraResetPasswordNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        // 1. Kita bangun URL manual mengarah ke rute 'mitra.password.reset'
-        // $notifiable adalah instance dari Model Mitra
-        $url = route('mitra.password.reset', [
-            'token' => $this->token,
-            'email' => $notifiable->getEmailForPasswordReset(),
-        ]);
+        // Bangun URL dengan explicit APP_URL dari config
+        $resetUrl = config('app.url') . '/mitra/reset-password/' . $this->token . '?email=' . urlencode($notifiable->getEmailForPasswordReset());
 
         return (new MailMessage)
                     ->subject('Reset Password Mitra FoodLink')
                     ->greeting('Halo Mitra FoodLink,')
                     ->line('Anda menerima email ini karena kami menerima permintaan reset password untuk akun Anda.')
-                    ->action('Reset Password', $url) // Tombol mengarah ke URL custom kita
+                    ->action('Reset Password', $resetUrl)
                     ->line('Link ini akan kadaluwarsa dalam 60 menit.')
                     ->line('Jika Anda tidak meminta reset password, abaikan email ini.')
                     ->salutation('Salam Hormat, Tim FoodLink');
