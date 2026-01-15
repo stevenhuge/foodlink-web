@@ -47,12 +47,12 @@
                         <div class="mb-3">
                             <label for="nama_kategori" class="form-label">Nama Kategori</label>
                             <input type="text"
-                                   id="nama_kategori"
-                                   name="nama_kategori"
-                                   class="form-control @error('nama_kategori') is-invalid @enderror"
-                                   value="{{ old('nama_kategori') }}"
-                                   required
-                                   autofocus>
+                                id="nama_kategori"
+                                name="nama_kategori"
+                                class="form-control @error('nama_kategori') is-invalid @enderror"
+                                value="{{ old('nama_kategori') }}"
+                                required
+                                autofocus>
 
                             @error('nama_kategori')
                                 <div class="invalid-feedback">

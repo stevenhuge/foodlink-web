@@ -11,7 +11,7 @@
 
     <style>
         :root {
-            --foodlink-primary: #2c5aa0;
+            --foodlink-primary: #4db43f;
             --bg-color: #eef2f7;
         }
 
@@ -80,8 +80,8 @@
         }
 
         .btn-primary:hover {
-            background-color: #234b8c;
-            border-color: #234b8c;
+            background-color: #3e8b33;
+            border-color: #3e8b33;
             transform: translateY(-1px);
         }
     </style>

@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Foodlink</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         :root {
-            --foodlink-primary: #2c5aa0;
+            --foodlink-primary: #4db43f;
             --foodlink-bg: #f8f9fa;
         }
 
@@ -22,29 +20,54 @@
         }
 
         .login-card {
-            max-width: 450px; /* Lebar maksimum card */
-            border-radius: .75rem; /* Sudut lebih bulat */
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.1); /* Bayangan yang soft */
+            max-width: 450px;
+            border-radius: .75rem;
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
             border: 0;
         }
 
         .brand-logo {
             color: var(--foodlink-primary);
             font-weight: 700;
-            font-size: 1.75rem; /* Ukuran font brand */
+            font-size: 1.75rem;
         }
 
-        /* Ubah warna tombol primary agar sesuai brand */
+        /* --- MODIFIKASI TOMBOL --- */
         .btn-primary {
             background-color: var(--foodlink-primary);
             border-color: var(--foodlink-primary);
+            transition: all 0.3s ease; /* Transisi halus */
         }
         .btn-primary:hover {
-            background-color: #244a85; /* Sedikit lebih gelap saat hover */
-            border-color: #244a85;
+            background-color: #3e8b33; 
+            border-color: #3e8b33;
+            box-shadow: 0 4px 12px rgba(77, 180, 63, 0.4); /* Efek glow pada tombol saat hover */
         }
+
+        /* --- MODIFIKASI INPUT FIELD AGAR LEBIH HALUS (SOFT GLOW) --- */
+        .form-control {
+            border: 1px solid #ced4da;
+            transition: all 0.3s ease-in-out; /* Animasi perubahan warna halus */
+        }
+
+        .form-control:focus {
+            /* Warna border saat diklik */
+            border-color: var(--foodlink-primary);
+            
+            /* RAHASIA GLOW HALUS: 
+            0 0 15px = posisi tengah dengan blur 15px (sangat lembut)
+            rgba(...) = warna hijau transparan (opacity 0.25) 
+            */
+            box-shadow: 0 0 15px rgba(77, 180, 63, 0.25); 
+        }
+
+        /* Modifikasi Checkbox agar seragam */
         .form-check-input:checked {
             background-color: var(--foodlink-primary);
+            border-color: var(--foodlink-primary);
+        }
+        .form-check-input:focus {
+            box-shadow: 0 0 10px rgba(77, 180, 63, 0.25);
             border-color: var(--foodlink-primary);
         }
     </style>
@@ -55,11 +78,9 @@
         <div class="row justify-content-center">
             <div class="col-12" style="max-width: 450px;">
 
-                <!-- Card Login -->
                 <div class="card login-card">
                     <div class="card-body p-4 p-md-5">
 
-                        <!-- Brand/Logo -->
                         <div class="text-center mb-4">
                             <h2 class="brand-logo">
                                 <i class="fas fa-utensils me-2"></i>Foodlink Admin
@@ -67,45 +88,39 @@
                             <p class="text-muted mt-2">Silakan login untuk melanjutkan</p>
                         </div>
 
-                        <!-- Tampilkan Error Validasi -->
                         @if ($errors->any())
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                {{-- Biasanya login error hanya satu pesan --}}
                                 {{ $errors->first() }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
 
-                        <!-- Form Login -->
                         <form method="POST" action="{{ route('admin.login') }}">
                             @csrf
 
-                            <!-- Input Username (Floating Label) -->
                             <div class="form-floating mb-3">
-                                <input type="text"
-                                       class="form-control @error('username') is-invalid @enderror"
-                                       id="username"
-                                       name="username"
-                                       value="{{ old('username') }}"
-                                       placeholder="Username"
-                                       required
-                                       autofocus>
+                                <input type="text" 
+                                    class="form-control @error('username') is-invalid @enderror" 
+                                    id="username" 
+                                    name="username" 
+                                    value="{{ old('username') }}" 
+                                    placeholder="Username" 
+                                    required 
+                                    autofocus>
                                 <label for="username">Username</label>
                             </div>
 
-                            <!-- Input Password (Floating Label) -->
                             <div class="form-floating mb-3">
-                                <input type="password"
-                                       class="form-control @error('password') is-invalid @enderror"
-                                       id="password"
-                                       name="password"
-                                       placeholder="Password"
-                                       required>
+                                <input type="password" 
+                                    class="form-control @error('password') is-invalid @enderror" 
+                                    id="password" 
+                                    name="password" 
+                                    placeholder="Password" 
+                                    required>
                                 <label for="password">Password</label>
                             </div>
 
-                            <!-- Checkbox Remember Me -->
                             <div class="form-check mb-4">
                                 <input class="form-check-input" type="checkbox" name="remember" id="remember">
                                 <label class="form-check-label" for="remember">
@@ -113,7 +128,6 @@
                                 </label>
                             </div>
 
-                            <!-- Tombol Submit -->
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg fw-bold">
                                     <i class="fas fa-sign-in-alt me-2"></i> Login
@@ -121,14 +135,8 @@
                             </div>
                         </form>
 
-                    </div> <!-- End card-body -->
-                </div> <!-- End card -->
+                    </div> </div> </div> </div> </main>
 
-            </div> <!-- End col -->
-        </div> <!-- End row -->
-    </main>
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
