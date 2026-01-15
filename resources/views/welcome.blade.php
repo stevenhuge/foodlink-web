@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FoodLink — Landing (Demo)</title>
     <meta name="description" content="FoodLink — Ekosistem Ekonomi Sirkular (demo)"/>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --fl-green: #4DB43F;
@@ -27,7 +27,7 @@
         .text-fl-green { color: var(--fl-green) !important; }
         .bg-fl-green { background-color: var(--fl-green) !important; }
         .bg-fl-green-subtle { background-color: rgba(77, 180, 63, 0.1) !important; }
-        
+
         .btn-fl-primary {
             background-color: var(--fl-green);
             color: white;
@@ -90,7 +90,7 @@
             width: 100%;
             height: 100%;
         }
-        
+
         /* Floating Badges on Phone */
         .badge-float {
             position: absolute;
@@ -109,12 +109,13 @@
         .gradient-banner {
             background: linear-gradient(to right, #eaf9ec, #f6fff7);
         }
-        
+
         footer {
             background-color: #0f1410;
             border-top-left-radius: 1.5rem;
             border-top-right-radius: 1.5rem; /* Optional symmetry */
         }
+<<<<<<< HEAD
 
         /* NAVIGASI STICKY */
         .navbar-sticky-custom {
@@ -122,44 +123,46 @@
             backdrop-filter: blur(10px); /* Efek blur kaca */
             border-bottom: 1px solid rgba(0,0,0,0.03); /* Garis tipis di bawah */
         }
+=======
+>>>>>>> 25c0b97 (update json get profile)
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-sticky-custom py-3">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-3" href="#">
-                <div class="rounded-circle bg-fl-green text-white d-flex align-items-center justify-content-center shadow-fl-soft fw-bold" style="width: 40px; height: 40px;">F</div>
-                <div class="lh-1">
-                    <div class="fw-semibold">FoodLink</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Ekosistem Ekonomi Sirkular</div>
-                </div>
-            </a>
-            
-            <button class="navbar-toggler border-0 shadow-none bg-white bg-opacity-50" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-                <ul class="navbar-nav gap-lg-4 text-sm mt-3 mt-lg-0 fw-medium">
-                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#fitur">Fitur</a></li>
-                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#cara">Cara Kerja</a></li>
-                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#manfaat">Manfaat</a></li>
-                    <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#kontak">Kontak</a></li>
-                </ul>
-            </div>
-            
-            <div class="d-none d-lg-block">
-                <a href="#cta" class="btn btn-fl-primary shadow-sm text-decoration-none">Unduh Aplikasi</a>
-            </div>
-        </div>
-    </nav>
-
     <div class="container py-4">
 
-        <header class="mt-4 mt-lg-5">
+        <nav class="navbar navbar-expand-lg navbar-light bg-transparent p-0">
+            <div class="container-fluid px-0">
+                <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+                    <div class="rounded-circle bg-fl-green text-white d-flex align-items-center justify-content-center shadow-fl-soft fw-bold" style="width: 40px; height: 40px;">F</div>
+                    <div class="lh-1">
+                        <div class="fw-semibold">FoodLink</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Ekosistem Ekonomi Sirkular</div>
+                    </div>
+                </a>
+
+                <button class="navbar-toggler border-0 shadow-none bg-white bg-opacity-50" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <ul class="navbar-nav gap-lg-4 text-sm mt-3 mt-lg-0 fw-medium">
+                        <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#fitur">Fitur</a></li>
+                        <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#cara">Cara Kerja</a></li>
+                        <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#manfaat">Manfaat</a></li>
+                        <li class="nav-item"><a class="nav-link text-secondary hover-dark" href="#kontak">Kontak</a></li>
+                    </ul>
+                </div>
+
+                <div class="d-none d-lg-block">
+                    <a href="#cta" class="btn btn-fl-primary shadow-sm text-decoration-none">Unduh Aplikasi</a>
+                </div>
+            </div>
+        </nav>
+
+        <header class="mt-5">
             <div class="row align-items-center gy-5">
-                
+
                 <div class="col-lg-6">
                     <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-1 rounded-pill small fw-medium w-auto mb-3">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 2v20"/></svg>
@@ -176,7 +179,7 @@
 
                     <div class="d-flex flex-wrap gap-3 mb-5">
                         <a href="#cta" class="btn btn-fl-primary d-inline-flex align-items-center gap-2 shadow-fl-soft">
-                            Mulai Sekarang 
+                            Mulai Sekarang
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                         <a href="#fitur" class="btn btn-fl-outline d-inline-flex align-items-center gap-2">Pelajari Lebih</a>
@@ -343,7 +346,7 @@
                     <div class="col-md-7">
                         <h3 class="fw-bolder mb-3">Paradigma Baru: <span class="text-fl-green">Ekonomi Sirkular B2B</span></h3>
                         <p class="text-secondary">Berbeda dengan model linear tradisional, FoodLink menciptakan siklus ekonomi tertutup dimana pelaku usaha saling terhubung. Sistem kredit internal memungkinkan transaksi tanpa uang tunai.</p>
-                        
+
                         <div class="d-flex flex-wrap gap-2 mt-4">
                             <span class="badge bg-white text-dark border rounded-pill px-3 py-2 fw-normal">💰 Hemat Biaya</span>
                             <span class="badge bg-white text-dark border rounded-pill px-3 py-2 fw-normal">🤝 Kolaborasi</span>
@@ -445,16 +448,23 @@
                         </picture>
                     </div>
                 </div>
+<<<<<<< HEAD
             </div>
+=======
+>>>>>>> 25c0b97 (update json get profile)
         </section>
 
         <div class="text-center mt-5 mb-5">
             <a id="cta" href="#daftar" class="btn btn-fl-outline rounded-pill px-4 py-3">Daftar Sebagai Mitra →</a>
         </div>
-        
-    </div> 
-    
+
+<<<<<<< HEAD
+    </div>
+
     <footer id="kontak" class="text-white pt-5 pb-4 px-4">
+=======
+    </div> <footer id="kontak" class="text-white pt-5 pb-4 px-4">
+>>>>>>> 25c0b97 (update json get profile)
         <div class="container">
             <div class="row g-5">
                 <div class="col-md-4">
