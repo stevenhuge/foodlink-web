@@ -5,7 +5,7 @@
 @section('content')
     <div class="text-center mb-4">
         <h5 class="fw-bold">Buat Password Baru</h5>
-        <p class="text-muted small">Silakan masukkan password baru untuk akun Anda.</p>
+        <p class="text-muted small">Silakan masukkan password baru untuk akun Anda</p>
     </div>
 
     <form method="POST" action="{{ route('mitra.password.update') }}">
