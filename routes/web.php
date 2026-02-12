@@ -33,7 +33,12 @@ use App\Http\Controllers\Mitra\ForgotPasswordController; // <-- Jangan lupa ini
 
 // --- CONTROLLER UMUM ---
 use App\Http\Controllers\WelcomeController;
+use Illuminate\Support\Facades\Artisan;
 
+Route::get('/migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return "Database migration success!";
+});
 /*
 |--------------------------------------------------------------------------
 | RUTE UMUM (LANDING PAGE)
