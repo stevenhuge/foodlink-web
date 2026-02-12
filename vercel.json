@@ -2,10 +2,10 @@
     "version": 2,
     "framework": null,
     "functions": {
-        "api/index.php": { "runtime": "vercel-php@0.6.0" }
+        "api/index.php": { "runtime": "vercel-php@0.7.1" }
     },
     "routes": [
-        { "src": "/build/(.*)", "dest": "/public/build/" },
+        { "src": "/build/(.*)", "dest": "/public/build/$1" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
@@ -14,7 +14,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://yourproductionurl.com",
+        "APP_URL": "https://foodlink-web.vercel.app",
         "APP_KEY": "base64:TGaVaXwhWgjn9akhE4SCSIjGG/cQqvICUQ+PgLA3Bs0=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
