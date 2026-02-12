@@ -12,7 +12,7 @@
     <style>
         :root {
             --sidebar-width: 260px;
-            --foodlink-primary: #2c5aa0; /* KEMBALI KE WARNA BIRU */
+            --foodlink-primary: #4DB43F; /* KEMBALI KE WARNA BIRU */
             --content-bg: #f8f9fa;
         }
 

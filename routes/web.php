@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\KategoriUsahaController;
 use App\Http\Controllers\Admin\AlasanBlokirController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\PengaturanController;
+use App\Http\Controllers\Mitra\BlokirController;
 use App\Http\Controllers\Admin\PenyanggahanController;
 
 // --- CONTROLLER SUPER ADMIN (KHUSUS) ---
@@ -128,6 +129,11 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
 
     // 1. Rute Tamu Mitra (Login, Register, Lupa Password) - [INI YANG ANDA KURANG]
     Route::middleware('guest:mitra')->group(function () {
+        Route::get('akun-diblokir', [BlokirController::class, 'publicIndex'])->name('blokir.public');
+
+    // Menangani pengiriman data sanggahan (POST) - MENGATASI ERROR mitra.blokir.public.store
+        Route::post('akun-diblokir', [BlokirController::class, 'publicStore'])->name('blokir.public.store');
+
         // Login
         Route::get('login', [MitraLoginController::class, 'create'])->name('login');
         Route::post('login', [MitraLoginController::class, 'store']);

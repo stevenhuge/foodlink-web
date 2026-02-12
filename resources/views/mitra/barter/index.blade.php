@@ -8,6 +8,12 @@
     <h1 class="mt-4">Marketplace Barter</h1>
     <p class="text-muted mb-4">Lihat produk dari mitra lain yang tersedia untuk dibarter.</p>
 
+    <div class="mb-4" style="background-color: ">
+        <a href="{{ route('mitra.barter.inbox') }}" class="btn btn-info">
+            <i class="bi bi-inbox-fill"></i> Kotak Masuk Barter
+        </a>
+    </div>
+
     {{-- Notifikasi Sukses/Error --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show rounded-lg" role="alert">
