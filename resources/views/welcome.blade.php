@@ -459,9 +459,9 @@
                         </div>
                     </div>
                     <div class="small text-white-50 d-flex flex-column gap-2">
-                        <div>hello@foodlink.id</div>
-                        <div>+62 812 3456 7890</div>
-                        <div>Jakarta, Indonesia</div>
+                        <div>foodlinkmeal@gmail.com</div>
+                        <div>+62 882 1550 2344</div>
+                        <div>Yogyakarta, Indonesia</div>
                     </div>
                 </div>
 
