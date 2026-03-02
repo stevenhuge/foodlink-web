@@ -20,7 +20,11 @@ class WelcomeController extends Controller
 
             // Jika row belum ada (return 0), insert row pertama
             if ($updated === 0) {
-                DB::table('settings')->insert(['key' => 'visitor_count', 'value' => 1]);
+                DB::table('settings')->insert([
+                    'key' => 'visitor_count',
+                    'value' => 1,
+                    'label' => 'Total Pengunjung Homepage'
+                ]);
                 $visitorCount = 1;
             } else {
                 // Ambil nilai terbaru
