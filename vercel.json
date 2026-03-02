@@ -18,20 +18,13 @@
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "true",
+        "APP_DEBUG": "false",
         "APP_URL": "https://foodlink-web.vercel.app",
         "APP_KEY": "base64:TGaVaXwhWgjn9akhE4SCSIjGG/cQqvICUQ+PgLA3Bs0=",
-        "APP_SERVICES_CACHE": "/tmp/services.php",
-        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "DB_CONNECTION": "pgsql",
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_STORE": "array",
         "SESSION_DRIVER": "cookie",
-        "LOG_CHANNEL": "stderr",
-        "DB_CONNECTION": "pgsql",
-        "DB_HOST": "4gg.h.filess.io",
-        "DB_PORT": "3306",
-        "DB_DATABASE": "foodlink_db",
-        "DB_USERNAME": "root",
-        "DB_PASSWORD": ""
+        "LOG_CHANNEL": "stderr"
     }
 }
