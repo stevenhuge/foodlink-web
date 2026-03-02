@@ -39,6 +39,18 @@ class Produk extends Model
     // --- BATAS TAMBAHAN ---
 
 
+    /**
+     * Accessor untuk foto_produk agar bisa mendeteksi format base64
+     */
+    public function getFotoProdukAttribute($value)
+    {
+        if (!$value) return null;
+        if (str_starts_with($value, 'data:image')) {
+            return $value; // Kembalikan langsung jika formatnya sudah base64
+        }
+        return $value; // Kembalikan path aslinya (nanti dibungkus Storage::url di blade)
+    }
+
     // --- RELASI (Sudah Benar) ---
     public function mitra()
     {

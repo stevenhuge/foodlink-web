@@ -77,8 +77,9 @@ class ProdukController extends Controller
         ]);
 
         if ($request->hasFile('foto_produk')) {
-            $path = $request->file('foto_produk')->store('produk', 'public');
-            $dataToSave['foto_produk'] = $path;
+            $file = $request->file('foto_produk');
+            $base64 = 'data:image/' . $file->getClientOriginalExtension() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+            $dataToSave['foto_produk'] = $base64;
         }
 
         Produk::create($dataToSave);
@@ -131,11 +132,14 @@ class ProdukController extends Controller
 
         // Logika Update Foto
         if ($request->hasFile('foto_produk')) {
-            if ($produk->foto_produk) {
+            // Hapus file lama di storage lokal JIKA formatnya BUKAN base64
+            if ($produk->foto_produk && !str_starts_with($produk->foto_produk, 'data:image')) {
                 Storage::disk('public')->delete($produk->foto_produk);
             }
-            $path = $request->file('foto_produk')->store('produk', 'public');
-            $dataToUpdate['foto_produk'] = $path;
+            
+            $file = $request->file('foto_produk');
+            $base64 = 'data:image/' . $file->getClientOriginalExtension() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+            $dataToUpdate['foto_produk'] = $base64;
         }
 
         $produk->update($dataToUpdate);

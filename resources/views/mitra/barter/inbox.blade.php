@@ -52,7 +52,7 @@
                                     {{-- Foto --}}
                                     @php $foto_url = null; @endphp
                                     @if($tawaran->produk_ditawarkan_id && $tawaran->produkDitawarkan && $tawaran->produkDitawarkan->foto_produk)
-                                        @php $foto_url = Storage::url($tawaran->produkDitawarkan->foto_produk); @endphp
+                                        @php $foto_url = str_starts_with($tawaran->produkDitawarkan->foto_produk, 'data:image') ? $tawaran->produkDitawarkan->foto_produk : Storage::url($tawaran->produkDitawarkan->foto_produk); @endphp
                                     @elseif($tawaran->foto_barang_manual)
                                         @php $foto_url = Storage::url($tawaran->foto_barang_manual); @endphp
                                     @endif
@@ -157,7 +157,7 @@
                                     {{-- Foto --}}
                                     @php $foto_url = null; @endphp
                                     @if($tawaran->produk_ditawarkan_id && $tawaran->produkDitawarkan && $tawaran->produkDitawarkan->foto_produk)
-                                        @php $foto_url = Storage::url($tawaran->produkDitawarkan->foto_produk); @endphp
+                                        @php $foto_url = str_starts_with($tawaran->produkDitawarkan->foto_produk, 'data:image') ? $tawaran->produkDitawarkan->foto_produk : Storage::url($tawaran->produkDitawarkan->foto_produk); @endphp
                                     @elseif($tawaran->foto_barang_manual)
                                         @php $foto_url = Storage::url($tawaran->foto_barang_manual); @endphp
                                     @endif

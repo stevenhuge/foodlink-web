@@ -51,7 +51,7 @@
                                 {{-- Foto Produk --}}
                                 <td>
                                     @if($produk->foto_produk)
-                                        <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                        <img src="{{ str_starts_with($produk->foto_produk, 'data:image') ? $produk->foto_produk : Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                                     @else
                                         {{-- Placeholder Gambar --}}
                                         <div class="d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 60px; border-radius: 8px; color: #aaa;">

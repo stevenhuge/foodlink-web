@@ -21,7 +21,7 @@
                     <div class="d-flex align-items-center">
                         {{-- Foto --}}
                         @if($produk->foto_produk)
-                            <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" class="me-3">
+                            <img src="{{ str_starts_with($produk->foto_produk, 'data:image') ? $produk->foto_produk : Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" class="me-3">
                         @else
                             {{-- Placeholder Gambar --}}
                             <div class="d-flex align-items-center justify-content-center bg-light me-3" style="width: 80px; height: 80px; border-radius: 8px; color: #aaa;">

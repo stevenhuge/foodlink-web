@@ -39,7 +39,7 @@
 <tr class="@if($produk->status_produk == 'Ditarik') table-secondary @endif">
 <td>
 @if($produk->foto_produk)
-<img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}"
+<img src="{{ str_starts_with($produk->foto_produk, 'data:image') ? $produk->foto_produk : Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}"
 class="rounded img-fluid" style="width: 60px; height: 60px; object-fit: cover;">
 @else
 <span class="text-muted small">(No-img)</span>

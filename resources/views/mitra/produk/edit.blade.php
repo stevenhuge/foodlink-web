@@ -195,7 +195,7 @@
                         <label for="foto_produk" class="form-label">Foto Produk (Kosongkan jika tidak ingin ganti)</label>
 
                         @if($produk->foto_produk)
-                            <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}"
+                            <img src="{{ str_starts_with($produk->foto_produk, 'data:image') ? $produk->foto_produk : Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}"
                                 class="img-thumbnail d-block mb-3" style="width: 120px; height: 120px; object-fit: cover;">
                         @else
                             <p class="text-muted small">(Belum ada foto)</p>
