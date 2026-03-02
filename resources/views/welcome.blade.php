@@ -412,6 +412,10 @@
                         <div class="display-6 fw-bold">100Ton</div>
                         <div class="small">Makanan Diselamatkan</div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="display-6 fw-bold">{{ number_format($visitorCount ?? 0) }}</div>
+                        <div class="small">Total Pengunjung</div>
+                    </div>
                 </div>
             </div>
         </section>
