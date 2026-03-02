@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Mitra;
 
 class WelcomeController extends Controller
 {
     public function index() 
     {
         $visitorCount = 1;
+        $mitraCount = 0;
         $dbError = null;
 
         try {
@@ -32,13 +34,17 @@ class WelcomeController extends Controller
                 $visitorCount = $data ? $data->value : 1;
             }
 
+            // Hitung total mitra
+            $mitraCount = Mitra::count();
+
         } catch (\Exception $e) {
             // Tangkap error jika tabel belum ada atau koneksi database di vercel bermasalah
             $visitorCount = 1;
+            $mitraCount = 0;
             $dbError = $e->getMessage();
             \Log::error("Visitor Count Error: " . $dbError);
         }
 
-        return view('welcome', compact('visitorCount', 'dbError'));
+        return view('welcome', compact('visitorCount', 'mitraCount', 'dbError'));
     }
 }

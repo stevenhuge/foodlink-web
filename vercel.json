@@ -23,7 +23,7 @@
         "VIEW_COMPILED_PATH": "/tmp"
     },
     "functions": {
-        "api_handler/index.php": {
+        "api/index.php": {
             "runtime": "vercel-php@0.7.1"
         }
     },
@@ -34,7 +34,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "/api_handler/index.php"
+            "dest": "/api/index.php"
         }
     ]
 }

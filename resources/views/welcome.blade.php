@@ -401,7 +401,7 @@
 
                 <div class="row justify-content-center mt-5 gy-4">
                     <div class="col-md-3">
-                        <div class="display-6 fw-bold">0</div>
+                        <div class="display-6 fw-bold">{{ number_format($mitraCount ?? 0) }}</div>
                         <div class="small">Restoran & Kafe</div>
                     </div>
                     <div class="col-md-3">
