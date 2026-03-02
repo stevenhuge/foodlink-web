@@ -39,6 +39,12 @@ Route::get('/migrate', function () {
     Artisan::call('migrate', ['--force' => true]);
     return "Database migration success!";
 });
+
+// ROUTE KHUSUS VERCEL: HAPUS JIKA SUDAH RILIS KE PUBLIK
+Route::get('/seed', function () {
+    Artisan::call('db:seed', ['--force' => true]);
+    return "Database seeding success! Akun AdminSeeder Anda telah siap digunakan.";
+});
 /*
 |--------------------------------------------------------------------------
 | RUTE UMUM (LANDING PAGE)
