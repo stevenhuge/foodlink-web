@@ -401,15 +401,15 @@
 
                 <div class="row justify-content-center mt-5 gy-4">
                     <div class="col-md-3">
-                        <div class="display-6 fw-bold">500+</div>
+                        <div class="display-6 fw-bold">0</div>
                         <div class="small">Restoran & Kafe</div>
                     </div>
                     <div class="col-md-3">
-                        <div class="display-6 fw-bold">50K+</div>
+                        <div class="display-6 fw-bold">10</div>
                         <div class="small">Pengguna Aktif</div>
                     </div>
                     <div class="col-md-3">
-                        <div class="display-6 fw-bold">100Ton</div>
+                        <div class="display-6 fw-bold">0</div>
                         <div class="small">Makanan Diselamatkan</div>
                     </div>
                     <div class="col-md-3">
