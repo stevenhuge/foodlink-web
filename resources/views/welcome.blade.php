@@ -405,11 +405,11 @@
                         <div class="small">Restoran & Kafe</div>
                     </div>
                     <div class="col-md-3">
-                        <div class="display-6 fw-bold">10</div>
+                        <div class="display-6 fw-bold">{{ number_format($userCount ?? 0) }}</div>
                         <div class="small">Pengguna Aktif</div>
                     </div>
                     <div class="col-md-3">
-                        <div class="display-6 fw-bold">0</div>
+                        <div class="display-6 fw-bold">{{ number_format($makananDiselamatkan ?? 0) }}</div>
                         <div class="small">Makanan Diselamatkan</div>
                     </div>
                     <div class="col-md-3">
