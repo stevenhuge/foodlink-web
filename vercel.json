@@ -10,6 +10,12 @@
         "SESSION_DRIVER": "cookie",
         "CACHE_STORE": "array"
     },
+    "builds": [
+        {
+            "src": "api/index.php",
+            "use": "@vercel/php"
+        }
+    ],
     "routes": [
         {
             "src": "/(css|js|images|fonts)/(.*)",
@@ -17,7 +23,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "/api/index.php"
+            "dest": "api/index.php"
         }
     ]
 }
