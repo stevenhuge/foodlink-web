@@ -1,30 +1,26 @@
 {
     "version": 2,
-    "framework": null,
-    "functions": {
-        "api/index.php": {
-            "runtime": "vercel-php@0.7.1"
-        }
-    },
-    "routes": [
-        {
-            "src": "/build/(.*)",
-            "dest": "/public/build/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/api/index.php"
-        }
-    ],
+    "framework": "laravel",
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://foodlink-web.vercel.app",
+        "APP_URL": "https://foodlinkmeal.vercel.app",
         "APP_KEY": "base64:TGaVaXwhWgjn9akhE4SCSIjGG/cQqvICUQ+PgLA3Bs0=",
         "DB_CONNECTION": "pgsql",
-        "VIEW_COMPILED_PATH": "/tmp",
-        "CACHE_STORE": "array",
+        "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
-        "LOG_CHANNEL": "stderr"
-    }
+        "CACHE_STORE": "array"
+    },
+    "builds": [
+        {
+            "src": "api/index.php",
+            "use": "@vercel/php"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "api/index.php"
+        }
+    ]
 }
