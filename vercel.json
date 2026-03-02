@@ -1,29 +1,39 @@
 {
     "version": 2,
+    "framework": null,
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://foodlinkmeal.vercel.app",
         "APP_KEY": "base64:TGaVaXwhWgjn9akhE4SCSIjGG/cQqvICUQ+PgLA3Bs0=",
-        "DB_CONNECTION": "pgsql",
+        "DB_CONNECTION": "mysql",
+        "DB_HOST": "4gg.h.filess.io",
+        "DB_PORT": "3306",
+        "DB_DATABASE": "db2024_stormtorn",
+        "DB_USERNAME": "db2024_stormtorn",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
-        "CACHE_STORE": "array"
+        "CACHE_STORE": "array",
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "VIEW_COMPILED_PATH": "/tmp"
     },
-    "builds": [
-        {
-            "src": "api/index.php",
-            "use": "@vercel/php"
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.7.1"
         }
-    ],
+    },
     "routes": [
         {
-            "src": "/(css|js|images|fonts)/(.*)",
+            "src": "/(css|js|images|fonts|build)/(.*)",
             "dest": "/public/$1/$2"
         },
         {
             "src": "/(.*)",
-            "dest": "api/index.php"
+            "dest": "/api/index.php"
         }
     ]
 }
