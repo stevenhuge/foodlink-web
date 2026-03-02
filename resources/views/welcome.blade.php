@@ -415,6 +415,11 @@
                     <div class="col-md-3">
                         <div class="display-6 fw-bold">{{ number_format($visitorCount ?? 0) }}</div>
                         <div class="small">Total Pengunjung</div>
+                        @if(isset($dbError) && $dbError)
+                            <div class="text-danger mt-2" style="font-size: 0.65rem; word-break: break-all; opacity: 0.7;">
+                                {{ $dbError }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
