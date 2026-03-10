@@ -1,0 +1,31 @@
+/* --- Global Smooth Page Transitions Animations --- */
+.page-transition-enter {
+    animation: pageFadeEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page-transition-exit {
+    animation: pageFadeExit 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: none; /* Mencegah double click selama animasi keluar */
+}
+
+@keyframes pageFadeEnter {
+    0% { 
+        opacity: 0; 
+        transform: translateY(12px); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes pageFadeExit {
+    0% { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translateY(-12px); 
+    }
+}

@@ -130,6 +130,7 @@
             .sidebar { min-height: auto; }
         }
     </style>
+    <link href="{{ asset('css/page-transitions.css') }}" rel="stylesheet">
 </head>
 <body>
     <div class="container-fluid">
@@ -230,6 +231,15 @@
                                 </div>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.barter.*') ? 'active' : '' }}"
+                               href="{{ route('admin.barter.index') }}">
+                                <div>
+                                    <i class="fas fa-exchange-alt icon-left"></i> Audit Barter
+                                </div>
+                            </a>
+                        </li>
                         @endif
 
                         {{-- SuperAdmin Only Links (Pemasukan & Alasan Blokir) --}}
@@ -297,7 +307,7 @@
                     </div>
                 </nav>
 
-                <main class="px-3 py-4">
+                <main class="px-3 py-4" id="main-content">
                     <div class="container-fluid">
                         @if (session('success'))
                             <div class="alert alert-success alert-custom-success alert-dismissible fade show" role="alert">
@@ -323,6 +333,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/page-transitions.js') }}"></script>
 
     <script>
         // Auto-hide alerts after 5 seconds

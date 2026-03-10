@@ -119,6 +119,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::delete('/{mitra}', [MitraVerificationController::class, 'destroy'])->name('destroy');
             });
 
+            // Manajemen Barter (Audit History) - Pindahkan ke sini agar Admin biasa bisa akses
+            Route::prefix('barter')->name('barter.')->group(function() {
+                Route::get('/', [\App\Http\Controllers\Admin\BarterController::class, 'index'])->name('index');
+                Route::get('/{id}', [\App\Http\Controllers\Admin\BarterController::class, 'show'])->name('show');
+            });
+
             // Manajemen User
             Route::prefix('users')->name('users.')->group(function() {
                 Route::get('/', [UserManagementController::class, 'index'])->name('index');

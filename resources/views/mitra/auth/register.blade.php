@@ -101,7 +101,7 @@
         </div>
 
         <div class="text-center small border-top pt-3">
-            Sudah punya akun? <a href="{{ route('mitra.login') }}" class="fw-bold text-decoration-none">Login disini</a>
+            Sudah punya akun? <a href="{{ route('mitra.login') }}" class="fw-bold text-decoration-none smooth-transition">Login disini</a>
         </div>
     </form>
 

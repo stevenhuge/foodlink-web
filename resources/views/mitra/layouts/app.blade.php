@@ -255,6 +255,7 @@
         }
     </style>
     @yield('styles')
+    <link href="{{ asset('css/page-transitions.css') }}" rel="stylesheet">
 </head>
 <body>
 
@@ -366,7 +367,7 @@
             </div>
         </header>
 
-        <main class="p-4">
+        <main class="p-4" id="main-container">
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 border-start border-success border-4" role="alert">
                     <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
@@ -411,6 +412,8 @@
         overlay.addEventListener('click', toggleSidebar);
     }
 </script>
+
+<script src="{{ asset('js/page-transitions.js') }}"></script>
 
 @yield('scripts')
 </body>

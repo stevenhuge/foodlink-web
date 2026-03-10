@@ -83,7 +83,7 @@
 
         <div class="text-center mt-4 pt-2 border-top">
             <p class="small text-muted mb-0">Belum menjadi mitra?</p>
-            <a href="{{ route('mitra.register') }}" class="fw-bold text-decoration-none">Daftar disini</a>
+            <a href="{{ route('mitra.register') }}" class="fw-bold text-decoration-none smooth-transition">Daftar disini</a>
         </div>
     </form>
 
