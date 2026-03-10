@@ -8,6 +8,10 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- LIBRARIES UNTUK ANIMASI -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- END LIBRARIES -->
 
     <style>
         :root {
@@ -154,7 +158,7 @@
         <header class="mt-5">
             <div class="row align-items-center gy-5">
 
-                <div class="col-lg-6">
+                <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
                     <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-1 rounded-pill small fw-medium w-auto mb-3">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 2v20"/></svg>
                         Ekosistem Ekonomi Sirkular
@@ -192,7 +196,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end">
+                <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
                     <div class="phone-mockup me-lg-4">
                         <picture class="phone-screen">
                             <img src="https://i.ibb.co.com/nNq2SNHK/selamat-datang-foodlink.png" alt="App Preview" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
@@ -219,14 +223,14 @@
         </header>
 
         <section id="fitur" class="mt-5 pt-5">
-            <div class="text-center mb-5">
+            <div class="text-center mb-5" data-aos="fade-up">
                 <div class="text-fl-green fw-bold small text-uppercase">Fitur Unggulan</div>
                 <h2 class="display-6 fw-bolder mt-2">Tiga Pilar Ekosistem <span class="text-fl-green">FoodLink</span></h2>
                 <p class="text-secondary mx-auto" style="max-width: 600px;">Solusi terintegrasi untuk mengatasi masalah limbah makanan dari berbagai sudut pandang.</p>
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex align-items-start gap-3">
                             <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 text-white" style="width: 48px; height: 48px; background: linear-gradient(to top right, #fbbf24, #fb923c);">⚡</div>
@@ -295,35 +299,35 @@
         </section>
 
         <section id="cara" class="mt-5 pt-5">
-            <div class="text-center mb-5">
+            <div class="text-center mb-5" data-aos="fade-up">
                 <div class="text-fl-green fw-bold small text-uppercase">Cara Kerja</div>
                 <h2 class="display-6 fw-bolder mt-2">Ekosistem <span class="text-fl-green">Sirkular</span> yang Simpel</h2>
                 <p class="text-secondary mx-auto" style="max-width: 600px;">Hanya dalam 4 langkah, ubah kelebihan makanan menjadi nilai ekonomi baru.</p>
             </div>
 
             <div class="row g-4">
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">01</div>
                         <h3 class="h6 fw-bold mt-3">Daftar Bisnis</h3>
                         <p class="small text-secondary mt-2 mb-0">Kafe, restoran, toko kelontong—siapa saja dapat bergabung sebagai mitra FoodLink.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">02</div>
                         <h3 class="h6 fw-bold mt-3">Upload Surplus</h3>
                         <p class="small text-secondary mt-2 mb-0">Masukkan kelebihan stok makanan, tentukan Jual-Cepat / Donasi / Barter.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">03</div>
                         <h3 class="h6 fw-bold mt-3">Match & Connect</h3>
                         <p class="small text-secondary mt-2 mb-0">Sistem AI mencocokkan kebutuhan antar mitra — tukar kue dengan sayuran.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">04</div>
                         <h3 class="h6 fw-bold mt-3">Selesai!</h3>
@@ -332,7 +336,7 @@
                 </div>
             </div>
 
-            <div class="mt-5 rounded-4 gradient-banner p-5">
+            <div class="mt-5 rounded-4 gradient-banner p-5" data-aos="zoom-in" data-aos-duration="1000">
                 <div class="row align-items-center">
                     <div class="col-md-7">
                         <h3 class="fw-bolder mb-3">Paradigma Baru: <span class="text-fl-green">Ekonomi Sirkular B2B</span></h3>
@@ -354,14 +358,14 @@
         </section>
 
         <section id="manfaat" class="mt-5 pt-5">
-            <div class="text-center mb-5">
+            <div class="text-center mb-5" data-aos="fade-up">
                 <div class="text-fl-green fw-bold small text-uppercase">Manfaat</div>
                 <h2 class="display-6 fw-bolder mt-2">Lebih dari Sekedar <span class="text-fl-green">Aplikasi</span></h2>
                 <p class="text-secondary mx-auto" style="max-width: 600px;">FoodLink adalah alat intelijen bisnis yang membantu Anda menghemat, berkolaborasi, dan berkembang.</p>
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex gap-3">
                             <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">💼</div>
@@ -372,7 +376,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex gap-3">
                             <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">📊</div>
@@ -383,7 +387,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex gap-3">
                             <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">🌐</div>
@@ -396,7 +400,7 @@
                 </div>
             </div>
 
-            <div class="mt-5 rounded-4 bg-fl-green text-white p-5 text-center shadow-fl-soft">
+            <div class="mt-5 rounded-4 bg-fl-green text-white p-5 text-center shadow-fl-soft" data-aos="zoom-in" data-aos-duration="1000">
                 <h3 class="h2 fw-bold">Dampak Nyata FoodLink</h3>
                 <p class="small opacity-75 mx-auto" style="max-width: 600px;">Bersama-sama kita menciptakan perubahan yang berarti</p>
 
@@ -426,7 +430,7 @@
             </div>
         </section>
 
-        <section class="mt-5 rounded-4 bg-white p-5 shadow-sm border">
+        <section class="mt-5 rounded-4 bg-white p-5 shadow-sm border" data-aos="fade-up" data-aos-duration="1200">
             <div class="row align-items-center">
                 <div class="col-md-6 mb-4 mb-md-0">
                     <div class="small text-fl-green fw-bold">Tersedia di Android & iOS</div>
@@ -512,6 +516,19 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="{{ asset('js/page-transitions.js') }}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize AOS (Animate on Scroll)
+            AOS.init({
+                once: true, // Animasi hanya berjalan sekali saat pertama terlihat
+                offset: 50, // Trigger animasi lebih cepat dari bawah
+                duration: 800, // Durasi animasi standar
+                easing: 'ease-out-cubic'
+            });
+        });
+    </script>
 </body>
 </html>
