@@ -26,7 +26,11 @@ class Transaksi extends Model
         'total_harga',
         'total_harga_poin',
         'kode_unik_pengambilan',
-        'status_pemesanan', // <-- PASTIKAN INI ADA
+        'status_pemesanan',
+        'biaya_ppn_user',
+        'biaya_layanan_user',
+        'potongan_pajak_mitra',
+        'pendapatan_bersih_mitra',
     ];
     // =======================
 

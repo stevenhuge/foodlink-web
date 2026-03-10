@@ -122,7 +122,7 @@
     <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-sticky-custom py-3 bg-white">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-3" href="#">
-                <div class="rounded-circle bg-fl-green text-white d-flex align-items-center justify-content-center shadow-fl-soft fw-bold" style="width: 40px; height: 40px;">F</div>
+                <img src="{{ asset('images/logo_foodlink_hijau_tanpa_background.png') }}" alt="Foodlink Logo" class="img-fluid" style="max-height: 40px;">
                 <div class="lh-1">
                     <div class="fw-semibold">FoodLink</div>
                     <div class="text-muted" style="font-size: 0.75rem;">Ekosistem Ekonomi Sirkular</div>
@@ -461,7 +461,7 @@
             <div class="row g-5">
                 <div class="col-md-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">F</div>
+                        <img src="{{ asset('images/logo_foodlink_putih_tanpa_background.png') }}" alt="Foodlink Logo" class="img-fluid" style="max-height: 45px;">
                         <div class="lh-1">
                             <div class="fw-semibold">FoodLink</div>
                             <div class="small text-white-50">Platform inovatif ekosistem ekonomi sirkular</div>

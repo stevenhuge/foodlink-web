@@ -41,6 +41,7 @@ class Mitra extends Authenticatable
         'alasan_blokir_option_id',
         'kategori_usaha_id', // <-- Tambahkan ini untuk relasi kategori usaha
         'saldo_pemasukan',
+        'logo_mitra',
     ];
 
     /**

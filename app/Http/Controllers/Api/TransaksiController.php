@@ -63,10 +63,16 @@ class TransaksiController extends Controller
                 }
 
                 // Ambil Setting (Handle jika setting kosong)
-                $biayaLayananSetting = (int) (Setting::where('key', 'biaya_layanan_user')->value('value') ?? 500);
+                $biayaLayananSetting = (int) (Setting::where('key', 'biaya_layanan_user')->value('value') ?? 1000);
+                $persenPpnUser = (float) (Setting::where('key', 'biaya_ppn_persen')->value('value') ?? 11);
                 $persenPotonganMitra = (float) (Setting::where('key', 'biaya_mitra_persen')->value('value') ?? 5);
 
-                $totalFinalUser = $totalHargaProduk + $biayaLayananSetting;
+                // Kalkulasi PPN (dikenakan ke Pembeli)
+                $biayaPpnUser = (int) ceil($totalHargaProduk * ($persenPpnUser / 100));
+
+                $totalFinalUser = $totalHargaProduk + $biayaPpnUser + $biayaLayananSetting;
+                
+                // Kalkulasi Komisi Platform (dikenakan ke Mitra)
                 $potonganPajakMitra = (int) ceil($totalHargaProduk * ($persenPotonganMitra / 100));
                 $pendapatanBersihMitra = $totalHargaProduk - $potonganPajakMitra;
 
@@ -84,6 +90,7 @@ class TransaksiController extends Controller
                     'waktu_pemesanan' => Carbon::now(), // Wajib diisi manual karena timestamps false
                     'total_harga' => $totalFinalUser,
                     'total_harga_poin' => $totalHargaProduk,
+                    'biaya_ppn_user' => $biayaPpnUser,
                     'biaya_layanan_user' => $biayaLayananSetting,
                     'potongan_pajak_mitra' => $potonganPajakMitra,
                     'pendapatan_bersih_mitra' => $pendapatanBersihMitra,
@@ -214,6 +221,7 @@ class TransaksiController extends Controller
             }),
             'rincian_biaya' => [
                 'total_produk' => $transaksi->total_harga_poin,
+                'biaya_ppn' => $transaksi->biaya_ppn_user,
                 'biaya_layanan' => $transaksi->biaya_layanan_user,
                 'total_bayar' => $transaksi->total_harga
             ]

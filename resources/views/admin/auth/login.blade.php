@@ -82,9 +82,10 @@
                     <div class="card-body p-4 p-md-5">
 
                         <div class="text-center mb-4">
-                            <h2 class="brand-logo">
-                                <i class="fas fa-utensils me-2"></i>Foodlink Admin
-                            </h2>
+                            <div class="brand-logo d-flex align-items-center justify-content-center mb-3 gap-2">
+                                <img src="{{ asset('images/logo_foodlink_hijau_tanpa_background.png') }}" alt="Foodlink Logo" class="img-fluid" style="max-height: 60px;">
+                                <span>Foodlink Admin</span>
+                            </div>
                             <p class="text-muted mt-2">Silakan login untuk melanjutkan</p>
                         </div>
 

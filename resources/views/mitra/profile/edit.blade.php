@@ -27,7 +27,7 @@
         </div>
     @endif
 
-    <form action="{{ route('mitra.profile.update') }}" method="POST">
+    <form action="{{ route('mitra.profile.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PATCH') {{-- Gunakan PATCH karena kita update data --}}
 
@@ -39,6 +39,27 @@
                         <h5 class="mb-0">Informasi Usaha</h5>
                     </div>
                     <div class="card-body p-4">
+                        {{-- Unggah Logo Mitra --}}
+                        <div class="mb-4 text-center">
+                            <label class="form-label d-block fw-bold">Logo Usaha</label>
+                            <div class="mb-2">
+                                @if($mitra->logo_mitra)
+                                    <img src="{{ asset($mitra->logo_mitra) }}" alt="Logo {{ $mitra->nama_mitra }}" class="img-thumbnail rounded-circle object-fit-cover shadow-sm" style="width: 120px; height: 120px;">
+                                @else
+                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 120px; height: 120px; background-color: var(--foodlink-primary); font-size: 2.5rem;">
+                                        {{ substr($mitra->nama_mitra, 0, 1) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <input class="form-control form-control-sm w-75 mx-auto @error('logo_mitra') is-invalid @enderror" type="file" id="logo_mitra" name="logo_mitra" accept="image/*">
+                            <div class="form-text small">Rekomendasi rasio 1:1 (PNG, JPG, maksimal 2MB)</div>
+                            @error('logo_mitra')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <hr class="mb-4 opacity-75">
+
                         {{-- Input Nama Usaha --}}
                         <div class="mb-3">
                             <label for="nama_mitra" class="form-label">Nama Usaha / Mitra</label>

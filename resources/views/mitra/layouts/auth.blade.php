@@ -92,8 +92,9 @@
         <div class="auth-card">
 
             <div class="auth-header">
-                <a href="/" class="brand-logo">
-                    <i class="fas fa-utensils"></i> FoodLink
+                <a href="/" class="brand-logo d-flex align-items-center justify-content-center mb-2 gap-2 text-decoration-none">
+                    <img src="{{ asset('images/logo_foodlink_hijau_tanpa_background.png') }}" alt="Foodlink Logo" class="img-fluid" style="max-height: 50px;">
+                    <span>FoodLink</span>
                 </a>
                 <p class="text-muted mt-2 mb-0 small">Portal Khusus Mitra</p>
             </div>

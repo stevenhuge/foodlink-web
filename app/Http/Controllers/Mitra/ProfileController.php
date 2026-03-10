@@ -37,9 +37,7 @@ class ProfileController extends Controller
             'alamat' => ['required', 'string'],
             'deskripsi' => ['nullable', 'string'],
             'kategori_usaha_id' => ['required', 'integer', 'exists:kategori_usaha,kategori_usaha_id'], // Wajib diisi mitra
-            // Validasi password jika ingin diubah
-            // 'current_password' => ['nullable', 'required_with:new_password', 'current_password:mitra'], // Gunakan rule Laravel
-            // 'new_password' => ['nullable', 'string', 'min:8', 'confirmed'], // Gunakan rule Laravel
+            'logo_mitra' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'], // Validasi file gambar logo
 
             // Cara validasi password yang lebih benar:
             'current_password' => ['nullable', 'required_with:new_password', function ($attribute, $value, $fail) use ($mitra) {
@@ -59,6 +57,23 @@ class ProfileController extends Controller
         $mitra->alamat = $validated['alamat'];
         $mitra->deskripsi = $validated['deskripsi'] ?? $mitra->deskripsi; // Tetap pakai deskripsi lama jika kosong
         $mitra->kategori_usaha_id = $validated['kategori_usaha_id'];
+
+        // Proses unggah Logo Mitra jika ada
+        if ($request->hasFile('logo_mitra')) {
+            $file = $request->file('logo_mitra');
+            $filename = time() . '_logo_' . $mitra->mitra_id . '.' . $file->getClientOriginalExtension();
+            
+            // Simpan gambar ke public/images/mitra
+            $file->move(public_path('images/mitra'), $filename);
+            
+            // Hapus gambar lama jika ada dan bukan default
+            if ($mitra->logo_mitra && file_exists(public_path($mitra->logo_mitra))) {
+                @unlink(public_path($mitra->logo_mitra));
+            }
+
+            // Simpan path ke database
+            $mitra->logo_mitra = 'images/mitra/' . $filename;
+        }
 
         // Update password hanya jika new_password diisi DAN validasi current_password lolos
         if ($request->filled('new_password') && $request->filled('current_password') && Hash::check($request->current_password, $mitra->password_hash)) {

@@ -14,7 +14,14 @@
     <div class="card border-0 shadow-sm rounded-3">
 
         <!-- Card Header -->
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex align-items-center gap-3">
+            @if($mitra->logo_mitra)
+                <img src="{{ asset($mitra->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm" style="width: 50px; height: 50px;">
+            @else
+                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm text-white" style="width: 50px; height: 50px; background-color: #4DB43F; font-size: 1.5rem;">
+                    {{ substr($mitra->nama_mitra, 0, 1) }}
+                </div>
+            @endif
             <h5 class="mb-0 text-dark">{{ $mitra->nama_mitra }}</h5>
         </div>
 

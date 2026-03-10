@@ -10,6 +10,7 @@ use App\Models\KategoriProduk;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class BarterController extends Controller
 {
@@ -188,84 +189,110 @@ class BarterController extends Controller
      */
     public function accept(Barter $barter)
     {
-        // 1. Otorisasi (Sama seperti sebelumnya)
+        // 1. Otorisasi
         if ($barter->penerima_mitra_id !== Auth::guard('mitra')->id()) { abort(403); }
         if ($barter->status_barter !== 'Diajukan') { return redirect()->route('mitra.barter.inbox')->with('error', 'Tawaran ini sudah tidak valid.'); }
 
-        // --- Logika Inti ---
+        try {
+            DB::transaction(function () use ($barter) {
+                // Kunci data barter agar tidak direject/cancel oleh aksi lain di waktu bersamaan
+                $barter = Barter::lockForUpdate()->find($barter->barter_id);
 
-        // A. Produk yang diminta (Dimiliki Mitra B [Penerima], Pindah ke Mitra A [Pengaju]) - Tidak Berubah
-        $produkDiminta = $barter->produkDiminta;
-        if ($produkDiminta) {
-            $produkDiminta->mitra_id = $barter->pengaju_mitra_id; // Pindah ke Pengaju (A)
-            $produkDiminta->status_produk = 'Ditarik'; // Jadi Draft
-            $produkDiminta->save();
-        }
-
-        // B. Produk yang ditawarkan (Dimiliki Mitra A [Pengaju], Sebagian Pindah ke Mitra B [Penerima])
-
-        // Opsi 1: Jika pengaju menawarkan produknya yang sudah ada
-        if ($barter->produk_ditawarkan_id) {
-            $produkDitawarkanAsli = $barter->produkDitawarkan; // Produk asli milik Mitra A
-            if ($produkDitawarkanAsli) {
-                // 1. Kurangi stok produk ASLI milik Mitra A
-                $stokLama = $produkDitawarkanAsli->stok_tersisa;
-                $jumlahDitransfer = $barter->jumlah_ditawarkan;
-                $stokBaru = $stokLama - $jumlahDitransfer;
-
-                $produkDitawarkanAsli->stok_tersisa = max(0, $stokBaru); // Pastikan tidak negatif
-                if ($produkDitawarkanAsli->stok_tersisa <= 0) {
-                    $produkDitawarkanAsli->status_produk = 'Habis';
+                if ($barter->status_barter !== 'Diajukan') {
+                    throw new \Exception('Tawaran ini sudah diproses atau direject.');
                 }
-                $produkDitawarkanAsli->save();
 
-                // 2. BUAT Produk BARU untuk Mitra B (Penerima)
-                // Salin data dari produk asli
-                Produk::create([
-                    'mitra_id' => $barter->penerima_mitra_id, // Milik Penerima (B)
-                    'kategori_id' => $produkDitawarkanAsli->kategori_id,
-                    'nama_produk' => $produkDitawarkanAsli->nama_produk, // Salin nama
-                    'deskripsi' => $produkDitawarkanAsli->deskripsi, // Salin deskripsi
-                    'foto_produk' => $produkDitawarkanAsli->foto_produk, // Salin path foto
-                    'harga_normal' => $produkDitawarkanAsli->harga_normal, // Salin harga
-                    'harga_diskon' => $produkDitawarkanAsli->harga_diskon, // Salin harga
-                    'tipe_penawaran' => $produkDitawarkanAsli->tipe_penawaran, // Salin tipe
-                    'stok_awal' => $jumlahDitransfer, // Stok awal = jumlah yg ditransfer
-                    'stok_tersisa' => $jumlahDitransfer, // Stok tersisa = jumlah yg ditransfer
-                    'waktu_kadaluarsa' => $produkDitawarkanAsli->waktu_kadaluarsa, // Salin kadaluarsa
-                    'waktu_ambil_mulai' => now(), // Waktu ambil bisa diset ulang
-                    'waktu_ambil_selesai' => now()->addDays(7), // Default 1 minggu dari sekarang
-                    'status_produk' => 'Ditarik', // Masuk sebagai Draft
-                ]);
-            }
+                // A. Produk yang diminta (Dimiliki Mitra B [Penerima])
+                $produkDiminta = Produk::lockForUpdate()->find($barter->produk_diminta_id);
+
+                // RE-VALIDATION 1: Pastikan produk yang diminta masih tersedia dan belum ditarik / dibeli user
+                if (!$produkDiminta) {
+                    throw new \Exception('Produk yang Anda tawarkan sudah dihapus dari sistem.');
+                }
+                if ($produkDiminta->status_produk !== 'Tersedia' || $produkDiminta->mitra_id !== $barter->penerima_mitra_id) {
+                    throw new \Exception('Produk yang Anda tawarkan sudah tidak tersedia, terjual, atau telah Anda tarik.');
+                }
+
+                $produkDiminta->mitra_id = $barter->pengaju_mitra_id; // Pindah ke Pengaju (A)
+                $produkDiminta->status_produk = 'Ditarik'; // Jadi Draft
+                $produkDiminta->save();
+
+                // B. Produk yang ditawarkan (Dimiliki Mitra A [Pengaju])
+                // Opsi 1: Jika pengaju menawarkan produknya yang sudah ada
+                if ($barter->produk_ditawarkan_id) {
+                    $produkDitawarkanAsli = Produk::lockForUpdate()->find($barter->produk_ditawarkan_id);
+                    
+                    if (!$produkDitawarkanAsli) {
+                        throw new \Exception('Produk dari pihak pengaju sudah dihapus dari sistem.');
+                    }
+                    
+                    // RE-VALIDATION 2: Pastikan produk pengaju masih tersedia dan stoknya cukup
+                    if ($produkDitawarkanAsli->status_produk !== 'Tersedia') {
+                         throw new \Exception('Produk dari pihak pengaju sudah ditarik atau habis.');
+                    }
+                    if ($produkDitawarkanAsli->stok_tersisa < $barter->jumlah_ditawarkan) {
+                        throw new \Exception("Stok produk pengaju tersisa ({$produkDitawarkanAsli->stok_tersisa}), tidak cukup untuk barter ini (memerlukan {$barter->jumlah_ditawarkan}).");
+                    }
+
+                    // 1. Kurangi stok produk ASLI milik Mitra A
+                    $stokLama = $produkDitawarkanAsli->stok_tersisa;
+                    $jumlahDitransfer = $barter->jumlah_ditawarkan;
+                    $stokBaru = $stokLama - $jumlahDitransfer;
+
+                    $produkDitawarkanAsli->stok_tersisa = max(0, $stokBaru); // Pastikan tidak negatif
+                    if ($produkDitawarkanAsli->stok_tersisa <= 0) {
+                        $produkDitawarkanAsli->status_produk = 'Habis';
+                    }
+                    $produkDitawarkanAsli->save();
+
+                    // 2. BUAT Produk BARU untuk Mitra B (Penerima)
+                    Produk::create([
+                        'mitra_id' => $barter->penerima_mitra_id, // Milik Penerima (B)
+                        'kategori_id' => $produkDitawarkanAsli->kategori_id,
+                        'nama_produk' => $produkDitawarkanAsli->nama_produk,
+                        'deskripsi' => $produkDitawarkanAsli->deskripsi,
+                        'foto_produk' => $produkDitawarkanAsli->foto_produk,
+                        'harga_normal' => $produkDitawarkanAsli->harga_normal,
+                        'harga_diskon' => $produkDitawarkanAsli->harga_diskon,
+                        'tipe_penawaran' => $produkDitawarkanAsli->tipe_penawaran,
+                        'stok_awal' => $jumlahDitransfer,
+                        'stok_tersisa' => $jumlahDitransfer,
+                        'waktu_kadaluarsa' => $produkDitawarkanAsli->waktu_kadaluarsa,
+                        'waktu_ambil_mulai' => now(),
+                        'waktu_ambil_selesai' => now()->addDays(7),
+                        'status_produk' => 'Ditarik',
+                    ]);
+                }
+                // Opsi 2: Jika pengaju menawarkan barang manual
+                else {
+                    $dataManual = json_decode($barter->deskripsi_barang_manual, true);
+                    Produk::create([
+                        'mitra_id' => $barter->penerima_mitra_id,
+                        'kategori_id' => $dataManual['kategori_id'] ?? KategoriProduk::where('nama_kategori', 'Lainnya')->first()->kategori_id ?? 1,
+                        'nama_produk' => $barter->nama_barang_manual,
+                        'deskripsi' => $dataManual['deskripsi'] ?? '',
+                        'foto_produk' => $barter->foto_barang_manual,
+                        'harga_normal' => $dataManual['harga_perkiraan'] ?? 0,
+                        'harga_diskon' => $dataManual['harga_perkiraan'] ?? 0,
+                        'tipe_penawaran' => 'Jual-Cepat',
+                        'stok_awal' => 1,
+                        'stok_tersisa' => 1,
+                        'waktu_kadaluarsa' => now()->addDays(7),
+                        'waktu_ambil_mulai' => now(),
+                        'waktu_ambil_selesai' => now()->addDays(7),
+                        'status_produk' => 'Ditarik',
+                    ]);
+                }
+
+                // 5. Set status barter menjadi Selesai
+                $barter->status_barter = 'Selesai';
+                $barter->save();
+            });
+
+            return redirect()->route('mitra.barter.inbox')->with('success', 'Barter berhasil diterima! Produk telah ditransfer dan ditambahkan ke daftar produk Anda sebagai draft.');
+        } catch (\Exception $e) {
+            return redirect()->route('mitra.barter.inbox')->with('error', $e->getMessage());
         }
-
-        // Opsi 2: Jika pengaju menawarkan barang manual (Logika Tidak Berubah)
-        else {
-            $dataManual = json_decode($barter->deskripsi_barang_manual, true);
-            Produk::create([
-                'mitra_id' => $barter->penerima_mitra_id,
-                'kategori_id' => $dataManual['kategori_id'] ?? KategoriProduk::where('nama_kategori', 'Lainnya')->first()->kategori_id ?? 1,
-                'nama_produk' => $barter->nama_barang_manual,
-                'deskripsi' => $dataManual['deskripsi'] ?? '',
-                'foto_produk' => $barter->foto_barang_manual,
-                'harga_normal' => $dataManual['harga_perkiraan'] ?? 0,
-                'harga_diskon' => $dataManual['harga_perkiraan'] ?? 0,
-                'tipe_penawaran' => 'Jual-Cepat',
-                'stok_awal' => 1,
-                'stok_tersisa' => 1,
-                'waktu_kadaluarsa' => now()->addDays(7),
-                'waktu_ambil_mulai' => now(),
-                'waktu_ambil_selesai' => now()->addDays(7),
-                'status_produk' => 'Ditarik',
-            ]);
-        }
-
-        // 5. Set status barter (Sama seperti sebelumnya)
-        $barter->status_barter = 'Selesai';
-        $barter->save();
-
-        return redirect()->route('mitra.barter.inbox')->with('success', 'Barter berhasil diterima! Produk telah ditransfer/dibuat dan ditambahkan ke daftar produk Anda sebagai draft.');
     }
 
     // ... (Fungsi reject() dan cancel() tidak perlu diubah) ...
