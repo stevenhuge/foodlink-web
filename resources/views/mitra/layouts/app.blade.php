@@ -14,17 +14,19 @@
             --sidebar-width: 260px;
             --foodlink-primary: #4DB43F; 
             --foodlink-primary-hover: #3d9231;
-            --content-bg: #f8fbfa; /* Background lebih lapang & modern */
-            --sidebar-bg: #ffffff; /* Clean Minimalist */
+            --content-bg: #f4f9f5; /* Sangat soft green-white */
+            --sidebar-bg: linear-gradient(180deg, #ffffff 0%, #f4fdf6 100%); /* Efek premium */
             --sidebar-color: #475569; /* Slate 600 */
-            --sidebar-item-active: #f1f5f9; /* Slate 100 */
-            --sidebar-item-active-text: #0f172a; /* Slate 900 */
+            --sidebar-item-active: #ebf7ec; /* Sangat soft green */
+            --sidebar-item-active-text: #064e3b; /* Dark emerald */
         }
 
         body {
             /* Font profesional standard SaaS/E-Commerce */
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--content-bg);
+            background-image: radial-gradient(circle at 0% 0%, #e2f4e5 0%, transparent 40%), radial-gradient(circle at 100% 100%, #ebf5e9 0%, transparent 40%);
+            background-attachment: fixed;
             color: #334155; 
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
@@ -34,12 +36,14 @@
         .card {
             border: none;
             border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05); /* Soft premium shadow */
+            box-shadow: 0 4px 24px -4px rgba(77, 180, 63, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.03); /* Soft premium shadow greenish */
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
         }
         
         .card-header {
             background-color: transparent;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid rgba(77, 180, 63, 0.1);
             padding: 1.25rem 1.5rem;
         }
 
@@ -49,10 +53,9 @@
             min-height: 100vh;
         }
 
-        /* SIDEBAR (CLEAN MINIMALIST) */
         .sidebar {
             width: var(--sidebar-width);
-            background-color: var(--sidebar-bg);
+            background: var(--sidebar-bg);
             color: var(--sidebar-color);
             position: fixed;
             top: 0;
@@ -62,7 +65,8 @@
             flex-direction: column;
             transition: transform 0.3s ease;
             z-index: 1030;
-            border-right: 1px solid #e2e8f0; /* Garis pemisah abu-abu super halus */
+            border-right: 1px solid rgba(77, 180, 63, 0.15); /* Garis pemisah greenish super halus */
+            box-shadow: 4px 0 24px rgba(77, 180, 63, 0.03);
         }
 
         .sidebar-header {
@@ -163,18 +167,19 @@
 
         /* NAVBAR ATAS (Header Content) */
         .top-navbar {
-            background-color: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(244, 249, 245, 0.65); /* Menyatu halus dengan background radial */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             height: 76px;
             padding: 0 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            border-bottom: 1px solid rgba(77, 180, 63, 0.06);
             position: sticky;
             top: 0;
             z-index: 1020;
+            box-shadow: 0 10px 30px -10px rgba(77, 180, 63, 0.05);
         }
 
         /* Tombol & Utilities Elegan */

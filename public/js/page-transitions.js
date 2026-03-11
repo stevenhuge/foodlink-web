@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Tentukan elemen kontainer yang akan di-animasikan
-    // Prioritas: elemen dengan id="main-content" (Admin), "main-container" (Mitra), "auth-form-container" (Auth), atau <main>, atau <body>
+    // Tentukan elemen kontainer (untuk animasi fade-in onload)
     let container = document.getElementById('main-content') || 
                     document.getElementById('main-container') || 
                     document.getElementById('auth-form-container') ||
@@ -8,59 +7,77 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.querySelector('main') || 
                     document.body;
 
-    // Pastikan container memiliki kelas animasi masuk
     if (container && !container.classList.contains('page-transition-enter')) {
         container.classList.add('page-transition-enter');
     }
 
-    // Tangkap semua link intern yang BUKAN untuk Modal atau anchoring halaman yang sama
+    // Fungsi global untuk menampilkan Premium Loader
+    window.showPremiumLoader = function() {
+        let loader = document.getElementById('fl-global-loader');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'fl-global-loader';
+            loader.className = 'fl-loader-overlay';
+            loader.innerHTML = `
+                <div class="fl-brand-pulse">
+                    <img src="/images/logo_foodlink_hijau_tanpa_background.png" alt="Foodlink" style="width: 48px; height: auto; object-fit: contain;">
+                </div>
+                <div class="fl-loader-text">Loading...</div>
+            `;
+            document.body.appendChild(loader);
+        }
+        
+        // Memaksa browser merepaint sebelum menambah class
+        requestAnimationFrame(() => {
+            loader.classList.add('show');
+        });
+    };
+
+    window.hidePremiumLoader = function() {
+        let loader = document.getElementById('fl-global-loader');
+        if (loader) {
+            loader.classList.remove('show');
+        }
+    };
+
+    // Tangkap semua link nav
     const internalLinks = document.querySelectorAll('a:not([target="_blank"]):not([href^="#"]):not([href^="javascript"]):not([data-bs-toggle])');
 
     internalLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const destUrl = this.getAttribute('href');
             
-            // Cegah error
             if (!destUrl || destUrl === '#' || destUrl.trim() === '') return;
-            // Jika ada event listener lain yang sudah mencegah klik, biarkan (contoh: validasi form onsubmit yg pakai a tag)
-            if (e.defaultPrevented) return;
-            // Cegah transisi jika pengguna menahan Ctrl/Cmd untuk buka tab baru
-            if (e.ctrlKey || e.metaKey || e.shiftKey) return; 
+            if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return; 
 
             e.preventDefault();
             const targetUrl = this.href;
 
-            if(container) {
-                // Tambahkan class animasi keluar
-                container.classList.remove('page-transition-enter');
-                container.classList.add('page-transition-exit');
+            // Trigger global loading UI
+            window.showPremiumLoader();
 
-                // Pindah halaman setelah animasi keluar selesai (tergantung dr durasi CSS di page-transitions.css)
-                setTimeout(() => {
-                    window.location.href = targetUrl;
-                }, 300);
-            } else {
+            // Pindah halaman dengan delay lebih singkat agar terasa ringan
+            setTimeout(() => {
                 window.location.href = targetUrl;
-            }
+            }, 100);
         });
     });
 
-    // Tangkap submit form agar pas loading form juga ada animasi keluarnya
+    // Tangkap submit form
     const forms = document.querySelectorAll('form:not([target="_blank"])');
     forms.forEach(form => {
         form.addEventListener('submit', function(e) {
-            // Biarkan native HTML5 validation tetap jalan
-            if (!form.checkValidity()) return;
-            if (e.defaultPrevented) return;
-
-            // Jika form valid dan disubmit
-            if(container) {
-                container.classList.remove('page-transition-enter');
-                container.classList.add('page-transition-exit');
-                
-                // Jangan panggil preventDefault atau setTimeout. 
-                // Biarkan native browser POST/GET. Animasi exit akan jalan sembari browser ngirim request.
-            }
+            if (!form.checkValidity() || e.defaultPrevented) return;
+            
+            // Trigger global loading UI during form post
+            window.showPremiumLoader();
         });
     });
+});
+
+// Hide loader jika pengguna menggunakan tombol BACK/FORWARD dari browser
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.hidePremiumLoader();
+    }
 });

@@ -15,15 +15,16 @@
             --foodlink-primary-hover: #3d9432;
             --foodlink-secondary: #f8fafc;
             --foodlink-accent: #ff6b35;
-            --sidebar-bg: #ffffff;
             --sidebar-text: #475569;
-            --sidebar-text-hover: #0f172a;
-            --bg-body: #f1f5f9;
+            --sidebar-text-hover: #064e3b; /* Dark emerald */
+            --bg-body: #f4f8f5; /* Soft premium green-grey */
         }
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-body);
+            background-image: radial-gradient(circle at 100% 0%, #e8f5e9 0%, transparent 25%), radial-gradient(circle at 0% 100%, #e8f5e9 0%, transparent 25%);
+            background-attachment: fixed;
             color: #334155;
         }
 
@@ -31,8 +32,9 @@
             background: var(--sidebar-bg);
             color: var(--sidebar-text);
             min-height: 100vh;
-            border-right: 1px solid #e2e8f0;
+            border-right: 1px solid rgba(77, 180, 63, 0.15); /* Halus bercorak hijau */
             z-index: 1020;
+            box-shadow: 2px 0 10px rgba(77, 180, 63, 0.03);
         }
 
         .sidebar .nav-link {
@@ -87,10 +89,11 @@
         }
 
         .navbar-custom {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            border-bottom: 1px solid #f1f5f9;
+            background: rgba(244, 248, 245, 0.65); /* Sangat menyatu dengan radial background */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 24px -6px rgba(77, 180, 63, 0.04);
+            border-bottom: 1px solid rgba(77, 180, 63, 0.08);
             padding: 0.75rem 1.5rem;
             position: sticky;
             top: 0;
