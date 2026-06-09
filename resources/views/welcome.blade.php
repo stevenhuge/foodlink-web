@@ -191,13 +191,15 @@
                         <a href="#fitur" class="btn btn-fl-outline d-inline-flex align-items-center gap-2">Pelajari Lebih</a>
                     </div>
 
+                    <!-- ganti kode dibawah supaya lebih realistis -->
+                     
                     <div class="d-flex align-items-center gap-5">
                         <div class="text-center">
-                            <div class="h3 fw-bolder text-fl-green mb-0">10K+</div>
+                            <div class="h3 fw-bolder text-fl-green mb-0">100+</div>
                             <small class="text-muted">Mitra Aktif</small>
                         </div>
                         <div class="text-center">
-                            <div class="h3 fw-bolder text-fl-green mb-0">50Ton</div>
+                            <div class="h3 fw-bolder text-fl-green mb-0">1 Ton+</div>
                             <small class="text-muted">Makanan Diselamatkan</small>
                         </div>
                         <div class="text-center">
