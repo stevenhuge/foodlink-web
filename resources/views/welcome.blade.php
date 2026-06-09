@@ -121,6 +121,17 @@
         }
     </style>
     <link href="{{ asset('css/page-transitions.css') }}" rel="stylesheet">
+
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S1B50GLPDP"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-S1B50GLPDP');
+</script>
+
 </head>
 <body>
 
