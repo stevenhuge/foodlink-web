@@ -24,10 +24,9 @@
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--fl-bg);
-            color: #0f172a; /* Slate-900 equivalent */
+            color: #0f172a;
         }
 
-        /* Custom Colors & Utilities */
         .text-fl-green { color: var(--fl-green) !important; }
         .bg-fl-green { background-color: var(--fl-green) !important; }
         .bg-fl-green-subtle { background-color: rgba(77, 180, 63, 0.1) !important; }
@@ -60,7 +59,6 @@
             color: white;
         }
 
-        /* Shadows & Cards */
         .shadow-fl-card {
             box-shadow: 0 10px 30px rgba(6,20,10,0.08);
             border: 1px solid rgba(0,0,0,0.05);
@@ -72,7 +70,6 @@
         .rounded-5 { border-radius: 1.5rem !important; }
         .rounded-xl-3 { border-radius: 28px !important; }
 
-        /* Mockup Styles */
         .phone-mockup {
             width: 320px;
             height: 640px;
@@ -95,7 +92,6 @@
             height: 100%;
         }
 
-        /* Floating Badges on Phone */
         .badge-float {
             position: absolute;
             background: white;
@@ -109,7 +105,6 @@
             max-width: 200px;
         }
 
-        /* Sections */
         .gradient-banner {
             background: linear-gradient(to right, #eaf9ec, #f6fff7);
         }
@@ -117,21 +112,19 @@
         footer {
             background-color: #0f1410;
             border-top-left-radius: 1.5rem;
-            border-top-right-radius: 1.5rem; /* Optional symmetry */
+            border-top-right-radius: 1.5rem;
         }
     </style>
     <link href="{{ asset('css/page-transitions.css') }}" rel="stylesheet">
 
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-S1B50GLPDP"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-S1B50GLPDP');
-</script>
-
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S1B50GLPDP"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-S1B50GLPDP');
+    </script>
 </head>
 <body>
 
@@ -191,8 +184,6 @@
                         <a href="#fitur" class="btn btn-fl-outline d-inline-flex align-items-center gap-2">Pelajari Lebih</a>
                     </div>
 
-                    <!-- ganti kode dibawah supaya lebih realistis -->
-                     
                     <div class="d-flex align-items-center gap-5">
                         <div class="text-center">
                             <div class="h3 fw-bolder text-fl-green mb-0">100+</div>
@@ -451,11 +442,11 @@
                     <p class="text-secondary mt-3">Bergabung dengan ribuan mitra bisnis dan konsumen yang sudah merasakan manfaat ekosistem FoodLink.</p>
 
                     <div class="d-flex gap-3 mt-4">
-                        <!-- <button class="btn btn-dark d-inline-flex align-items-center">Download App Store</button> -->
-                        <button 
-                            class="btn btn-success d-inline-flex align-items-center gap-2" 
+                        {{-- Trigger Modal --}}
+                        <button
+                            class="btn btn-success d-inline-flex align-items-center gap-2"
                             style="background-color: #15803d; border:none;"
-                            data-bs-toggle="modal" 
+                            data-bs-toggle="modal"
                             data-bs-target="#modalDownload">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
@@ -466,7 +457,6 @@
                     <div class="small text-secondary mt-4">10,000+ Pengguna bergabung bulan ini</div>
                 </div>
 
-
                 <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end">
                     <div class="phone-mockup me-lg-4">
                         <picture class="phone-screen">
@@ -474,7 +464,6 @@
                         </picture>
                     </div>
                 </div>
-            </div>
             </div>
         </section>
 
@@ -537,60 +526,73 @@
         </div>
     </footer>
 
+    <!-- Modal Konfirmasi Download -->
+    <div class="modal fade" id="modalDownload" tabindex="-1" aria-labelledby="modalDownloadLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-fl-card">
+                <div class="modal-body text-center p-5">
+
+                    <div class="rounded-circle bg-fl-green-subtle d-inline-flex align-items-center justify-content-center mb-4" style="width: 72px; height: 72px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="var(--fl-green)">
+                            <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
+                        </svg>
+                    </div>
+
+                    <h5 class="fw-bold mb-2">Unduh Aplikasi FoodLink?</h5>
+                    <p class="text-secondary small mb-1">Anda akan mengunduh file APK FoodLink untuk Android.</p>
+                    <p class="text-secondary small mb-4">Pastikan perangkat Anda mengizinkan instalasi dari sumber eksternal.</p>
+
+                    <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-2 rounded-pill small fw-medium mb-4">
+                        📦 FoodLink-v1.0.0.apk · ~25 MB
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-center">
+                        <button type="button" class="btn btn-fl-outline px-4" data-bs-dismiss="modal">Batal</button>
+
+                        {{-- ✅ PERBAIKAN: pakai button + JavaScript, bukan <a> dengan data-bs-dismiss --}}
+                        <button type="button" class="btn btn-fl-primary px-4 d-inline-flex align-items-center gap-2" id="btnDownload">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Ya, Unduh Sekarang
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="{{ asset('js/page-transitions.js') }}"></script>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize AOS (Animate on Scroll)
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Initialize AOS
             AOS.init({
-                once: true, // Animasi hanya berjalan sekali saat pertama terlihat
-                offset: 50, // Trigger animasi lebih cepat dari bawah
-                duration: 800, // Durasi animasi standar
+                once: true,
+                offset: 50,
+                duration: 800,
                 easing: 'ease-out-cubic'
             });
+
+            // ✅ Fix Download: tutup modal dulu, baru buka URL download
+            document.getElementById('btnDownload').addEventListener('click', function () {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('modalDownload'));
+                modal.hide();
+
+                setTimeout(function () {
+                    window.open(
+                        'https://github.com/stevenhuge/foodlink-web/releases/download/v1.0.0/Foodlink.apk',
+                        '_blank'
+                    );
+                }, 300);
+            });
+
         });
     </script>
 
-    <!-- Modal Konfirmasi Download -->
-<div class="modal fade" id="modalDownload" tabindex="-1" aria-labelledby="modalDownloadLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow-fl-card">
-
-            <div class="modal-body text-center p-5">
-                <!-- Icon -->
-                <div class="rounded-circle bg-fl-green-subtle d-inline-flex align-items-center justify-content-center mb-4" style="width: 72px; height: 72px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="var(--fl-green)">
-                        <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
-                    </svg>
-                </div>
-
-                <h5 class="fw-bold mb-2">Unduh Aplikasi FoodLink?</h5>
-                <p class="text-secondary small mb-1">Anda akan mengunduh file APK FoodLink untuk Android.</p>
-                <p class="text-secondary small mb-4">Pastikan perangkat Anda mengizinkan instalasi dari sumber eksternal.</p>
-
-                <!-- Info ukuran file (opsional, sesuaikan) -->
-                <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-2 rounded-pill small fw-medium mb-4">
-                    📦 FoodLink-v1.0.0.apk · ~25 MB
-                </div>
-
-                <div class="d-flex gap-3 justify-content-center">
-                    <button type="button" class="btn btn-fl-outline px-4" data-bs-dismiss="modal">Batal</button>
-                    <a href="https://github.com/stevenhuge/foodlink-web/releases/download/v1.0.0/Foodlink.apk"
-                       class="btn btn-fl-primary px-4 d-inline-flex align-items-center gap-2"
-                       target="_blank"
-                       data-bs-dismiss="modal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                        Ya, Unduh Sekarang
-                    </a>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
 </body>
 </html>
