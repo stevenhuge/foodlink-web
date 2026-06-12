@@ -451,7 +451,7 @@
                     <p class="text-secondary mt-3">Bergabung dengan ribuan mitra bisnis dan konsumen yang sudah merasakan manfaat ekosistem FoodLink.</p>
 
                     <div class="d-flex gap-3 mt-4">
-                        <button class="btn btn-dark d-inline-flex align-items-center">Download App Store</button>
+                        <!-- <button class="btn btn-dark d-inline-flex align-items-center">Download App Store</button> -->
                         <button class="btn btn-success d-inline-flex align-items-center" style="background-color: #15803d; border:none;">Download Play Store</button>
                     </div>
                     <div class="small text-secondary mt-4">10,000+ Pengguna bergabung bulan ini</div>
