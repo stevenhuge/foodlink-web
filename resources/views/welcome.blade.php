@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FoodLink — Landing (Demo)</title>
+    <title>FoodLink - Save Your Food</title>
     <meta name="description" content="FoodLink — Ekosistem Ekonomi Sirkular (demo)"/>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -452,7 +452,14 @@
 
                     <div class="d-flex gap-3 mt-4">
                         <!-- <button class="btn btn-dark d-inline-flex align-items-center">Download App Store</button> -->
-                        <button class="btn btn-success d-inline-flex align-items-center" style="background-color: #15803d; border:none;">Download Play Store</button>
+                        <a href="https://github.com/stevenhuge/foodlink-web/releases/download/v1.0.0/Foodlink.apk" 
+                            class="btn btn-success d-inline-flex align-items-center gap-2" 
+                            style="background-color: #15803d; border:none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
+                                </svg>
+                                Download App Here
+                        </a>
                     </div>
                     <div class="small text-secondary mt-4">10,000+ Pengguna bergabung bulan ini</div>
                 </div>
