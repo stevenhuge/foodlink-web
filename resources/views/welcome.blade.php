@@ -452,14 +452,16 @@
 
                     <div class="d-flex gap-3 mt-4">
                         <!-- <button class="btn btn-dark d-inline-flex align-items-center">Download App Store</button> -->
-                        <a href="https://github.com/stevenhuge/foodlink-web/releases/download/v1.0.0/Foodlink.apk" 
+                        <button 
                             class="btn btn-success d-inline-flex align-items-center gap-2" 
-                            style="background-color: #15803d; border:none;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
-                                </svg>
-                                Download App Here
-                        </a>
+                            style="background-color: #15803d; border:none;"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalDownload">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
+                            </svg>
+                            Download Play Store
+                        </button>
                     </div>
                     <div class="small text-secondary mt-4">10,000+ Pengguna bergabung bulan ini</div>
                 </div>
@@ -550,5 +552,44 @@
             });
         });
     </script>
+
+    <!-- Modal Konfirmasi Download -->
+<div class="modal fade" id="modalDownload" tabindex="-1" aria-labelledby="modalDownloadLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-fl-card">
+
+            <div class="modal-body text-center p-5">
+                <!-- Icon -->
+                <div class="rounded-circle bg-fl-green-subtle d-inline-flex align-items-center justify-content-center mb-4" style="width: 72px; height: 72px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="var(--fl-green)">
+                        <path d="M3.18 23.76A1.5 1.5 0 0 0 5 23.57l11.34-6.54-3.19-3.19zM.5 1.4A1.5 1.5 0 0 0 0 2.5v19a1.5 1.5 0 0 0 .5 1.1l.08.07 10.64-10.64v-.25L.58 1.33zM20.1 10.4l-3.03-1.75-3.54 3.54 3.54 3.54 3.06-1.77a1.5 1.5 0 0 0 0-2.56zM3.18.24l13.89 8.01-3.19 3.19L3.18.24z"/>
+                    </svg>
+                </div>
+
+                <h5 class="fw-bold mb-2">Unduh Aplikasi FoodLink?</h5>
+                <p class="text-secondary small mb-1">Anda akan mengunduh file APK FoodLink untuk Android.</p>
+                <p class="text-secondary small mb-4">Pastikan perangkat Anda mengizinkan instalasi dari sumber eksternal.</p>
+
+                <!-- Info ukuran file (opsional, sesuaikan) -->
+                <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-2 rounded-pill small fw-medium mb-4">
+                    📦 FoodLink-v1.0.0.apk · ~25 MB
+                </div>
+
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn btn-fl-outline px-4" data-bs-dismiss="modal">Batal</button>
+                    <a href="https://github.com/stevenhuge/foodlink-web/releases/download/v1.0.0/Foodlink.apk"
+                       class="btn btn-fl-primary px-4 d-inline-flex align-items-center gap-2"
+                       data-bs-dismiss="modal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Ya, Unduh Sekarang
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 </body>
 </html>
