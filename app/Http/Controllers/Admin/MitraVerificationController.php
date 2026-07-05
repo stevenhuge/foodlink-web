@@ -14,7 +14,7 @@ class MitraVerificationController extends Controller
     public function index()
     {
         $mitra = Mitra::with(['kategoriUsaha', 'alasanBlokir']) // Eager load relasi
-            ->orderByRaw("FIELD(status_verifikasi, 'Pending') DESC")
+            ->orderByRaw("CASE WHEN status_verifikasi = 'Pending' THEN 1 ELSE 0 END DESC")
             ->orderBy('created_at', 'desc')
             ->get();
         // Ambil juga pilihan alasan untuk dropdown di view
