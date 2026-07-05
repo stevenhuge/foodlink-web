@@ -3,8 +3,19 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FoodLink - Save Your Food</title>
-    <meta name="description" content="FoodLink — Ekosistem Ekonomi Sirkular (demo)"/>
+    <title>FoodLink - Save Your Food, Save The Earth</title>
+    <meta name="description" content="FoodLink adalah ekosistem ekonomi sirkular yang menghubungkan usaha makanan dengan masyarakat untuk mengurangi food waste. Dapatkan makanan berkualitas dengan harga terjangkau."/>
+    <meta name="keywords" content="FoodLink, Food Waste, Makanan Sisa, Ekonomi Sirkular, Diskon Makanan, Makanan Murah, Penyelamatan Makanan" />
+    <meta name="author" content="FoodLink Team" />
+    <meta property="og:title" content="FoodLink - Save Your Food, Save The Earth" />
+    <meta property="og:description" content="Bergabunglah dengan ekosistem ekonomi sirkular FoodLink. Kurangi food waste dan dapatkan makanan berkualitas dengan harga terjangkau." />
+    <meta property="og:image" content="{{ asset('images/logo_foodlink_background_hijau.png') }}" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('images/logo_foodlink_background_hijau.png') }}" type="image/png">
+    
+    @vite(['resources/js/app.js'])
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">

@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('mitra', function (Blueprint $table) {
-            $table->string('logo_mitra')->nullable()->after('foto_ktp');
-        });
+        if (!Schema::hasColumn('mitra', 'logo_mitra')) {
+            Schema::table('mitra', function (Blueprint $table) {
+                $table->string('logo_mitra')->nullable()->after('foto_ktp');
+            });
+        }
     }
 
     /**
