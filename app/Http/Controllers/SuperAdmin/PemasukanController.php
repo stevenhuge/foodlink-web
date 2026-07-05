@@ -26,10 +26,10 @@ class PemasukanController extends Controller
         // 3. HITUNG TOTAL PEMASUKAN BERSIH (Dari Transaksi Selesai)
         // Rumus: Total Biaya Layanan User + Total Potongan Mitra
 
-        $totalBiayaLayanan = Transaksi::where('status_pemesanan', 'selesai')
+        $totalBiayaLayanan = Transaksi::whereIn('status_pemesanan', ['selesai', 'Selesai', 'SELESAI'])
                                       ->sum('biaya_layanan_user');
 
-        $totalPotonganMitra = Transaksi::where('status_pemesanan', 'selesai')
+        $totalPotonganMitra = Transaksi::whereIn('status_pemesanan', ['selesai', 'Selesai', 'SELESAI'])
                                        ->sum('potongan_pajak_mitra');
 
         $totalPemasukan = $totalBiayaLayanan + $totalPotonganMitra;

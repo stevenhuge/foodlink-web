@@ -29,7 +29,7 @@ class DashboardController extends Controller
             $penjualanTerbaru = DetailTransaksi::select('detail_transaksi.*')
                 ->join('transaksi', 'detail_transaksi.transaksi_id', '=', 'transaksi.transaksi_id')
                 ->where('transaksi.mitra_id', $mitra->mitra_id)
-                ->whereIn('transaksi.status_pemesanan', ['paid', 'selesai'])
+                ->whereIn('transaksi.status_pemesanan', ['paid', 'Paid', 'PAID', 'selesai', 'Selesai', 'SELESAI'])
                 ->with(['produk', 'transaksi']) // Eager load agar tidak N+1 Query
                 ->orderBy('transaksi.waktu_pemesanan', 'desc')
                 ->limit(5)

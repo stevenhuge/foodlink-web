@@ -14,7 +14,9 @@ use App\Models\Setting;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Notification;
 class TransaksiController extends Controller
 {
     // --- 1. CHECKOUT / PEMBELIAN (SUDAH BENAR) ---
@@ -155,9 +157,9 @@ class TransaksiController extends Controller
                 // Status Logic
                 $status = 'PENDING';
                 // Cek Enum DB Anda: 'Paid','Siap Diambil','Selesai' dianggap sukses
-                if (in_array($item->status_pemesanan, ['Paid', 'Siap Diambil', 'Selesai'])) {
+                if (in_array($item->status_pemesanan, ['Paid', 'paid', 'Siap Diambil', 'Selesai', 'selesai'])) {
                     $status = 'SUKSES';
-                } elseif ($item->status_pemesanan == 'Batal') {
+                } elseif (in_array($item->status_pemesanan, ['Batal', 'batal'])) {
                     $status = 'GAGAL';
                 }
 
@@ -226,5 +228,206 @@ class TransaksiController extends Controller
                 'total_bayar' => $transaksi->total_harga
             ]
         ]);
+    }
+
+    // --- 4. MIDTRANS CHECKOUT ---
+    public function checkout(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.produk_id' => 'required|integer|exists:produk,produk_id',
+            'items.*.jumlah' => 'required|integer|min:1',
+        ]);
+
+        $user = $request->user();
+        $items = $request->input('items');
+
+        try {
+            $result = DB::transaction(function () use ($user, $items) {
+                $totalHargaProduk = 0;
+                $mitra_id = null;
+                $itemsToProcess = [];
+
+                foreach ($items as $item) {
+                    $produk = Produk::lockForUpdate()->find($item['produk_id']);
+
+                    if (!$produk) { throw new \Exception("Produk tidak ditemukan."); }
+                    if ($produk->status_produk != 'Tersedia') { throw new \Exception("Produk '{$produk->nama_produk}' tidak tersedia."); }
+                    if ($produk->stok_tersisa < $item['jumlah']) { throw new \Exception("Stok '{$produk->nama_produk}' kurang."); }
+
+                    if ($mitra_id === null) {
+                        $mitra_id = $produk->mitra_id;
+                    } elseif ($mitra_id != $produk->mitra_id) {
+                        throw new \Exception("Produk harus dari satu Mitra yang sama.");
+                    }
+
+                    $hargaSatuan = $produk->harga_diskon >= 0 ? $produk->harga_diskon : $produk->harga_asli;
+                    if (!$hargaSatuan) $hargaSatuan = $produk->harga_normal; // fallback
+                    $totalHargaProduk += ($hargaSatuan * $item['jumlah']);
+
+                    $itemsToProcess[] = [
+                        'produk' => $produk,
+                        'jumlah' => $item['jumlah'],
+                        'harga_satuan' => $hargaSatuan
+                    ];
+                }
+
+                $biayaLayananSetting = (int) (Setting::where('key', 'biaya_layanan_user')->value('value') ?? 1000);
+                $persenPpnUser = (float) (Setting::where('key', 'biaya_ppn_persen')->value('value') ?? 11);
+                $persenPotonganMitra = (float) (Setting::where('key', 'biaya_mitra_persen')->value('value') ?? 5);
+
+                $biayaPpnUser = (int) ceil($totalHargaProduk * ($persenPpnUser / 100));
+                $totalFinalUser = $totalHargaProduk + $biayaPpnUser + $biayaLayananSetting;
+                
+                $potonganPajakMitra = (int) ceil($totalHargaProduk * ($persenPotonganMitra / 100));
+                $pendapatanBersihMitra = $totalHargaProduk - $potonganPajakMitra;
+
+                $orderId = 'FL-' . time() . '-' . mt_rand(100, 999);
+
+                // Buat record baru di tabel transaksis dengan status awal Pending
+                $order = Transaksi::create([
+                    'user_id' => $user->user_id,
+                    'mitra_id' => $mitra_id,
+                    'kode_unik_pengambilan' => $orderId, 
+                    'kode_pemesanan' => $orderId,
+                    'status_pemesanan' => 'Pending', 
+                    'waktu_pemesanan' => Carbon::now(),
+                    'total_harga' => $totalFinalUser,
+                    'total_harga_poin' => $totalHargaProduk,
+                    'biaya_ppn_user' => $biayaPpnUser,
+                    'biaya_layanan_user' => $biayaLayananSetting,
+                    'potongan_pajak_mitra' => $potonganPajakMitra,
+                    'pendapatan_bersih_mitra' => $pendapatanBersihMitra,
+                    'metode_pembayaran' => 'Midtrans',
+                ]);
+
+                $itemDetails = [];
+                foreach ($itemsToProcess as $item) {
+                    $produk = $item['produk'];
+                    DetailTransaksi::create([
+                        'transaksi_id' => $order->transaksi_id,
+                        'produk_id' => $produk->produk_id,
+                        'jumlah' => $item['jumlah'],
+                        'harga_saat_transaksi' => $item['harga_satuan'],
+                    ]);
+
+                    $itemDetails[] = [
+                        'id' => $produk->produk_id,
+                        'price' => $item['harga_satuan'],
+                        'quantity' => $item['jumlah'],
+                        'name' => substr($produk->nama_produk, 0, 50)
+                    ];
+                }
+
+                // Tambahan biaya ke item details Midtrans
+                if ($biayaPpnUser > 0) {
+                    $itemDetails[] = [
+                        'id' => 'FEE-PPN',
+                        'price' => $biayaPpnUser,
+                        'quantity' => 1,
+                        'name' => 'PPN'
+                    ];
+                }
+                if ($biayaLayananSetting > 0) {
+                    $itemDetails[] = [
+                        'id' => 'FEE-LAYANAN',
+                        'price' => $biayaLayananSetting,
+                        'quantity' => 1,
+                        'name' => 'Biaya Layanan'
+                    ];
+                }
+
+                // MIDTRANS CONFIGURATION
+                Config::$serverKey = config('services.midtrans.server_key');
+                Config::$isProduction = config('services.midtrans.is_production');
+                Config::$isSanitized = true;
+                Config::$is3ds = true;
+
+                $params = [
+                    'transaction_details' => [
+                        'order_id' => $orderId,
+                        'gross_amount' => $totalFinalUser,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $user->nama ?? $user->name ?? 'User',
+                        'email' => $user->email,
+                        'phone' => $user->no_telp ?? $user->phone ?? '081111111111',
+                    ],
+                    'item_details' => $itemDetails,
+                ];
+
+                $snapToken = Snap::getSnapToken($params);
+
+                return [
+                    'snap_token' => $snapToken,
+                    'transaksi_id' => $order->transaksi_id,
+                    'kode_transaksi' => $orderId
+                ];
+            });
+
+            return response()->json([
+                'message' => 'Checkout Berhasil',
+                'snap_token' => $result['snap_token'],
+                'transaksi_id' => $result['transaksi_id'],
+                'kode_transaksi' => $result['kode_transaksi']
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    // --- 5. MIDTRANS WEBHOOK CALLBACK ---
+    public function midtransCallback(Request $request)
+    {
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+
+        try {
+            $notif = new Notification();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Invalid signature'], 403);
+        }
+
+        $transactionStatus = $notif->transaction_status;
+        $orderId = $notif->order_id;
+        
+        $transaksi = Transaksi::where('kode_pemesanan', $orderId)->orWhere('kode_unik_pengambilan', $orderId)->first();
+        if (!$transaksi) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        switch ($transactionStatus) {
+            case 'capture':
+            case 'settlement':
+                if ($transaksi->status_pemesanan == 'Pending') {
+                    DB::transaction(function () use ($transaksi) {
+                        $transaksi->update(['status_pemesanan' => 'Paid']);
+                        
+                        // Kurangi stok produk secara permanen
+                        $details = DetailTransaksi::where('transaksi_id', $transaksi->transaksi_id)->get();
+                        foreach ($details as $detail) {
+                            $produk = Produk::lockForUpdate()->find($detail->produk_id);
+                            if ($produk) {
+                                $produk->decrement('stok_tersisa', $detail->jumlah);
+                                if($produk->stok_tersisa <= 0) {
+                                    $produk->update(['status_produk' => 'Habis']);
+                                }
+                            }
+                        }
+                    });
+                }
+                break;
+            case 'pending':
+                $transaksi->update(['status_pemesanan' => 'Pending']);
+                break;
+            case 'deny':
+            case 'expire':
+            case 'cancel':
+                $transaksi->update(['status_pemesanan' => 'Batal']);
+                break;
+        }
+
+        return response()->json(['message' => 'OK']);
     }
 }

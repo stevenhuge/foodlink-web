@@ -38,6 +38,7 @@ Route::get('/produk/{produk}', [ProdukController::class, 'show']);
 
 // Payment Gateway Webhook
 Route::post('/payment/webhook', [WalletController::class, 'webhookHandler'])->name('payment.webhook');
+Route::post('/midtrans-callback', [TransaksiController::class, 'midtransCallback']);
 
 // ========================================================================
 // 2. RUTE TERPROTEKSI (Wajib Login / Punya Token)
@@ -59,7 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wallet/topup', [WalletController::class, 'requestTopup']);
 
     // --- Transaksi (Belanja) ---
-    Route::post('/transaksi/checkout', [TransaksiController::class, 'store']);
+    Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout']);
     Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
     Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
 

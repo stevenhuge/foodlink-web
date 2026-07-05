@@ -48,7 +48,7 @@ class WelcomeController extends Controller
             // Hitung total makanan yang diselamatkan (Cache 1 jam)
             $makananDiselamatkan = Cache::remember('total_makanan_diselamatkan', 3600, function () {
                 return DetailTransaksi::whereHas('transaksi', function($query) {
-                    $query->where('status_pemesanan', 'Selesai');
+                    $query->whereIn('status_pemesanan', ['selesai', 'Selesai', 'SELESAI']);
                 })->sum('jumlah');
             });
 

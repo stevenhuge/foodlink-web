@@ -35,7 +35,7 @@ class RiwayatTransaksiController extends Controller
     {
         $mitraId = Auth::guard('mitra')->id();
         $transaksis = Transaksi::where('mitra_id', $mitraId)
-                            ->where('status_pemesanan', 'paid')
+                            ->whereIn('status_pemesanan', ['paid', 'Paid', 'PAID'])
                             ->with('user', 'detailTransaksi.produk')
                             ->orderBy('waktu_pemesanan', 'desc')
                             ->get();
@@ -145,7 +145,7 @@ class RiwayatTransaksiController extends Controller
                 ]);
 
                 // 7. Update status transaksi
-                $transaksi->status_pemesanan = 'selesai';
+                $transaksi->status_pemesanan = 'Selesai';
                 $transaksi->save();
 
                 return $transaksi;
@@ -206,7 +206,7 @@ class RiwayatTransaksiController extends Controller
                     }
                 }
 
-                $transaksi->status_pemesanan = 'batal';
+                $transaksi->status_pemesanan = 'Batal';
                 $transaksi->save();
 
                 return $totalRefund;
