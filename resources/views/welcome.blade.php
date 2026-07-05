@@ -450,7 +450,7 @@
                 <div class="col-md-6 mb-4 mb-md-0">
                     <div class="small text-fl-green fw-bold">Tersedia di Android & iOS</div>
                     <h2 class="display-6 fw-bolder mt-2">Mulai Kurangi <span class="text-fl-green">Limbah Makanan</span> Hari Ini</h2>
-                    <p class="text-secondary mt-3">Bergabung dengan ribuan mitra bisnis dan konsumen yang sudah merasakan manfaat ekosistem FoodLink.</p>
+                    <p class="text-secondary mt-3">Bergabung dengan ribuan mitra bisnis dan konsumen yang sudah merasakan manfaat ekosistem FoodLink</p>
 
                     <div class="d-flex gap-3 mt-4">
                         {{-- Trigger Modal --}}
