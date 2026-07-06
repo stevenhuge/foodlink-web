@@ -64,4 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
     Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
 
+    // Tambahkan di dalam Route::middleware('auth:sanctum') setelah baris checkout yang sudah ada:
+
+    Route::post('/transaksi/checkout-poin', [TransaksiController::class, 'checkoutPoin']); // Poin ← BARU
+    Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
+    Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
+
 });
