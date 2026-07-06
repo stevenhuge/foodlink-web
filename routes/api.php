@@ -39,7 +39,7 @@ Route::get('/produk/{produk}', [ProdukController::class, 'show']);
 // Payment Gateway Webhook
 Route::post('/payment/webhook', [WalletController::class, 'webhookHandler'])->name('payment.webhook');
 Route::post('/midtrans-callback', [TransaksiController::class, 'midtransCallback']);
-Route::post('/transaksi/midtrans-callback', [TransaksiController::class, 'midtransCallback']);
+Route::match(['get', 'post'], '/transaksi/midtrans-callback', [TransaksiController::class, 'midtransCallback']);
 
 // ========================================================================
 // 2. RUTE TERPROTEKSI (Wajib Login / Punya Token)
