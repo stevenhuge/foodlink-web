@@ -554,7 +554,7 @@
                     <p class="text-secondary small mb-4">Pastikan perangkat Anda mengizinkan instalasi dari sumber eksternal.</p>
 
                     <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-2 rounded-pill small fw-medium mb-4">
-                        📦 FoodLink-v1.0.0.apk · ~25 MB
+                        📦 FoodLink-v2.0.0.apk · ~25 MB
                     </div>
 
                     <div class="d-flex gap-3 justify-content-center">
@@ -596,7 +596,7 @@
 
                 setTimeout(function () {
                     window.open(
-                        'https://github.com/stevenhuge/foodlink-web/releases/download/v1.0.0/Foodlink.apk',
+                        'https://github.com/stevenhuge/foodlink-web/releases/download/v2.0.0/FoodLink.apk',
                         '_blank'
                     );
                 }, 300);
