@@ -42,11 +42,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // ------------------------------------
 
-        // Opsional: Validasi CSRF (biasanya sudah ada)
-        // $middleware->validateCsrfTokens(except: [
-        //     // 'api/*' // Contoh
-        // ]);
-
+        // --- Validasi CSRF ---
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            '*midtrans-callback*',
+            '/api/transaksi/midtrans-callback'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // ... Konfigurasi Exception Handling ...
