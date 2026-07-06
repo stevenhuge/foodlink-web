@@ -31,6 +31,10 @@ class Transaksi extends Model
         'biaya_layanan_user',
         'potongan_pajak_mitra',
         'pendapatan_bersih_mitra',
+        'snap_token',
+        'payment_type',
+        'va_number',
+        'metode_pembayaran'
     ];
     // =======================
 
