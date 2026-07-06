@@ -446,4 +446,87 @@ class TransaksiController extends Controller
 
         return response()->json(['message' => 'OK']);
     }
+
+    // ─── TransaksiController.php ────────────────────────────────────────────────
+
+    /**
+     * Cek status transaksi — dipanggil dari dialog "Cek Status" di PaymentActivity
+     */
+    public function cekStatus(Request $request, $kode_transaksi)
+    {
+        $transaksi = Transaksi::where('kode_unik_pengambilan', $kode_transaksi)
+            ->where('user_id', $request->user()->user_id)
+            ->first();
+
+        if (!$transaksi) {
+            return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
+        }
+
+        return response()->json([
+            'status'          => $transaksi->status_pemesanan,
+            'kode_transaksi'  => $transaksi->kode_unik_pengambilan,
+            'total_harga'     => $transaksi->total_harga,
+        ]);
+    }
+
+    /**
+     * Ganti metode pembayaran dari Midtrans ke Poin
+     * Dipanggil dari popup "Ganti Metode" di DetailTransaksiActivity
+     */
+    public function bayarDenganPoin(Request $request, $kode_transaksi)
+    {
+        $user = $request->user();
+
+        $transaksi = Transaksi::where('kode_unik_pengambilan', $kode_transaksi)
+            ->where('user_id', $user->user_id)
+            ->first();
+
+        if (!$transaksi) {
+            return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
+        }
+        if ($transaksi->status_pemesanan !== 'Pending') {
+            return response()->json(['message' => 'Transaksi tidak dalam status Pending'], 400);
+        }
+
+        try {
+            DB::transaction(function () use ($user, $transaksi) {
+                $user = User::lockForUpdate()->find($user->user_id);
+
+                if ($user->poin_reward < $transaksi->total_harga) {
+                    throw new \Exception("Poin tidak cukup. Dibutuhkan {$transaksi->total_harga}, dimiliki {$user->poin_reward}.");
+                }
+
+                // Potong poin
+                $user->decrement('poin_reward', $transaksi->total_harga);
+
+                // Update transaksi: metode → Poin, status → Paid, hapus snap_token
+                $transaksi->update([
+                    'status_pemesanan'  => 'Paid',
+                    'metode_pembayaran' => 'Poin',
+                    'snap_token'        => null,
+                ]);
+
+                // Kurangi stok (sebelumnya belum dikurangi karena Midtrans pending)
+                $details = \App\Models\DetailTransaksi::where('transaksi_id', $transaksi->transaksi_id)->get();
+                foreach ($details as $detail) {
+                    $produk = Produk::lockForUpdate()->find($detail->produk_id);
+                    if ($produk) {
+                        $produk->decrement('stok_tersisa', $detail->jumlah);
+                        if ($produk->fresh()->stok_tersisa <= 0) {
+                            $produk->update(['status_produk' => 'Habis']);
+                        }
+                    }
+                }
+            });
+
+            return response()->json([
+                'message'         => 'Berhasil dibayar dengan poin',
+                'status'          => 'Paid',
+                'kode_transaksi'  => $transaksi->kode_unik_pengambilan,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
 }
