@@ -371,81 +371,85 @@ class TransaksiController extends Controller
     // 5. MIDTRANS WEBHOOK CALLBACK
     // =========================================================================
     public function midtransCallback(Request $request)
-    {
-        Config::$serverKey    = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
+{
+    Config::$serverKey    = config('services.midtrans.server_key');
+    Config::$isProduction = config('services.midtrans.is_production');
 
-        try {
-            $notif = new Notification();
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid notification'], 403);
-        }
+    try {
+        // Menggunakan \Throwable agar request kosong dari browser tidak membuat server crash
+        $notif = new Notification();
+    } catch (\Throwable $e) {
+        return response()->json([
+            'message' => 'Invalid notification or method',
+            'error'   => $e->getMessage()
+        ], 403);
+    }
 
-        $transactionStatus = $notif->transaction_status;
-        $orderId           = $notif->order_id;
-        $paymentType       = $notif->payment_type ?? null;
-        $vaNumber          = null;
+    $transactionStatus = $notif->transaction_status;
+    $orderId           = $notif->order_id;
+    $paymentType       = $notif->payment_type ?? null;
+    $vaNumber          = null;
 
-        // Ambil VA number dari response Midtrans (jika ada)
-        if (!empty($notif->va_numbers) && is_array($notif->va_numbers)) {
-            $vaNumber = $notif->va_numbers[0]->va_number ?? null;
-        } elseif (!empty($notif->permata_va_number)) {
-            $vaNumber = $notif->permata_va_number;
-        } elseif (!empty($notif->bill_key)) {
-            $vaNumber = $notif->bill_key;
-        }
+    // Ambil VA number dari response Midtrans (jika ada)
+    if (!empty($notif->va_numbers) && is_array($notif->va_numbers)) {
+        $vaNumber = $notif->va_numbers[0]->va_number ?? null;
+    } elseif (!empty($notif->permata_va_number)) {
+        $vaNumber = $notif->permata_va_number;
+    } elseif (!empty($notif->bill_key)) {
+        $vaNumber = $notif->bill_key;
+    }
 
-        $transaksi = Transaksi::where('kode_pemesanan', $orderId)
-            ->orWhere('kode_unik_pengambilan', $orderId)
-            ->first();
+    $transaksi = Transaksi::where('kode_pemesanan', $orderId)
+        ->orWhere('kode_unik_pengambilan', $orderId)
+        ->first();
 
-        if (!$transaksi) {
-            return response()->json(['message' => 'Order not found'], 404);
-        }
+    if (!$transaksi) {
+        return response()->json(['message' => 'Order not found'], 404);
+    }
 
-        switch ($transactionStatus) {
-            case 'capture':
-            case 'settlement':
-                if ($transaksi->status_pemesanan === 'Pending') {
-                    DB::transaction(function () use ($transaksi, $paymentType, $vaNumber) {
-                        $transaksi->update([
-                            'status_pemesanan' => 'Paid',
-                            'payment_type'     => $paymentType,
-                            'va_number'        => $vaNumber,
-                        ]);
-                        // Kurangi stok saat payment confirmed
-                        $details = DetailTransaksi::where('transaksi_id', $transaksi->transaksi_id)->get();
-                        foreach ($details as $detail) {
-                            $produk = Produk::lockForUpdate()->find($detail->produk_id);
-                            if ($produk) {
-                                $produk->decrement('stok_tersisa', $detail->jumlah);
-                                if ($produk->fresh()->stok_tersisa <= 0) {
-                                    $produk->update(['status_produk' => 'Habis']);
-                                }
+    switch ($transactionStatus) {
+        case 'capture':
+        case 'settlement':
+            if ($transaksi->status_pemesanan === 'Pending') {
+                DB::transaction(function () use ($transaksi, $paymentType, $vaNumber) {
+                    $transaksi->update([
+                        'status_pemesanan' => 'Paid',
+                        'payment_type'     => $paymentType,
+                        'va_number'        => $vaNumber,
+                    ]);
+                    
+                    // Kurangi stok saat payment confirmed
+                    $details = DetailTransaksi::where('transaksi_id', $transaksi->transaksi_id)->get();
+                    foreach ($details as $detail) {
+                        $produk = Produk::lockForUpdate()->find($detail->produk_id);
+                        if ($produk) {
+                            $produk->decrement('stok_tersisa', $detail->jumlah);
+                            if ($produk->fresh()->stok_tersisa <= 0) {
+                                $produk->update(['status_produk' => 'Habis']);
                             }
                         }
-                    });
-                }
-                break;
+                    }
+            });
+            }
+            break;
 
-            case 'pending':
-                // Update VA number jika baru tersedia
-                $transaksi->update([
-                    'status_pemesanan' => 'Pending',
-                    'payment_type'     => $paymentType,
-                    'va_number'        => $vaNumber,
-                ]);
-                break;
+        case 'pending':
+            $transaksi->update([
+                'status_pemesanan' => 'Pending',
+                'payment_type'     => $paymentType,
+                'va_number'        => $vaNumber,
+            ]);
+            break;
 
-            case 'deny':
-            case 'expire':
-            case 'cancel':
-                $transaksi->update(['status_pemesanan' => 'Batal']);
-                break;
-        }
-
-        return response()->json(['message' => 'OK']);
+        case 'deny':
+        case 'expire':
+        case 'cancel':
+            $transaksi->update(['status_pemesanan' => 'Batal']);
+            break;
     }
+
+    return response()->json(['message' => 'OK']);
+}
 
     // ─── TransaksiController.php ────────────────────────────────────────────────
 
