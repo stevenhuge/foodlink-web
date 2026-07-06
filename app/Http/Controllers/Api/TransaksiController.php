@@ -372,41 +372,51 @@ class TransaksiController extends Controller
     // =========================================================================
     public function midtransCallback(Request $request)
 {
-    Config::$serverKey    = config('services.midtrans.server_key');
-    Config::$isProduction = config('services.midtrans.is_production');
+    // 1. Tangkap semua data langsung dari request (Lebih aman untuk Vercel)
+    $payload = $request->all();
 
-    try {
-        // Menggunakan \Throwable agar request kosong dari browser tidak membuat server crash
-        $notif = new Notification();
-    } catch (\Throwable $e) {
-        return response()->json([
-            'message' => 'Invalid notification or method',
-            'error'   => $e->getMessage()
-        ], 403);
+    $orderId           = $payload['order_id'] ?? null;
+    $transactionStatus = $payload['transaction_status'] ?? null;
+    $paymentType       = $payload['payment_type'] ?? null;
+    $signatureKey      = $payload['signature_key'] ?? null;
+    $statusCode        = $payload['status_code'] ?? null;
+    $grossAmount       = $payload['gross_amount'] ?? null;
+
+    // Jika diakses lewat browser (tanpa data), cegah error 500
+    if (!$orderId) {
+        return response()->json(['message' => 'Hanya menerima request dari webhook Midtrans'], 400);
     }
 
-    $transactionStatus = $notif->transaction_status;
-    $orderId           = $notif->order_id;
-    $paymentType       = $notif->payment_type ?? null;
-    $vaNumber          = null;
-
-    // Ambil VA number dari response Midtrans (jika ada)
-    if (!empty($notif->va_numbers) && is_array($notif->va_numbers)) {
-        $vaNumber = $notif->va_numbers[0]->va_number ?? null;
-    } elseif (!empty($notif->permata_va_number)) {
-        $vaNumber = $notif->permata_va_number;
-    } elseif (!empty($notif->bill_key)) {
-        $vaNumber = $notif->bill_key;
+    // 2. Validasi Keamanan (Signature Key) dari Midtrans
+    $serverKey = config('services.midtrans.server_key');
+    $mySignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+    
+    if ($mySignature !== $signatureKey) {
+        return response()->json(['message' => 'Tanda tangan tidak valid!'], 403);
     }
 
+    // 3. Cari transaksi di database
     $transaksi = Transaksi::where('kode_pemesanan', $orderId)
         ->orWhere('kode_unik_pengambilan', $orderId)
         ->first();
 
+    // Jika transaksi tidak ada (biasanya karena menekan tombol "Test" di Midtrans)
+    // Tetap kembalikan status 200 OK agar Midtrans menganggap test-nya sukses
     if (!$transaksi) {
-        return response()->json(['message' => 'Order not found'], 404);
+        return response()->json(['message' => 'Test Webhook Sukses (Transaksi Dummy)'], 200);
     }
 
+    // 4. Ambil nomor VA jika pembayarannya via Virtual Account
+    $vaNumber = null;
+    if (!empty($payload['va_numbers']) && is_array($payload['va_numbers'])) {
+        $vaNumber = $payload['va_numbers'][0]['va_number'] ?? null;
+    } elseif (!empty($payload['permata_va_number'])) {
+        $vaNumber = $payload['permata_va_number'];
+    } elseif (!empty($payload['bill_key'])) {
+        $vaNumber = $payload['bill_key'];
+    }
+
+    // 5. Update status pesanan sesuai notifikasi
     switch ($transactionStatus) {
         case 'capture':
         case 'settlement':
@@ -418,7 +428,7 @@ class TransaksiController extends Controller
                         'va_number'        => $vaNumber,
                     ]);
                     
-                    // Kurangi stok saat payment confirmed
+                    // Kurangi stok mitra karena sudah lunas
                     $details = DetailTransaksi::where('transaksi_id', $transaksi->transaksi_id)->get();
                     foreach ($details as $detail) {
                         $produk = Produk::lockForUpdate()->find($detail->produk_id);
@@ -429,7 +439,7 @@ class TransaksiController extends Controller
                             }
                         }
                     }
-            });
+                }); 
             }
             break;
 
@@ -448,7 +458,7 @@ class TransaksiController extends Controller
             break;
     }
 
-    return response()->json(['message' => 'OK']);
+    return response()->json(['message' => 'Status berhasil diupdate'], 200);
 }
 
     // ─── TransaksiController.php ────────────────────────────────────────────────
