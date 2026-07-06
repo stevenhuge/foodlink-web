@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\WalletController;
-use App\Http\Controllers\Api\MitraController; // <--- Baru ditambahkan
+use App\Http\Controllers\Api\MitraController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,11 +35,12 @@ Route::get('/produk', [ProdukController::class, 'index']);
 // 3. Detail produk (Parameter dinamis ditaruh paling bawah agar tidak bentrok)
 Route::get('/produk/{produk}', [ProdukController::class, 'show']);
 
-
-// Payment Gateway Webhook
+// --- WEBHOOK & PAYMENT GATEWAY ---
 Route::post('/payment/webhook', [WalletController::class, 'webhookHandler'])->name('payment.webhook');
-Route::post('/midtrans-callback', [TransaksiController::class, 'midtransCallback']);
+
+// Cukup gunakan satu route match ini saja untuk Midtrans, yang Route::post sebelumnya dihapus agar tidak bentrok
 Route::match(['get', 'post'], '/transaksi/midtrans-callback', [TransaksiController::class, 'midtransCallback']);
+
 
 // ========================================================================
 // 2. RUTE TERPROTEKSI (Wajib Login / Punya Token)
@@ -52,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Update profil user berdasarkan id nya
     Route::put('/profile/update', [AuthController::class, 'updateProfile']);
 
-    // --- Mitra / Toko (BARU) ---
+    // --- Mitra / Toko ---
     // Mengambil daftar toko untuk ditampilkan di menu "Toko" Android
     Route::get('/mitra', [MitraController::class, 'index']);
     Route::get('/mitra/{id}/produk', [ProdukController::class, 'getByMitra']);
@@ -61,18 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wallet/topup', [WalletController::class, 'requestTopup']);
 
     // --- Transaksi (Belanja) ---
-    Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout']);
-    Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
-    Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
-
-    // Tambahkan di dalam Route::middleware('auth:sanctum') setelah baris checkout yang sudah ada:
-
-    Route::post('/transaksi/checkout-poin', [TransaksiController::class, 'checkoutPoin']); // Poin ← BARU
-    Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
-    Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
-
-    Route::get('/transaksi/{kode_transaksi}/status',      [TransaksiController::class, 'cekStatus']);
-    Route::post('/transaksi/{kode_transaksi}/bayar-poin', [TransaksiController::class, 'bayarDenganPoin']);
+    // Semua duplikat sudah dihapus, cukup panggil masing-masing satu kali
     Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout']);
     Route::post('/transaksi/checkout-poin', [TransaksiController::class, 'checkoutPoin']);
     Route::get('/transaksi/history', [TransaksiController::class, 'riwayat']);
