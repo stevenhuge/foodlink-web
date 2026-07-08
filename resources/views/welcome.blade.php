@@ -11,6 +11,7 @@
     <meta property="og:description" content="Bergabunglah dengan ekosistem ekonomi sirkular FoodLink. Kurangi food waste dan dapatkan makanan berkualitas dengan harga terjangkau." />
     <meta property="og:image" content="{{ asset('images/logo_foodlink_background_hijau.png') }}" />
     <meta property="og:type" content="website" />
+    <meta name="google-site-verification" content="vGV17OD3mjn-q8y_urR_L2kLhJDAnE0TRcJhQ0OWcpc" />
     
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('images/favicon-192x192-rounded.png') }}" sizes="192x192" type="image/png">
