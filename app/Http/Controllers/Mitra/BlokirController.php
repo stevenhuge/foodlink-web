@@ -56,12 +56,8 @@ class BlokirController extends Controller
                     $filePaths[] = $file->store('sanggahan', 's3');
                 }
             } catch (\Exception $e) {
-                // Tangkap error spesifik dari AWS S3 (jika ada)
-                $pesanError = $e->getMessage();
-                if ($e->getPrevious()) {
-                    $pesanError .= " | Detail AWS: " . $e->getPrevious()->getMessage();
-                }
-                dd("Sistem gagal terhubung ke Supabase S3! Pesan Error Asli: " . $pesanError);
+                // Kembalikan ke halaman sebelumnya dengan pesan error yang elegan
+                return back()->with('error', 'Gagal mengupload file ke server. Pastikan pengaturan Supabase (Kunci Rahasia/Region) di Vercel Anda sudah benar!');
             }
         }
 
