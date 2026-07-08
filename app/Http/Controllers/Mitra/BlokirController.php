@@ -50,9 +50,14 @@ class BlokirController extends Controller
         // 4. Proses Upload File
         $filePaths = [];
         if ($request->hasFile('bukti_files')) {
-            foreach ($request->file('bukti_files') as $file) {
-                // Gunakan S3 karena Vercel bersifat Read-Only
-                $filePaths[] = $file->store('sanggahan', 's3');
+            try {
+                foreach ($request->file('bukti_files') as $file) {
+                    // Gunakan S3 karena Vercel bersifat Read-Only
+                    $filePaths[] = $file->store('sanggahan', 's3');
+                }
+            } catch (\Exception $e) {
+                // Tampilkan pesan error aslinya langsung ke layar!
+                dd("Sistem gagal terhubung ke Supabase S3! Pesan Error Asli: " . $e->getMessage());
             }
         }
 
