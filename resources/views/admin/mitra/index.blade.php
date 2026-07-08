@@ -139,42 +139,7 @@
                                 </td>
                             </tr>
 
-                            <!-- [MODAL] Blokir Mitra (dibuat unik per mitra) -->
-                            @if ($m->status_akun == 'Aktif')
-                            <div class="modal fade" id="blockMitraModal-{{ $m->mitra_id }}" tabindex="-1" aria-labelledby="blockMitraModalLabel-{{ $m->mitra_id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="blockMitraModalLabel-{{ $m->mitra_id }}">Blokir Akun: {{ $m->nama_mitra }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <!-- Form di dalam Modal -->
-                                        <form action="{{ route('admin.mitra.block', $m->mitra_id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <div class="modal-body">
-                                                <p>Anda yakin ingin memblokir akun <strong>{{ $m->nama_mitra }}</strong>?</p>
-                                                <div class="mb-3">
-                                                    <label for="alasan-{{ $m->mitra_id }}" class="form-label">Pilih Alasan Blokir:</label>
-                                                    <select name="alasan_blokir_option_id" id="alasan-{{ $m->mitra_id }}" class="form-select" required>
-                                                        <option value="" disabled selected>-- Pilih Alasan --</option>
-                                                        {{-- Loop pilihan alasan dari Controller --}}
-                                                        @foreach ($alasanBlokirOptions as $alasan)
-                                                            <option value="{{ $alasan->alasan_id }}">{{ $alasan->alasan_text }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-danger">Ya, Blokir Akun</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                            <!-- [AKHIR MODAL] -->
+
 
                         @empty
                             <!-- Tampilan Jika Tabel Kosong -->
@@ -193,5 +158,44 @@
 
     <!-- Script JS tidak lagi diperlukan karena kita menggunakan Modal Bootstrap -->
     {{-- <script> ... </script> --}}
+
+    <!-- [MODAL] Blokir Mitra dipindahkan ke luar container tabel agar layar tidak nge-freeze -->
+    @foreach ($mitra as $m)
+        @if ($m->status_akun == 'Aktif')
+        <div class="modal fade" id="blockMitraModal-{{ $m->mitra_id }}" tabindex="-1" aria-labelledby="blockMitraModalLabel-{{ $m->mitra_id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="blockMitraModalLabel-{{ $m->mitra_id }}">Blokir Akun: {{ $m->nama_mitra }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <!-- Form di dalam Modal -->
+                    <form action="{{ route('admin.mitra.block', $m->mitra_id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-body">
+                            <p>Anda yakin ingin memblokir akun <strong>{{ $m->nama_mitra }}</strong>?</p>
+                            <div class="mb-3">
+                                <label for="alasan-{{ $m->mitra_id }}" class="form-label">Pilih Alasan Blokir:</label>
+                                <select name="alasan_blokir_option_id" id="alasan-{{ $m->mitra_id }}" class="form-select" required>
+                                    <option value="" disabled selected>-- Pilih Alasan --</option>
+                                    {{-- Loop pilihan alasan dari Controller --}}
+                                    @foreach ($alasanBlokirOptions as $alasan)
+                                        <option value="{{ $alasan->alasan_id }}">{{ $alasan->alasan_text }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger">Ya, Blokir Akun</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endforeach
+    <!-- [AKHIR MODAL] -->
 
 @endsection
