@@ -13,7 +13,7 @@
     <meta property="og:type" content="website" />
     
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('images/favicon-192x192.png') }}" sizes="192x192" type="image/png">
+    <link rel="icon" href="{{ asset('images/favicon-192x192-rounded.png') }}" sizes="192x192" type="image/png">
     
     @vite(['resources/js/app.js'])
 
