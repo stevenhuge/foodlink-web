@@ -37,6 +37,7 @@
                                     [Lihat Selengkapnya]
                                 </a>
 
+                                @push('modals')
                                 <div class="modal fade" id="modalAlasan{{ $item->sanggahan_id }}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content">
@@ -55,6 +56,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endpush
                             @endif
                         </td>
                         <td>
@@ -81,6 +83,7 @@
                         </td>
                     </tr>
 
+                    @push('modals')
                     <div class="modal fade" id="modalBukti{{ $item->sanggahan_id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
@@ -163,6 +166,7 @@
                             </div>
                         </div>
                     </div>
+                    @endpush
                     @endforeach
                 </tbody>
             </table>
