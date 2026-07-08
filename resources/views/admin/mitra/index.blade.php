@@ -160,6 +160,7 @@
     {{-- <script> ... </script> --}}
 
     <!-- [MODAL] Blokir Mitra dipindahkan ke luar container tabel agar layar tidak nge-freeze -->
+    @push('modals')
     @foreach ($mitra as $m)
         @if ($m->status_akun == 'Aktif')
         <div class="modal fade" id="blockMitraModal-{{ $m->mitra_id }}" tabindex="-1" aria-labelledby="blockMitraModalLabel-{{ $m->mitra_id }}" aria-hidden="true">
@@ -196,6 +197,7 @@
         </div>
         @endif
     @endforeach
+    @endpush
     <!-- [AKHIR MODAL] -->
 
 @endsection

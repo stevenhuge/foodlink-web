@@ -11,7 +11,7 @@
                            1. src: Ganti dengan link gambar BARU yang ukurannya 1140x350px
                            2. height: auto (JANGAN DIUBAH jadi pixel, biar tidak gepeng)
                         --}}
-                        <img src="https://i.imgur.com/tgyaLRb.png"
+                        <img src="{{ asset('images/header-email.jpg') }}"
                              alt="Foodlink Logo"
                              style="width: 100%; max-width: 570px; height: auto; border: none; display: block; border-radius: 5px;">
                     </a>
