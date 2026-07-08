@@ -51,7 +51,8 @@ class BlokirController extends Controller
         $filePaths = [];
         if ($request->hasFile('bukti_files')) {
             foreach ($request->file('bukti_files') as $file) {
-                $filePaths[] = $file->store('sanggahan', 'public');
+                // Gunakan S3 karena Vercel bersifat Read-Only
+                $filePaths[] = $file->store('sanggahan', 's3');
             }
         }
 

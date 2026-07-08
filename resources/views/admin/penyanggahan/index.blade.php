@@ -105,7 +105,7 @@
                                             @foreach($item->bukti_files as $file)
                                                 @php
                                                     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                                    $fileUrl = asset('storage/' . $file);
+                                                    $fileUrl = \Illuminate\Support\Facades\Storage::disk('s3')->url($file);
                                                 @endphp
 
                                                 <div class="col-md-4 col-sm-6">
