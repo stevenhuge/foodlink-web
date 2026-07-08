@@ -20,20 +20,11 @@ class WelcomeController extends Controller
         $dbError = null;
 
         try {
-            // Ambil data terlebih dahulu
-            $data = DB::table('settings')->where('key', 'visitor_count')->first();
-            
-            if (!$data) {
-                DB::table('settings')->insert([
-                    'key' => 'visitor_count',
-                    'value' => '1',
-                    'label' => 'Total Pengunjung Homepage'
-                ]);
-                $visitorCount = 1;
-            } else {
-                $visitorCount = (int) $data->value + 1;
-                DB::table('settings')->where('key', 'visitor_count')->update(['value' => (string) $visitorCount]);
-            }
+            // Visitor count diambil dari DB tanpa melakukan UPDATE sinkronus setiap page load
+            $visitorCount = Cache::remember('visitor_count_display', 300, function () {
+                $data = DB::table('settings')->where('key', 'visitor_count')->first();
+                return $data ? (int) $data->value : 0;
+            });
 
             // Hitung total mitra (Cache 1 jam / 3600 detik)
             $mitraCount = Cache::remember('total_mitra', 3600, function () {

@@ -13,7 +13,7 @@
     <meta property="og:type" content="website" />
     
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('images/logo_foodlink_background_hijau.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('images/favicon-192x192.png') }}" sizes="192x192" type="image/png">
     
     @vite(['resources/js/app.js'])
 
@@ -596,7 +596,7 @@
 
                 setTimeout(function () {
                     window.open(
-                        'https://github.com/stevenhuge/foodlink-web/releases/download/v2.0.0/FoodLink.apk',
+                        'https://github.com/stevenhuge/foodlink-web/releases/download/v.2.0.0/FoodLink.apk',
                         '_blank'
                     );
                 }, 300);
