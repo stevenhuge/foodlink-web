@@ -12,7 +12,6 @@
                            2. height: auto (JANGAN DIUBAH jadi pixel, biar tidak gepeng)
                         --}}
                         <img src="https://i.imgur.com/tgyaLRb.png"
-                             class="logo"
                              alt="Foodlink Logo"
                              style="width: 100%; max-width: 570px; height: auto; border: none; display: block; border-radius: 5px;">
                     </a>
