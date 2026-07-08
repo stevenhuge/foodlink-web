@@ -56,8 +56,12 @@ class BlokirController extends Controller
                     $filePaths[] = $file->store('sanggahan', 's3');
                 }
             } catch (\Exception $e) {
-                // Tampilkan pesan error aslinya langsung ke layar!
-                dd("Sistem gagal terhubung ke Supabase S3! Pesan Error Asli: " . $e->getMessage());
+                // Tangkap error spesifik dari AWS S3 (jika ada)
+                $pesanError = $e->getMessage();
+                if ($e->getPrevious()) {
+                    $pesanError .= " | Detail AWS: " . $e->getPrevious()->getMessage();
+                }
+                dd("Sistem gagal terhubung ke Supabase S3! Pesan Error Asli: " . $pesanError);
             }
         }
 
