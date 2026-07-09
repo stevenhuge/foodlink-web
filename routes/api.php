@@ -69,5 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
     Route::get('/transaksi/{kode_transaksi}/status', [TransaksiController::class, 'cekStatus']);
     Route::post('/transaksi/{kode_transaksi}/bayar-poin', [TransaksiController::class, 'bayarDenganPoin']);
+    Route::post('/transaksi/{kode_transaksi}/batal', [TransaksiController::class, 'batalkanTransaksi']);
+
 
 });

@@ -540,4 +540,50 @@ class TransaksiController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }
+
+    /**
+     * Membatalkan transaksi yang masih berstatus Pending
+     */
+    public function batalkanTransaksi(Request $request, $kode_transaksi)
+    {
+        $user = $request->user();
+
+        $transaksi = Transaksi::where('kode_unik_pengambilan', $kode_transaksi)
+            ->where('user_id', $user->user_id)
+            ->first();
+
+        if (!$transaksi) {
+            return response()->json(['message' => 'Transaksi tidak ditemukan'], 404);
+        }
+
+        if ($transaksi->status_pemesanan !== 'Pending') {
+            return response()->json(['message' => 'Transaksi tidak dapat dibatalkan karena status sudah ' . $transaksi->status_pemesanan], 400);
+        }
+
+        try {
+            DB::transaction(function () use ($transaksi) {
+                // Update status menjadi Batal
+                $transaksi->update([
+                    'status_pemesanan' => 'Batal',
+                ]);
+
+                // Batalkan di Midtrans jika menggunakan Midtrans
+                if ($transaksi->metode_pembayaran === 'Midtrans' && $transaksi->kode_pemesanan) {
+                    try {
+                        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
+                        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
+                        \Midtrans\Transaction::cancel($transaksi->kode_pemesanan);
+                    } catch (\Exception $e) {
+                        // Jika gagal cancel di Midtrans, tidak menggagalkan proses lokal.
+                        // Mungkin transaksi sudah dibatalkan di Midtrans atau tidak ditemukan.
+                    }
+                }
+            });
+
+            return response()->json(['message' => 'Transaksi berhasil dibatalkan'], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal membatalkan transaksi: ' . $e->getMessage()], 500);
+        }
+    }
 }
