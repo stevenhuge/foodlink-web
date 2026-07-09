@@ -61,18 +61,15 @@ class ProfileController extends Controller
         // Proses unggah Logo Mitra jika ada
         if ($request->hasFile('logo_mitra')) {
             $file = $request->file('logo_mitra');
-            $filename = time() . '_logo_' . $mitra->mitra_id . '.' . $file->getClientOriginalExtension();
             
-            // Simpan gambar ke public/images/mitra
-            $file->move(public_path('images/mitra'), $filename);
-            
-            // Hapus gambar lama jika ada dan bukan default
-            if ($mitra->logo_mitra && file_exists(public_path($mitra->logo_mitra))) {
+            // Hapus gambar lama jika ada dan bukan base64 di storage lokal (fallback)
+            if ($mitra->logo_mitra && !str_starts_with($mitra->logo_mitra, 'data:image') && file_exists(public_path($mitra->logo_mitra))) {
                 @unlink(public_path($mitra->logo_mitra));
             }
 
-            // Simpan path ke database
-            $mitra->logo_mitra = 'images/mitra/' . $filename;
+            // Simpan gambar sebagai Base64 karena Vercel read-only system
+            $base64 = 'data:image/' . $file->getClientOriginalExtension() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+            $mitra->logo_mitra = $base64;
         }
 
         // Update password hanya jika new_password diisi DAN validasi current_password lolos

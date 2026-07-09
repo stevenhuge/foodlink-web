@@ -68,7 +68,7 @@ class RiwayatTransaksiExport implements FromQuery, WithHeadings, WithMapping, Sh
         }
 
         return [
-            $transaksi->waktu_pemesanan->format('d M Y, H:i'),
+            \Carbon\Carbon::parse($transaksi->waktu_pemesanan)->format('d M Y, H:i'),
             $transaksi->kode_unik_pengambilan,
             $transaksi->user->nama_lengkap ?? 'User Dihapus',
             $transaksi->user->email ?? '-',

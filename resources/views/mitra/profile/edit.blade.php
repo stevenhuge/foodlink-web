@@ -44,7 +44,7 @@
                             <label class="form-label d-block fw-bold">Logo Usaha</label>
                             <div class="mb-2">
                                 @if($mitra->logo_mitra)
-                                    <img src="{{ asset($mitra->logo_mitra) }}" alt="Logo {{ $mitra->nama_mitra }}" class="img-thumbnail rounded-circle object-fit-cover shadow-sm" style="width: 120px; height: 120px;">
+                                    <img src="{{ str_starts_with($mitra->logo_mitra, 'data:image') ? $mitra->logo_mitra : asset($mitra->logo_mitra) }}" alt="Logo {{ $mitra->nama_mitra }}" class="img-thumbnail rounded-circle object-fit-cover shadow-sm" style="width: 120px; height: 120px;">
                                 @else
                                     <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 120px; height: 120px; background-color: var(--foodlink-primary); font-size: 2.5rem;">
                                         {{ substr($mitra->nama_mitra, 0, 1) }}
