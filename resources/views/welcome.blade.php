@@ -554,8 +554,8 @@
                     <p class="text-secondary small mb-1">Anda akan mengunduh file APK FoodLink untuk Android.</p>
                     <p class="text-secondary small mb-4">Pastikan perangkat Anda mengizinkan instalasi dari sumber eksternal.</p>
 
-                    <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-2 rounded-pill small fw-medium mb-4">
-                        📦 FoodLink-v2.0.0.apk · ~25 MB
+                    <div id="apkVersionInfo" class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-2 rounded-pill small fw-medium mb-4">
+                        📦 Memuat info versi...
                     </div>
 
                     <div class="d-flex gap-3 justify-content-center">
@@ -602,6 +602,24 @@
                     );
                 }, 300);
             });
+
+            // ✅ Fetch latest release info dari GitHub API
+            fetch('https://api.github.com/repos/stevenhuge/foodlink-web/releases/latest')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.tag_name) {
+                        const versionInfo = document.getElementById('apkVersionInfo');
+                        if (versionInfo) {
+                            let sizeStr = '~25 MB';
+                            if (data.assets && data.assets.length > 0) {
+                                const sizeMB = (data.assets[0].size / (1024 * 1024)).toFixed(1);
+                                sizeStr = sizeMB + ' MB';
+                            }
+                            versionInfo.innerHTML = `📦 FoodLink-${data.tag_name}.apk &middot; ${sizeStr}`;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching release info:', error));
 
         });
     </script>
