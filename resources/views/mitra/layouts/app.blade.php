@@ -362,7 +362,11 @@
                     </div>
                     {{-- Avatar Modern --}}
                     @if(auth('mitra')->user()->logo_mitra)
-                        <img src="{{ asset(auth('mitra')->user()->logo_mitra) }}" alt="Avatar" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px;">
+                        @php
+                            $logoMitra = auth('mitra')->user()->logo_mitra;
+                            $logoSrc = str_starts_with($logoMitra, 'data:image') ? $logoMitra : asset($logoMitra);
+                        @endphp
+                        <img src="{{ $logoSrc }}" alt="Avatar" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px;">
                     @else
                         <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm text-white" style="width: 36px; height: 36px; background-color: var(--foodlink-primary);">
                             {{ substr(auth('mitra')->user()->nama_mitra, 0, 1) }}

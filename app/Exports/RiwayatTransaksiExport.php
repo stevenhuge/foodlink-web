@@ -63,15 +63,15 @@ class RiwayatTransaksiExport implements FromQuery, WithHeadings, WithMapping, Sh
         // Gabungkan detail produk menjadi satu string
         $detailProduk = '';
         foreach ($transaksi->detailTransaksi as $detail) {
-            $namaProduk = $detail->produk->nama_produk ?? 'Produk Dihapus';
+            $namaProduk = $detail->produk?->nama_produk ?? 'Produk Dihapus';
             $detailProduk .= $detail->jumlah . 'x ' . $namaProduk . '; ';
         }
 
         return [
             \Carbon\Carbon::parse($transaksi->waktu_pemesanan)->format('d M Y, H:i'),
             $transaksi->kode_unik_pengambilan,
-            $transaksi->user->nama_lengkap ?? 'User Dihapus',
-            $transaksi->user->email ?? '-',
+            $transaksi->user?->nama_lengkap ?? 'User Dihapus',
+            $transaksi->user?->email ?? '-',
             $transaksi->total_harga_poin,
             ucfirst($status),
             rtrim($detailProduk, '; '), // Hapus '; ' terakhir
