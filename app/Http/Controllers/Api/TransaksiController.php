@@ -266,9 +266,9 @@ class TransaksiController extends Controller
             $orders = Transaksi::where('user_id', $request->user()->user_id)
                 ->with(['detailTransaksi.produk', 'mitra'])
                 ->orderBy('waktu_pemesanan', 'desc')
-                ->get();
+                ->paginate(15); // Menggunakan pagination agar tidak memberatkan server/HP
 
-            $formatted = $orders->map(function ($item) {
+            $formatted = $orders->getCollection()->map(function ($item) {
                 $namaToko = $item->mitra?->nama_mitra ?? 'Mitra Tidak Dikenal';
 
                 $names = $item->detailTransaksi
@@ -300,7 +300,10 @@ class TransaksiController extends Controller
                 ];
             });
 
-            return response()->json($formatted, 200);
+            // Set kembali collection yang sudah di-format ke dalam objek paginator
+            $orders->setCollection($formatted);
+
+            return response()->json($orders, 200);
 
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal memuat history', 'error' => $e->getMessage()], 500);
@@ -522,6 +525,11 @@ class TransaksiController extends Controller
                 foreach ($details as $detail) {
                     $produk = Produk::lockForUpdate()->find($detail->produk_id);
                     if ($produk) {
+                        // CEK STOK SEBELUM DECREMENT (Mencegah Stok Minus / Overselling)
+                        if ($produk->stok_tersisa < $detail->jumlah) {
+                            throw new \Exception("Gagal: Stok '{$produk->nama_produk}' tidak mencukupi (sisa {$produk->stok_tersisa}). Silakan batalkan transaksi ini.");
+                        }
+
                         $produk->decrement('stok_tersisa', $detail->jumlah);
                         if ($produk->fresh()->stok_tersisa <= 0) {
                             $produk->update(['status_produk' => 'Habis']);
