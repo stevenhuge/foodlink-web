@@ -597,7 +597,7 @@
 
                 setTimeout(function () {
                     window.open(
-                        'https://github.com/stevenhuge/foodlink-web/releases/download/v.2.0.0/FoodLink.apk',
+                        'https://github.com/stevenhuge/foodlink-web/releases/latest/download/FoodLink.apk',
                         '_blank'
                     );
                 }, 300);
