@@ -223,8 +223,22 @@ class RiwayatTransaksiController extends Controller
 
     public function exportExcel()
     {
-        $mitraId = Auth::guard('mitra')->id();
-        $fileName = 'riwayat_transaksi_mitra_' . date('Y-m-d') . '.xlsx';
-        return Excel::download(new RiwayatTransaksiExport($mitraId), $fileName);
+        try {
+            $mitraId = Auth::guard('mitra')->id();
+            // Membersihkan buffer output yang mungkin mengganggu PhpSpreadsheet (mencegah corrupt/500)
+            if (ob_get_length() > 0) {
+                ob_end_clean();
+            }
+            $fileName = 'riwayat_transaksi_mitra_' . date('Y-m-d') . '.xlsx';
+            return Excel::download(new RiwayatTransaksiExport($mitraId), $fileName);
+        } catch (\Throwable $e) {
+            // Tampilkan error aslinya agar kita tahu apa yang rusak di production
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
     }
 }
