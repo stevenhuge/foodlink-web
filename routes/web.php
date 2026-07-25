@@ -43,6 +43,9 @@ use Illuminate\Support\Facades\Artisan;
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
+// Rute AI Chat (Frontend)
+Route::post('/api/chat', [\App\Http\Controllers\AIChatController::class, 'chat'])->name('api.chat');
+
 /*
 |--------------------------------------------------------------------------
 | GRUP RUTE ADMIN
@@ -83,6 +86,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Review Penarikan Mitra
             Route::get('review-penarikan', [ReviewPenarikanController::class, 'index'])->name('review.penarikan.index');
             Route::patch('review-penarikan/{penarikan}', [ReviewPenarikanController::class, 'update'])->name('review.penarikan.update');
+            
+            // Anggota Tim (Dinamic Section Home)
+            Route::resource('anggota-tim', \App\Http\Controllers\SuperAdmin\AnggotaTimController::class)->except(['show']);
         });
 
         // --- ADMIN & SUPER ADMIN (BISA AKSES SEMUA INI) ---

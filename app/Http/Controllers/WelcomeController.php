@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Mitra;
 use App\Models\User;
 use App\Models\DetailTransaksi;
+use App\Models\AnggotaTim;
 
 class WelcomeController extends Controller
 {
@@ -53,6 +54,8 @@ class WelcomeController extends Controller
             \Log::error("Visitor Count Error: " . $dbError);
         }
 
-        return view('welcome', compact('visitorCount', 'mitraCount', 'userCount', 'makananDiselamatkan', 'dbError'));
+        $anggotaTim = AnggotaTim::orderBy('created_at', 'asc')->get();
+
+        return view('welcome', compact('visitorCount', 'mitraCount', 'userCount', 'makananDiselamatkan', 'dbError', 'anggotaTim'));
     }
 }

@@ -267,6 +267,15 @@
                         </li>
 
                         <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.anggota-tim.*') ? 'active' : '' }}"
+                               href="{{ route('admin.anggota-tim.index') }}">
+                                <div>
+                                    <i class="fas fa-users-cog icon-left"></i> Anggota Tim (Home)
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.alasan-blokir.*') ? 'active' : '' }}"
                                href="{{ route('admin.alasan-blokir.index') }}">
                                 <div>
