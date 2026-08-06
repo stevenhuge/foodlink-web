@@ -21,7 +21,7 @@ class VoucherController extends Controller
             'produk:produk_id,nama_produk'
         ])
         ->where('status', 'aktif')
-        ->where('kuota', '>', 0)
+        ->where('kuota', '>=', 0) // Mendukung kuota > 0 maupun kuota 0 (unlimited)
         ->where('tanggal_mulai', '<=', $now)
         ->where('tanggal_selesai', '>=', $now);
 
@@ -64,7 +64,7 @@ class VoucherController extends Controller
             ], 404);
         }
 
-        if ($voucher->kuota <= 0) {
+        if ($voucher->kuota < 0) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kuota voucher telah habis.'
