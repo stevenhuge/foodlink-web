@@ -21,23 +21,19 @@ class WelcomeController extends Controller
         $dbError = null;
 
         try {
-            // Increment visitor count in session
-            if (!session()->has('has_visited')) {
-                // Ensure the row exists, otherwise insert it
-                $exists = DB::table('settings')->where('key', 'visitor_count')->exists();
-                if ($exists) {
-                    DB::table('settings')->where('key', 'visitor_count')->increment('value');
-                } else {
-                    DB::table('settings')->insert(['key' => 'visitor_count', 'value' => '1']);
-                }
-                session()->put('has_visited', true);
-                Cache::forget('visitor_count_display');
+            // Increment visitor count setiap kali halaman di-refresh
+            $setting = DB::table('settings')->where('key', 'visitor_count')->first();
+            if ($setting) {
+                $newCount = (int) $setting->value + 1;
+                DB::table('settings')->where('key', 'visitor_count')->update(['value' => (string) $newCount]);
+            } else {
+                $newCount = 1;
+                DB::table('settings')->insert(['key' => 'visitor_count', 'value' => '1']);
             }
+            Cache::forget('visitor_count_display');
 
-            // Visitor count diambil dari DB
-            $visitorCount = Cache::remember('visitor_count_display', 300, function () {
-                $data = DB::table('settings')->where('key', 'visitor_count')->first();
-                return $data ? (int) $data->value : 0;
+            $visitorCount = Cache::remember('visitor_count_display', 300, function () use ($newCount) {
+                return $newCount;
             });
 
             // Hitung total mitra (Cache 1 jam / 3600 detik)

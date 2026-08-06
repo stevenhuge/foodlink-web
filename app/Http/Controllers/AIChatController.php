@@ -15,7 +15,7 @@ class AIChatController extends Controller
             'history' => 'nullable|array',
         ]);
 
-        $apiKey = env('COSMOSHUB_API_KEY', 'sk-cos-5Yew_wCyM_GDnZSJgakIB1qLR6dmLh51azdIWDTNEYY');
+        $apiKey = env('COSMOSHUB_API_KEY');
         $baseUrl = 'https://api.cosmoshub.tech/v1/chat/completions';
         
         $userMessage = $request->input('message');
@@ -51,7 +51,7 @@ class AIChatController extends Controller
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post($baseUrl, [
-                'model' => 'qwen-3.7-max',
+                'model' => 'gemini-3.5-flash',
                 'messages' => $messages,
                 'temperature' => 0.7,
                 'max_tokens' => 500,
