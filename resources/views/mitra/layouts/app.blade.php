@@ -296,6 +296,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{{ route('mitra.voucher.index') }}" class="nav-link {{ request()->routeIs('mitra.voucher.*') ? 'active' : '' }}">
+                                <i class="fas fa-ticket-alt"></i> Voucher Diskon
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('mitra.pesanan.index') }}" class="nav-link {{ request()->routeIs('mitra.pesanan.*') ? 'active' : '' }}">
                                 <i class="fas fa-receipt"></i> Pesanan Masuk
                             </a>

@@ -30,6 +30,7 @@ use App\Http\Controllers\Mitra\RiwayatTransaksiController;
 use App\Http\Controllers\Mitra\PemasukanController as MitraPemasukanController;
 use App\Http\Controllers\Mitra\RekeningBankController as MitraRekeningController;
 use App\Http\Controllers\Mitra\ForgotPasswordController; // <-- Jangan lupa ini
+use App\Http\Controllers\Mitra\VoucherController;
 
 // --- CONTROLLER UMUM ---
 use App\Http\Controllers\WelcomeController;
@@ -202,6 +203,9 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
 
         // Export Excel
         Route::get('riwayat-transaksi/export/excel', [RiwayatTransaksiController::class, 'exportExcel'])->name('riwayat.export.excel');
+
+        // Voucher Mitra
+        Route::resource('voucher', VoucherController::class);
 
         // Keuangan Mitra
         Route::get('pemasukan', [MitraPemasukanController::class, 'index'])->name('pemasukan.index');

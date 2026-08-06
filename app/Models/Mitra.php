@@ -130,4 +130,9 @@ class Mitra extends Authenticatable
     public function logKeuangan() {
         return $this->morphMany(LogKeuangan::class, 'penerima');
     }
+
+    public function vouchers()
+    {
+        return $this->hasMany(MitraVoucher::class, 'mitra_id', 'mitra_id');
+    }
 }
