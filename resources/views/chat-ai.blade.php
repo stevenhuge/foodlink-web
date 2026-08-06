@@ -80,6 +80,34 @@
             border-radius: 1rem;
             font-size: 1rem;
             line-height: 1.5;
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Styling for markdown content */
+        .chat-msg p {
+            margin-bottom: 0.5rem;
+        }
+        .chat-msg p:last-child {
+            margin-bottom: 0;
+        }
+        .chat-msg ul, .chat-msg ol {
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .chat-msg ul:last-child, .chat-msg ol:last-child {
+            margin-bottom: 0;
+        }
+        .chat-msg strong {
+            font-weight: 700;
         }
 
         .chat-msg.user {
@@ -196,6 +224,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const chatInput = document.getElementById('chatInput');
@@ -264,8 +293,15 @@
             function appendMessage(text, sender) {
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `chat-msg ${sender}`;
-                // Convert newlines to br tags for better formatting
-                msgDiv.innerHTML = text.replace(/\\n/g, '<br>');
+                
+                if (sender === 'bot') {
+                    // Parse Markdown to HTML for AI response
+                    msgDiv.innerHTML = marked.parse(text);
+                } else {
+                    // Convert newlines to br tags for user messages
+                    msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+                }
+                
                 chatBody.appendChild(msgDiv);
                 scrollToBottom();
             }

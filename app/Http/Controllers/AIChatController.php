@@ -47,14 +47,14 @@ class AIChatController extends Controller
         ];
 
         try {
-            $response = Http::timeout(15)->withHeaders([
+            $response = Http::timeout(60)->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post($baseUrl, [
                 'model' => 'gemini-3.5-flash',
                 'messages' => $messages,
                 'temperature' => 0.7,
-                'max_tokens' => 500,
+                'max_tokens' => 2000,
             ]);
 
             if ($response->successful()) {
