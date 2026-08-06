@@ -127,7 +127,7 @@
             border-top-right-radius: 1.5rem;
         }
 
-        /* AI Chat Widget Styles */
+        /* AI Chat Widget Button */
         .chat-widget-btn {
             position: fixed;
             bottom: 24px;
@@ -148,119 +148,7 @@
         .chat-widget-btn:hover {
             transform: scale(1.05);
             background-color: var(--fl-green-dark);
-        }
-        .chat-window {
-            position: fixed;
-            bottom: 100px;
-            right: 24px;
-            width: 350px;
-            height: 500px;
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        .chat-window.active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateY(0);
-        }
-        .chat-header {
-            background-color: var(--fl-green);
             color: white;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .chat-body {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            background-color: #f8fafc;
-        }
-        .chat-msg {
-            max-width: 80%;
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .chat-msg.user {
-            background-color: var(--fl-green);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 0.25rem;
-        }
-        .chat-msg.bot {
-            background-color: white;
-            color: #334155;
-            align-self: flex-start;
-            border-bottom-left-radius: 0.25rem;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .chat-footer {
-            padding: 1rem;
-            background: white;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            gap: 0.5rem;
-        }
-        .chat-input {
-            flex: 1;
-            border: 1px solid #e2e8f0;
-            border-radius: 2rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            outline: none;
-        }
-        .chat-input:focus {
-            border-color: var(--fl-green);
-        }
-        .chat-send-btn {
-            background: var(--fl-green);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .chat-send-btn:hover {
-            background: var(--fl-green-dark);
-        }
-        .typing-indicator {
-            display: inline-flex;
-            gap: 4px;
-        }
-        .typing-indicator span {
-            width: 6px;
-            height: 6px;
-            background-color: #94a3b8;
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
         }
     </style>
     <link href="{{ asset('css/page-transitions.css') }}" rel="stylesheet">
@@ -747,35 +635,9 @@
     </div>
 
     <!-- Floating AI Chat Widget -->
-    <div class="chat-widget-btn" id="chatToggleBtn">
+    <a href="{{ route('chat.ai') }}" class="chat-widget-btn" title="Tanya FoodLink AI">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-    </div>
-
-    <div class="chat-window" id="chatWindow">
-        <div class="chat-header">
-            <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle bg-white text-fl-green d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="fas fa-robot fs-6"></i>
-                </div>
-                <div>
-                    <div class="fw-bold" style="font-size: 0.95rem;">FoodLink AI</div>
-                    <div style="font-size: 0.7rem; opacity: 0.8;">Asisten Virtual</div>
-                </div>
-            </div>
-            <button class="btn-close btn-close-white" style="font-size: 0.8rem;" id="chatCloseBtn"></button>
-        </div>
-        <div class="chat-body" id="chatBody">
-            <div class="chat-msg bot">
-                Halo! Saya asisten AI FoodLink. Ada yang bisa saya bantu hari ini? 😊
-            </div>
-        </div>
-        <div class="chat-footer">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Ketik pesan..." autocomplete="off">
-            <button class="chat-send-btn" id="chatSendBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-        </div>
-    </div>
+    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -826,123 +688,6 @@
                 })
                 .catch(error => console.error('Error fetching release info:', error));
 
-
-            // ✅ AI Chat Logic
-            const chatToggleBtn = document.getElementById('chatToggleBtn');
-            const chatWindow = document.getElementById('chatWindow');
-            const chatCloseBtn = document.getElementById('chatCloseBtn');
-            const chatInput = document.getElementById('chatInput');
-            const chatSendBtn = document.getElementById('chatSendBtn');
-            const chatBody = document.getElementById('chatBody');
-            
-            let chatHistory = [];
-            let isWaitingForResponse = false;
-
-            // Toggle Chat
-            chatToggleBtn.addEventListener('click', () => {
-                chatWindow.classList.add('active');
-                chatInput.focus();
-            });
-
-            chatCloseBtn.addEventListener('click', () => {
-                chatWindow.classList.remove('active');
-            });
-
-            // Send Message Function
-            async function sendMessage() {
-                const message = chatInput.value.trim();
-                if (!message || isWaitingForResponse) return;
-
-                // 1. Add user message to UI
-                appendMessage(message, 'user');
-                chatInput.value = '';
-                
-                // 2. Show typing indicator
-                const typingId = showTypingIndicator();
-                isWaitingForResponse = true;
-
-                try {
-                    const response = await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            message: message,
-                            history: chatHistory
-                        })
-                    });
-
-                    const data = await response.json();
-                    
-                    // Remove typing indicator
-                    removeTypingIndicator(typingId);
-
-                    if (data.success) {
-                        appendMessage(data.reply, 'bot');
-                        
-                        // Save to history
-                        chatHistory.push({ role: 'user', content: message });
-                        chatHistory.push({ role: 'assistant', content: data.reply });
-                        
-                        // Keep history short (last 6 messages / 3 pairs) to save tokens
-                        if (chatHistory.length > 6) {
-                            chatHistory = chatHistory.slice(-6);
-                        }
-                    } else {
-                        appendMessage('Maaf, saya sedang mengalami gangguan. Silakan coba lagi nanti.', 'bot');
-                    }
-                } catch (error) {
-                    removeTypingIndicator(typingId);
-                    appendMessage('Terjadi kesalahan saat terhubung ke server.', 'bot');
-                    console.error('Chat Error:', error);
-                } finally {
-                    isWaitingForResponse = false;
-                    chatInput.focus();
-                }
-            }
-
-            // Append Message to UI
-            function appendMessage(text, sender) {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `chat-msg ${sender}`;
-                // Convert simple markdown-like newlines to <br> if needed, or just textContent
-                msgDiv.textContent = text;
-                chatBody.appendChild(msgDiv);
-                scrollToBottom();
-            }
-
-            // Show Typing Indicator
-            function showTypingIndicator() {
-                const id = 'typing-' + Date.now();
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-msg bot';
-                msgDiv.id = id;
-                msgDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
-                chatBody.appendChild(msgDiv);
-                scrollToBottom();
-                return id;
-            }
-
-            // Remove Typing Indicator
-            function removeTypingIndicator(id) {
-                const el = document.getElementById(id);
-                if (el) el.remove();
-            }
-
-            // Scroll to Bottom
-            function scrollToBottom() {
-                chatBody.scrollTop = chatBody.scrollHeight;
-            }
-
-            // Event Listeners for Input
-            chatSendBtn.addEventListener('click', sendMessage);
-            chatInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
 
         });
     </script>

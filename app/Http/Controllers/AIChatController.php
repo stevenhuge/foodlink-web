@@ -47,7 +47,7 @@ class AIChatController extends Controller
         ];
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::timeout(15)->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post($baseUrl, [
@@ -76,7 +76,7 @@ class AIChatController extends Controller
             Log::error('CosmosHub Exception: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'reply' => 'Maaf, terjadi kesalahan pada server.'
+                'reply' => 'Maaf, terjadi kesalahan atau koneksi timeout saat menghubungi server AI.'
             ], 500);
         }
     }

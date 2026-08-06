@@ -44,6 +44,9 @@ use Illuminate\Support\Facades\Artisan;
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 // Rute AI Chat (Frontend)
+Route::get('/chat-ai', function () {
+    return view('chat-ai');
+})->name('chat.ai');
 Route::post('/api/chat', [\App\Http\Controllers\AIChatController::class, 'chat'])->name('api.chat');
 
 /*
