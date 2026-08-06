@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         AdminSeeder::class,
         KategoriProdukSeeder::class,
         AlasanBlokirOptionsSeeder::class,
+        VoucherSeeder::class,
     ]);
 
     // HAPUS LOGIKA 'if count == 0', GANTI DENGAN INI:
