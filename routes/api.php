@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ProdukController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\MitraController;
+use App\Http\Controllers\Api\VoucherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +70,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/transaksi/{kode_transaksi}', [TransaksiController::class, 'show']);
     Route::get('/transaksi/{kode_transaksi}/status', [TransaksiController::class, 'cekStatus']);
     Route::post('/transaksi/{kode_transaksi}/bayar-poin', [TransaksiController::class, 'bayarDenganPoin']);
-    Route::post('/transaksi/{kode_transaksi}/batal', [TransaksiController::class, 'batalkanTransaksi']);
-
+    // --- Voucher ---
+    Route::get('/vouchers', [VoucherController::class, 'index']);
+    Route::post('/vouchers/cek', [VoucherController::class, 'cekVoucher']);
 
 });
