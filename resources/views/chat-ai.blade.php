@@ -178,6 +178,38 @@
             border-bottom-left-radius: 0.25rem;
             border: 1px solid rgba(0,0,0,0.05);
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .chat-msg.bot:hover .chat-actions {
+            opacity: 1;
+        }
+
+        .btn-chat-action {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-chat-action:hover {
+            color: var(--fl-green);
+            background: #f1f5f9;
         }
 
         .chat-footer-wrapper {
@@ -397,13 +429,35 @@
                 </div>
                 
                 <!-- Model Info -->
-                <div class="text-center mt-3" style="font-size: 0.75rem; color: #94a3b8;">
+                <div class="text-center mt-3 d-flex flex-column align-items-center gap-2" style="font-size: 0.75rem; color: #94a3b8;">
                     @if($isLoggedIn)
-                        <i class="fas fa-bolt text-warning"></i> Didukung oleh <strong>Claude AI</strong>. Nikmati pengalaman AI terbaik dengan kemampuan analitik maksimal.
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-bolt text-warning"></i>
+                            <span>Pilih Model AI:</span>
+                            <select id="modelSelect" class="form-select form-select-sm rounded-pill px-3 shadow-sm border-0" style="width: auto; font-size: 0.8rem; background-color: #f1f5f9;">
+                                <option value="gemini-3.5-flash">Gemini 3.5 Flash (Cepat)</option>
+                                <option value="claude-sonnet-4.5" selected>Claude Sonnet 4.5 (Pintar)</option>
+                                <option value="deepseek-v4-pro">DeepSeek V4 Pro (Logika Kuat)</option>
+                                <option value="qwen-3.7-max">Qwen 3.7 Max (Kreatif)</option>
+                            </select>
+                        </div>
                     @else
-                        <i class="fas fa-robot text-secondary"></i> Didukung oleh <strong>Gemini AI</strong>. 
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-success text-decoration-none fw-bold">Login atau daftar</a> untuk beralih ke <strong>Claude AI</strong> dan dapatkan jawaban yang lebih cerdas!
+                        <div>
+                            <i class="fas fa-robot text-secondary"></i> Didukung oleh <strong>Gemini AI</strong>. 
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-success text-decoration-none fw-bold">Login atau daftar</a> untuk membuka akses ke model premium seperti Claude dan DeepSeek!
+                        </div>
                     @endif
+                </div>
+
+                <!-- Limit Progress -->
+                <div class="mt-3 w-100" style="max-width: 400px; margin: 0 auto;">
+                    <div class="d-flex justify-content-between mb-1 fw-medium" style="font-size: 0.7rem; color: #64748b;">
+                        <span>Limit Penggunaan Harian</span>
+                        <span id="limitText">Memuat...</span>
+                    </div>
+                    <div class="progress bg-light" style="height: 6px; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <div id="limitProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%; transition: width 0.5s ease;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -480,7 +534,59 @@
                 sidebarBackdrop.classList.remove('show');
             });
 
-            // Initialize History if logged in
+            // Load Sessions
+            async function loadSessions() {
+                try {
+                    const res = await fetch('/api/chat/sessions');
+                    const data = await res.json();
+                    if (data.success) {
+                        renderHistoryList(data.sessions);
+                    }
+                } catch (e) {
+                    console.error("Failed to load sessions", e);
+                }
+            }
+
+            // Load Limit
+            async function fetchLimitStatus() {
+                try {
+                    const res = await fetch('/api/chat/limit');
+                    const data = await res.json();
+                    if (data.success && data.limit) {
+                        updateLimitUI(data.limit);
+                    }
+                } catch(e) {
+                    console.error("Failed to fetch limit", e);
+                }
+            }
+
+            function updateLimitUI(limitObj) {
+                const limitText = document.getElementById('limitText');
+                const limitProgress = document.getElementById('limitProgress');
+                
+                limitText.textContent = `${limitObj.used} / ${limitObj.max} Pesan`;
+                
+                const percentage = Math.min(100, Math.max(0, (limitObj.used / limitObj.max) * 100));
+                limitProgress.style.width = percentage + '%';
+                
+                // Ganti warna jika limit hampir habis
+                if (percentage >= 90) {
+                    limitProgress.className = 'progress-bar bg-danger';
+                } else if (percentage >= 70) {
+                    limitProgress.className = 'progress-bar bg-warning';
+                } else {
+                    limitProgress.className = 'progress-bar bg-success';
+                }
+
+                if (limitObj.remaining <= 0) {
+                    document.getElementById('chatInput').disabled = true;
+                    document.getElementById('chatInput').placeholder = 'Limit harian tercapai. Coba besok lagi.';
+                    document.getElementById('chatSendBtn').disabled = true;
+                }
+            }
+
+            // Initialize on load
+            fetchLimitStatus();
             if (isLoggedIn) {
                 loadSessions();
             }
@@ -592,6 +698,10 @@
                 chatSendBtn.disabled = true;
 
                 try {
+                    // Get selected model if logged in
+                    const modelSelect = document.getElementById('modelSelect');
+                    const selectedModel = modelSelect ? modelSelect.value : 'gemini-3.5-flash';
+
                     const response = await fetch('/api/chat', {
                         method: 'POST',
                         headers: {
@@ -601,7 +711,8 @@
                         body: JSON.stringify({
                             message: message,
                             history: chatHistory.slice(-6), // Send only last 6 for context
-                            session_id: currentSessionId
+                            session_id: currentSessionId,
+                            model: selectedModel
                         })
                     });
 
@@ -609,6 +720,16 @@
                     removeTypingIndicator(typingId);
 
                     if (data.success) {
+                        // Update Limit UI
+                        if (data.limit) {
+                            updateLimitUI(data.limit);
+                        }
+
+                        // Save session_id if provided (for new chats)
+                        if (data.session_id) {
+                            currentSessionId = data.session_id;
+                        }
+
                         // Use typewriter effect for the AI reply
                         await typeWriterMessage(data.reply, 'bot');
                         
@@ -655,6 +776,7 @@
                             setTimeout(type, speed);
                         } else {
                             msgDiv.innerHTML = marked.parse(text); // ensure final parse is clean
+                            appendChatActions(msgDiv, text);
                             scrollToBottom();
                             resolve();
                         }
@@ -676,12 +798,54 @@
                 
                 if (sender === 'bot') {
                     msgDiv.innerHTML = marked.parse(text);
+                    appendChatActions(msgDiv, text);
                 } else {
                     msgDiv.innerHTML = text.replace(/\n/g, '<br>');
                 }
                 
                 chatBody.appendChild(msgDiv);
                 scrollToBottom();
+            }
+
+            function appendChatActions(container, rawText) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'chat-actions border-top pt-2 mt-2';
+                
+                // Copy Button
+                const btnCopy = document.createElement('button');
+                btnCopy.className = 'btn-chat-action';
+                btnCopy.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                btnCopy.onclick = () => {
+                    navigator.clipboard.writeText(rawText).then(() => {
+                        const originalHTML = btnCopy.innerHTML;
+                        btnCopy.innerHTML = '<i class="fas fa-check text-success"></i> Copied';
+                        setTimeout(() => btnCopy.innerHTML = originalHTML, 2000);
+                    });
+                };
+                
+                // Share Button
+                const btnShare = document.createElement('button');
+                btnShare.className = 'btn-chat-action';
+                btnShare.innerHTML = '<i class="fas fa-share-nodes"></i> Share';
+                btnShare.onclick = () => {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Pesan dari FoodLink AI',
+                            text: rawText
+                        }).catch(console.error);
+                    } else {
+                        // Fallback to copy if web share is not supported
+                        navigator.clipboard.writeText(rawText).then(() => {
+                            const originalHTML = btnShare.innerHTML;
+                            btnShare.innerHTML = '<i class="fas fa-check text-success"></i> Copied to share';
+                            setTimeout(() => btnShare.innerHTML = originalHTML, 2000);
+                        });
+                    }
+                };
+                
+                actionsDiv.appendChild(btnCopy);
+                actionsDiv.appendChild(btnShare);
+                container.appendChild(actionsDiv);
             }
 
             // Show Typing Indicator

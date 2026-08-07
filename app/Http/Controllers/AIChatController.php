@@ -74,6 +74,17 @@ class AIChatController extends Controller
         $user = $this->getAuthenticatedUser();
         if (!$user) return response()->json(['success' => false, 'message' => 'Harus login.']);
         
+        // Cek apakah ada sesi kosong sebelumnya agar tidak menumpuk tab kosong
+        $existingSession = AiChatSession::where('user_id', $user['id'])
+            ->where('user_type', $user['type'])
+            ->where('title', 'Sesi Chat Baru')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($existingSession && $existingSession->messages()->count() === 0) {
+            return response()->json(['success' => true, 'session' => $existingSession]);
+        }
+
         $session = AiChatSession::create([
             'user_id' => $user['id'],
             'user_type' => $user['type'],
@@ -118,6 +129,7 @@ class AIChatController extends Controller
             'message' => 'required|string|max:1000',
             'session_id' => 'nullable|integer',
             'history' => 'nullable|array',
+            'model' => 'nullable|string|in:gemini-3.5-flash,claude-sonnet-4.5,deepseek-v4-pro,qwen-3.7-max'
         ]);
 
         $user = $this->getAuthenticatedUser();
@@ -192,12 +204,18 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
             }
         }
 
+        $selectedModel = $request->input('model', 'gemini-3.5-flash');
+        // If guest, force gemini
+        if (!$user) {
+            $selectedModel = 'gemini-3.5-flash';
+        }
+
         try {
             $response = Http::timeout(60)->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type' => 'application/json',
             ])->post($baseUrl, [
-                'model' => 'gemini-3.5-flash',
+                'model' => $selectedModel,
                 'messages' => $messages,
                 'temperature' => 0.7,
                 'max_tokens' => 2000,
@@ -218,10 +236,18 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
                     $session->touch();
                 }
 
+                $attempts = RateLimiter::attempts($limitKey);
+                $remaining = RateLimiter::retriesLeft($limitKey, $maxAttempts);
+
                 return response()->json([
                     'success' => true,
                     'reply' => $reply,
-                    'session_id' => $sessionId
+                    'session_id' => $sessionId,
+                    'limit' => [
+                        'max' => $maxAttempts,
+                        'used' => $attempts,
+                        'remaining' => $remaining
+                    ]
                 ]);
             } else {
                 Log::error('CosmosHub API Error: ' . $response->body());
@@ -237,5 +263,25 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
                 'reply' => 'Maaf, terjadi kesalahan atau koneksi timeout saat menghubungi server AI.'
             ], 500);
         }
+    }
+
+    public function getLimitStatus(Request $request)
+    {
+        $user = $this->getAuthenticatedUser();
+        $ip = $request->ip();
+        
+        $limitKey = $user ? "ai-chat-{$user['type']}-{$user['id']}" : "ai-chat-guest-{$ip}";
+        $maxAttempts = $user ? 50 : 5;
+        $attempts = RateLimiter::attempts($limitKey);
+        $remaining = RateLimiter::retriesLeft($limitKey, $maxAttempts);
+        
+        return response()->json([
+            'success' => true,
+            'limit' => [
+                'max' => $maxAttempts,
+                'used' => $attempts,
+                'remaining' => $remaining
+            ]
+        ]);
     }
 }
