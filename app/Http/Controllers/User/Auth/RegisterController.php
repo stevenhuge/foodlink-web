@@ -19,7 +19,7 @@ class RegisterController extends Controller
     {
         $request->validate([
             'nama_lengkap' => 'required|string|max:100',
-            'jenis_kelamin' => 'required|in:L,P',
+            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'email' => 'required|string|email|max:100|unique:users',
             'nomor_telepon' => 'required|string|max:15|unique:users',
             'password' => 'required|string|min:8|confirmed',
