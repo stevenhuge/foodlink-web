@@ -139,14 +139,29 @@ class AIChatController extends Controller
         $limitKey = $user ? "ai-chat-{$user['type']}-{$user['id']}" : "ai-chat-guest-{$ip}";
         $maxAttempts = $user ? 50 : 5; // 50 for logged in, 5 for guest per day
         
-        if (RateLimiter::tooManyAttempts($limitKey, $maxAttempts)) {
-            $seconds = RateLimiter::availableIn($limitKey);
-            return response()->json([
-                'success' => false,
-                'reply' => 'Maaf, Anda telah mencapai limit chat hari ini. Silakan coba lagi besok.' . (!$user ? ' Login untuk mendapatkan limit lebih besar.' : '')
-            ], 429);
+        $attempts = 0;
+        if ($user) {
+            $sessions = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->pluck('id');
+            $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
+                ->where('role', 'user')
+                ->whereDate('created_at', \Carbon\Carbon::today())
+                ->count();
+                
+            if ($attempts >= $maxAttempts) {
+                return response()->json([
+                    'success' => false,
+                    'reply' => 'Maaf, Anda telah mencapai limit chat hari ini. Silakan coba lagi besok.'
+                ], 429);
+            }
+        } else {
+            if (RateLimiter::tooManyAttempts($limitKey, $maxAttempts)) {
+                return response()->json([
+                    'success' => false,
+                    'reply' => 'Maaf, Anda telah mencapai limit chat hari ini. Silakan coba lagi besok. Login untuk mendapatkan limit lebih besar.'
+                ], 429);
+            }
+            RateLimiter::hit($limitKey, 86400); // 24 hours
         }
-        RateLimiter::hit($limitKey, 86400); // 24 hours
 
         $apiKey = env('COSMOSHUB_API_KEY');
         $baseUrl = 'https://api.cosmoshub.tech/v1/chat/completions';
@@ -236,8 +251,12 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
                     $session->touch();
                 }
 
-                $attempts = RateLimiter::attempts($limitKey);
-                $remaining = RateLimiter::retriesLeft($limitKey, $maxAttempts);
+                if (!$user) {
+                    $attempts = RateLimiter::attempts($limitKey);
+                } else {
+                    $attempts++; // Account for the message just saved
+                }
+                $remaining = max(0, $maxAttempts - $attempts);
 
                 return response()->json([
                     'success' => true,
@@ -272,8 +291,19 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
         
         $limitKey = $user ? "ai-chat-{$user['type']}-{$user['id']}" : "ai-chat-guest-{$ip}";
         $maxAttempts = $user ? 50 : 5;
-        $attempts = RateLimiter::attempts($limitKey);
-        $remaining = RateLimiter::retriesLeft($limitKey, $maxAttempts);
+        
+        $attempts = 0;
+        if ($user) {
+            $sessions = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->pluck('id');
+            $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
+                ->where('role', 'user')
+                ->whereDate('created_at', \Carbon\Carbon::today())
+                ->count();
+        } else {
+            $attempts = RateLimiter::attempts($limitKey);
+        }
+        
+        $remaining = max(0, $maxAttempts - $attempts);
         
         return response()->json([
             'success' => true,
