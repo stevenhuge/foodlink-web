@@ -19,14 +19,22 @@ class AIChatController extends Controller
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $mitraCredentials = [
+            'email_bisnis' => $request->email,
+            'password' => $request->password
+        ];
 
-        if (Auth::guard('mitra')->attempt($credentials)) {
+        if (Auth::guard('mitra')->attempt($mitraCredentials)) {
             $request->session()->regenerate();
             return response()->json(['success' => true, 'message' => 'Login berhasil.']);
         }
 
-        if (Auth::guard('web')->attempt($credentials)) {
+        $userCredentials = [
+            'email' => $request->email,
+            'password' => $request->password
+        ];
+
+        if (Auth::guard('web')->attempt($userCredentials)) {
             $request->session()->regenerate();
             return response()->json(['success' => true, 'message' => 'Login berhasil.']);
         }
