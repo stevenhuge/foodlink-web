@@ -414,13 +414,6 @@
 
             <form id="chatLoginForm">
                 <div class="mb-3">
-                    <label class="form-label">Login Sebagai</label>
-                    <select class="form-select" id="loginRole" required>
-                        <option value="user">User Umum</option>
-                        <option value="mitra">Mitra FoodLink</option>
-                    </select>
-                </div>
-                <div class="mb-3">
                     <label class="form-label">Email</label>
                     <input type="email" class="form-control" id="loginEmail" required placeholder="Masukkan email">
                 </div>
@@ -656,7 +649,11 @@
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `chat-msg ${sender}`;
                 
-                if (!animate) msgDiv.style.animation = 'none';
+                if (!animate) {
+                    msgDiv.style.animation = 'none';
+                    msgDiv.style.opacity = '1';
+                    msgDiv.style.transform = 'translateY(0)';
+                }
                 
                 if (sender === 'bot') {
                     msgDiv.innerHTML = marked.parse(text);
@@ -705,7 +702,6 @@
                 chatLoginForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
-                    const role = document.getElementById('loginRole').value;
                     const email = document.getElementById('loginEmail').value;
                     const password = document.getElementById('loginPassword').value;
                     const errorDiv = document.getElementById('loginError');
@@ -723,7 +719,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                             },
-                            body: JSON.stringify({ role, email, password })
+                            body: JSON.stringify({ email, password })
                         });
                         
                         const data = await res.json();

@@ -17,18 +17,21 @@ class AIChatController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'role' => 'required|in:user,mitra'
         ]);
 
-        $guard = $request->role === 'mitra' ? 'mitra' : 'web';
         $credentials = $request->only('email', 'password');
 
-        if (Auth::guard($guard)->attempt($credentials)) {
+        if (Auth::guard('mitra')->attempt($credentials)) {
             $request->session()->regenerate();
             return response()->json(['success' => true, 'message' => 'Login berhasil.']);
         }
 
-        return response()->json(['success' => false, 'message' => 'Kredensial tidak valid.'], 401);
+        if (Auth::guard('web')->attempt($credentials)) {
+            $request->session()->regenerate();
+            return response()->json(['success' => true, 'message' => 'Login berhasil.']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Email atau password salah.'], 401);
     }
 
     public function logout(Request $request)
