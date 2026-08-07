@@ -159,15 +159,23 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
             'content' => $userMessage
         ];
 
-        // Save user message if logged in and session exists
-        if ($user && $sessionId) {
-            $session = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->where('id', $sessionId)->first();
-            if ($session) {
-                // generate title based on first user message if title is default
-                if ($session->messages()->count() == 0 || $session->title == 'Sesi Chat Baru') {
+        // Save user message if logged in
+        if ($user) {
+            if (!$sessionId) {
+                $session = AiChatSession::create([
+                    'user_id' => $user['id'],
+                    'user_type' => $user['type'],
+                    'title' => mb_substr($userMessage, 0, 30) . '...'
+                ]);
+                $sessionId = $session->id;
+            } else {
+                $session = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->where('id', $sessionId)->first();
+                if ($session && ($session->messages()->count() == 0 || $session->title == 'Sesi Chat Baru')) {
                     $session->update(['title' => mb_substr($userMessage, 0, 30) . '...']);
                 }
-                
+            }
+
+            if (isset($session) && $session) {
                 AiChatMessage::create([
                     'ai_chat_session_id' => $session->id,
                     'role' => 'user',
@@ -204,7 +212,8 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
 
                 return response()->json([
                     'success' => true,
-                    'reply' => $reply
+                    'reply' => $reply,
+                    'session_id' => $sessionId
                 ]);
             } else {
                 Log::error('CosmosHub API Error: ' . $response->body());

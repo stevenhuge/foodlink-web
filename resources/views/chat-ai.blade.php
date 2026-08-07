@@ -305,8 +305,8 @@
         $isLoggedIn = Auth::guard('web')->check() || Auth::guard('mitra')->check();
         $userType = Auth::guard('mitra')->check() ? 'Mitra' : (Auth::guard('web')->check() ? 'User' : 'Guest');
         $userName = 'Guest';
-        if(Auth::guard('web')->check()) $userName = Auth::guard('web')->user()->nama;
-        if(Auth::guard('mitra')->check()) $userName = Auth::guard('mitra')->user()->nama_toko;
+        if(Auth::guard('web')->check()) $userName = Auth::guard('web')->user()->nama_lengkap;
+        if(Auth::guard('mitra')->check()) $userName = Auth::guard('mitra')->user()->nama_mitra;
     @endphp
 
     <div class="layout-wrapper">
@@ -337,8 +337,8 @@
             <div class="sidebar-footer">
                 @if($isLoggedIn)
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-success" style="width: 32px; height: 32px;">
-                            <i class="fas fa-user"></i>
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-success overflow-hidden" style="width: 32px; height: 32px;">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($userName) }}&background=f8fafc&color=4DB43F" alt="User" style="width: 100%;">
                         </div>
                         <div class="text-truncate">
                             <div class="fw-bold" style="font-size: 0.9rem;">{{ $userName }}</div>
@@ -364,8 +364,8 @@
                     <a href="{{ route('welcome') }}" class="text-white me-2" title="Kembali ke Beranda">
                         <i class="fas fa-arrow-left"></i>
                     </a>
-                    <div class="rounded-circle bg-white text-fl-green d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                        <i class="fas fa-robot fs-5"></i>
+                    <div class="rounded-circle bg-white text-fl-green d-flex align-items-center justify-content-center overflow-hidden" style="width: 40px; height: 40px;">
+                        <img src="https://ui-avatars.com/api/?name=AI&background=fff&color=4DB43F&rounded=true&font-size=0.4" alt="AI Logo" style="width: 100%; height: 100%;">
                     </div>
                     <div>
                         <div class="fw-bold fs-5">FoodLink AI</div>
