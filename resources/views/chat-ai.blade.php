@@ -395,6 +395,16 @@
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
+                
+                <!-- Model Info -->
+                <div class="text-center mt-3" style="font-size: 0.75rem; color: #94a3b8;">
+                    @if($isLoggedIn)
+                        <i class="fas fa-bolt text-warning"></i> Didukung oleh <strong>Claude AI</strong>. Nikmati pengalaman AI terbaik dengan kemampuan analitik maksimal.
+                    @else
+                        <i class="fas fa-robot text-secondary"></i> Didukung oleh <strong>Gemini AI</strong>. 
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-success text-decoration-none fw-bold">Login atau daftar</a> untuk beralih ke <strong>Claude AI</strong> dan dapatkan jawaban yang lebih cerdas!
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -426,6 +436,31 @@
                     Login
                 </button>
             </form>
+          </div>
+          <div class="modal-footer d-flex flex-column align-items-center bg-light">
+            <span class="text-muted small fw-bold">Belum punya akun? Daftar sebagai:</span>
+            <div class="d-flex gap-2 w-100 mt-2">
+                <a href="{{ route('mitra.register') }}" class="btn btn-outline-success w-50">Mitra</a>
+                <button type="button" class="btn btn-outline-primary w-50" data-bs-toggle="modal" data-bs-target="#registerUserModal">User Umum</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Register User Modal -->
+    <div class="modal fade" id="registerUserModal" tabindex="-1" aria-labelledby="registerUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="registerUserModalLabel">Daftar Sebagai User</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center py-4">
+            <img src="{{ asset('images/coming-soon-user.png') }}" alt="Coming Soon" class="img-fluid mb-4" style="max-height: 180px;">
+            <h5 class="fw-bold">Fitur Segera Hadir!</h5>
+            <p class="text-muted mb-4">Pendaftaran untuk pengguna umum (User) sedang dalam tahap pengembangan. Nantikan pembaruan kami selanjutnya!</p>
+            <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Mengerti</button>
           </div>
         </div>
       </div>
