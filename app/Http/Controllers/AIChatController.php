@@ -154,13 +154,19 @@ class AIChatController extends Controller
                 ], 429);
             }
         } else {
-            if (RateLimiter::tooManyAttempts($limitKey, $maxAttempts)) {
+            // Gunakan database untuk menghitung guest agar tidak ter-reset oleh file cache ephemeral Vercel
+            $sessions = AiChatSession::where('user_type', 'guest')->where('title', $ip)->pluck('id');
+            $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
+                ->where('role', 'user')
+                ->whereDate('created_at', \Carbon\Carbon::today())
+                ->count();
+                
+            if ($attempts >= $maxAttempts) {
                 return response()->json([
                     'success' => false,
                     'reply' => 'Maaf, Anda telah mencapai limit chat hari ini. Silakan coba lagi besok. Login untuk mendapatkan limit lebih besar.'
                 ], 429);
             }
-            RateLimiter::hit($limitKey, 86400); // 24 hours
         }
 
         $apiKey = env('COSMOSHUB_API_KEY');
@@ -194,29 +200,35 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
             'content' => $userMessage
         ];
 
-        // Save user message if logged in
-        if ($user) {
-            if (!$sessionId) {
-                $session = AiChatSession::create([
-                    'user_id' => $user['id'],
-                    'user_type' => $user['type'],
-                    'title' => mb_substr($userMessage, 0, 30) . '...'
-                ]);
-                $sessionId = $session->id;
+        // Ensure session exists
+        if (!$sessionId) {
+            $sessionData = [
+                'user_type' => $user ? $user['type'] : 'guest',
+                'user_id' => $user ? $user['id'] : null,
+                'title' => $user ? (mb_substr($userMessage, 0, 30) . '...') : $ip
+            ];
+            $session = AiChatSession::create($sessionData);
+            $sessionId = $session->id;
+        } else {
+            $sessionQuery = AiChatSession::where('id', $sessionId);
+            if ($user) {
+                $sessionQuery->where('user_id', $user['id'])->where('user_type', $user['type']);
             } else {
-                $session = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->where('id', $sessionId)->first();
-                if ($session && ($session->messages()->count() == 0 || $session->title == 'Sesi Chat Baru')) {
-                    $session->update(['title' => mb_substr($userMessage, 0, 30) . '...']);
-                }
+                $sessionQuery->where('user_type', 'guest')->where('title', $ip);
             }
+            $session = $sessionQuery->first();
+            
+            if ($session && $user && ($session->messages()->count() == 0 || $session->title == 'Sesi Chat Baru')) {
+                $session->update(['title' => mb_substr($userMessage, 0, 30) . '...']);
+            }
+        }
 
-            if (isset($session) && $session) {
-                AiChatMessage::create([
-                    'ai_chat_session_id' => $session->id,
-                    'role' => 'user',
-                    'content' => $userMessage
-                ]);
-            }
+        if (isset($session) && $session) {
+            AiChatMessage::create([
+                'ai_chat_session_id' => $session->id,
+                'role' => 'user',
+                'content' => $userMessage
+            ]);
         }
 
         $selectedModel = $request->input('model', 'gemini-3.5-flash');
@@ -240,8 +252,8 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
                 $data = $response->json();
                 $reply = $data['choices'][0]['message']['content'] ?? 'Maaf, saya tidak mengerti.';
                 
-                // Save AI message if logged in
-                if ($user && $sessionId && isset($session)) {
+                // Save AI message
+                if ($sessionId && isset($session)) {
                     AiChatMessage::create([
                         'ai_chat_session_id' => $session->id,
                         'role' => 'assistant',
