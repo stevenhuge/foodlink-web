@@ -450,7 +450,8 @@
                 </div>
 
                 <!-- Limit Progress -->
-                <div class="mt-3 w-100" style="max-width: 400px; margin: 0 auto;">
+                @if($isLoggedIn)
+                <div class="mt-3 w-100" style="max-width: 400px; margin: 0 auto;" id="limitContainer">
                     <div class="d-flex justify-content-between mb-1 fw-medium" style="font-size: 0.7rem; color: #64748b;">
                         <span>Limit Penggunaan Harian</span>
                         <span id="limitText">Memuat...</span>
@@ -459,6 +460,7 @@
                         <div id="limitProgress" class="progress-bar bg-success" role="progressbar" style="width: 0%; transition: width 0.5s ease;"></div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </div>
@@ -564,18 +566,20 @@
                 const limitText = document.getElementById('limitText');
                 const limitProgress = document.getElementById('limitProgress');
                 
-                limitText.textContent = `${limitObj.used} / ${limitObj.max} Pesan`;
-                
-                const percentage = Math.min(100, Math.max(0, (limitObj.used / limitObj.max) * 100));
-                limitProgress.style.width = percentage + '%';
-                
-                // Ganti warna jika limit hampir habis
-                if (percentage >= 90) {
-                    limitProgress.className = 'progress-bar bg-danger';
-                } else if (percentage >= 70) {
-                    limitProgress.className = 'progress-bar bg-warning';
-                } else {
-                    limitProgress.className = 'progress-bar bg-success';
+                if (limitText && limitProgress) {
+                    limitText.textContent = `${limitObj.used} / ${limitObj.max} Pesan`;
+                    
+                    const percentage = Math.min(100, Math.max(0, (limitObj.used / limitObj.max) * 100));
+                    limitProgress.style.width = percentage + '%';
+                    
+                    // Ganti warna jika limit hampir habis
+                    if (percentage >= 90) {
+                        limitProgress.className = 'progress-bar bg-danger';
+                    } else if (percentage >= 70) {
+                        limitProgress.className = 'progress-bar bg-warning';
+                    } else {
+                        limitProgress.className = 'progress-bar bg-success';
+                    }
                 }
 
                 if (limitObj.remaining <= 0) {
