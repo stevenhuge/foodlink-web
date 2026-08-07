@@ -36,6 +36,8 @@ use App\Http\Controllers\Mitra\VoucherController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Artisan;
 
+// --- CONTROLLER USER (UMUM) ---
+use App\Http\Controllers\User\Auth\RegisterController as UserRegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +57,14 @@ Route::post('/api/chat', [\App\Http\Controllers\AIChatController::class, 'chat']
 Route::get('/api/chat/sessions', [\App\Http\Controllers\AIChatController::class, 'getSessions'])->name('api.chat.sessions');
 Route::post('/api/chat/sessions', [\App\Http\Controllers\AIChatController::class, 'createSession'])->name('api.chat.sessions.create');
 Route::get('/api/chat/history', [\App\Http\Controllers\AIChatController::class, 'getHistory'])->name('api.chat.history');
+
+// Rute Pengguna Umum (Register)
+Route::prefix('user')->name('user.')->group(function () {
+    Route::middleware('guest:web')->group(function () {
+        Route::get('register', [UserRegisterController::class, 'create'])->name('register');
+        Route::post('register', [UserRegisterController::class, 'store']);
+    });
+});
 
 /*
 |--------------------------------------------------------------------------

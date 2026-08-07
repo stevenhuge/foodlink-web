@@ -441,30 +441,14 @@
             <span class="text-muted small fw-bold">Belum punya akun? Daftar sebagai:</span>
             <div class="d-flex gap-2 w-100 mt-2">
                 <a href="{{ route('mitra.register') }}" class="btn btn-outline-success w-50">Mitra</a>
-                <button type="button" class="btn btn-outline-primary w-50" data-bs-toggle="modal" data-bs-target="#registerUserModal">User Umum</button>
+                <a href="{{ route('user.register') }}" class="btn btn-outline-primary w-50">User Umum</a>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Register User Modal -->
-    <div class="modal fade" id="registerUserModal" tabindex="-1" aria-labelledby="registerUserModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title" id="registerUserModalLabel">Daftar Sebagai User</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center py-4">
-            <img src="{{ asset('images/coming-soon-user.png') }}" alt="Coming Soon" class="img-fluid mb-4" style="max-height: 180px;">
-            <h5 class="fw-bold">Fitur Segera Hadir!</h5>
-            <p class="text-muted mb-4">Pendaftaran untuk pengguna umum (User) sedang dalam tahap pengembangan. Nantikan pembaruan kami selanjutnya!</p>
-            <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Mengerti</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Login Modal -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
