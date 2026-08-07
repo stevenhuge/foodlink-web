@@ -48,7 +48,13 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/chat-ai', function () {
     return view('chat-ai');
 })->name('chat.ai');
+Route::post('/chat-ai/login', [\App\Http\Controllers\AIChatController::class, 'login'])->name('chat.ai.login');
+Route::post('/chat-ai/logout', [\App\Http\Controllers\AIChatController::class, 'logout'])->name('chat.ai.logout');
+
 Route::post('/api/chat', [\App\Http\Controllers\AIChatController::class, 'chat'])->name('api.chat');
+Route::get('/api/chat/sessions', [\App\Http\Controllers\AIChatController::class, 'getSessions'])->name('api.chat.sessions');
+Route::post('/api/chat/sessions', [\App\Http\Controllers\AIChatController::class, 'createSession'])->name('api.chat.sessions.create');
+Route::get('/api/chat/history', [\App\Http\Controllers\AIChatController::class, 'getHistory'])->name('api.chat.history');
 
 /*
 |--------------------------------------------------------------------------
