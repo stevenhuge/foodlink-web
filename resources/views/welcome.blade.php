@@ -691,6 +691,18 @@
 
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if(session('success_register_user'))
+            Swal.fire({
+                title: 'Registrasi Berhasil!',
+                text: '{{ session('success_register_user') }}',
+                icon: 'success',
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#4DB43F'
+            });
+        @endif
+    </script>
 
 </body>
 </html>

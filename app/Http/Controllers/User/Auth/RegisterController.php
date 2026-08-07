@@ -37,6 +37,6 @@ class RegisterController extends Controller
 
         Auth::guard('web')->login($user);
 
-        return redirect()->route('welcome')->with('success', 'Registrasi berhasil. Selamat datang di FoodLink!');
+        return redirect()->route('welcome')->with('success_register_user', 'Akun anda berhasil dibuat, akun bisa digunakan pada fitur ai dan login pada aplikasi mobile yang tersedia.');
     }
 }
