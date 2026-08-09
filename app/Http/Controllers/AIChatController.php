@@ -135,11 +135,20 @@ class AIChatController extends Controller
         $user = $this->getAuthenticatedUser();
         $ip = $request->ip();
         
-        // Rate Limiting
-        $limitKey = $user ? "ai-chat-{$user['type']}-{$user['id']}" : "ai-chat-guest-{$ip}";
-        $maxAttempts = $user ? 50 : 5; // 50 for logged in, 5 for guest per day
+        $userMessage = $request->input('message');
+
+        // Batasan karakter untuk guest
+        if (!$user && mb_strlen($userMessage) > 100) {
+            return response()->json([
+                'success' => false,
+                'reply' => 'Maaf, sebagai Guest Anda dibatasi maksimal 100 karakter per pesan. Silakan login untuk mengirim pesan lebih panjang.'
+            ], 403);
+        }
         
+        // Rate Limiting hanya untuk user yang login
+        $maxAttempts = 50;
         $attempts = 0;
+        
         if ($user) {
             $sessions = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->pluck('id');
             $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
@@ -153,26 +162,11 @@ class AIChatController extends Controller
                     'reply' => 'Maaf, Anda telah mencapai limit chat hari ini. Silakan coba lagi besok.'
                 ], 429);
             }
-        } else {
-            // Gunakan database untuk menghitung guest agar tidak ter-reset oleh file cache ephemeral Vercel
-            $sessions = AiChatSession::where('user_type', 'guest')->where('title', $ip)->pluck('id');
-            $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
-                ->where('role', 'user')
-                ->whereDate('created_at', \Carbon\Carbon::today())
-                ->count();
-                
-            if ($attempts >= $maxAttempts) {
-                return response()->json([
-                    'success' => false,
-                    'reply' => 'Maaf, Anda telah mencapai limit chat hari ini. Silakan coba lagi besok. Login untuk mendapatkan limit lebih besar.'
-                ], 429);
-            }
         }
 
         $apiKey = env('COSMOSHUB_API_KEY');
         $baseUrl = 'https://api.cosmoshub.tech/v1/chat/completions';
         
-        $userMessage = $request->input('message');
         $history = $request->input('history', []);
         $sessionId = $request->input('session_id');
 
@@ -264,11 +258,13 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
                 }
 
                 if (!$user) {
-                    $attempts = RateLimiter::attempts($limitKey);
+                    $attempts = 0;
+                    $remaining = 'Unlimited';
+                    $maxAttempts = 'Unlimited';
                 } else {
                     $attempts++; // Account for the message just saved
+                    $remaining = max(0, $maxAttempts - $attempts);
                 }
-                $remaining = max(0, $maxAttempts - $attempts);
 
                 return response()->json([
                     'success' => true,
@@ -299,21 +295,24 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
     public function getLimitStatus(Request $request)
     {
         $user = $this->getAuthenticatedUser();
-        $ip = $request->ip();
         
-        $limitKey = $user ? "ai-chat-{$user['type']}-{$user['id']}" : "ai-chat-guest-{$ip}";
-        $maxAttempts = $user ? 50 : 5;
-        
-        $attempts = 0;
-        if ($user) {
-            $sessions = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->pluck('id');
-            $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
-                ->where('role', 'user')
-                ->whereDate('created_at', \Carbon\Carbon::today())
-                ->count();
-        } else {
-            $attempts = RateLimiter::attempts($limitKey);
+        if (!$user) {
+            return response()->json([
+                'success' => true,
+                'limit' => [
+                    'max' => 'Unlimited',
+                    'used' => 0,
+                    'remaining' => 'Unlimited'
+                ]
+            ]);
         }
+        
+        $maxAttempts = 50;
+        $sessions = AiChatSession::where('user_id', $user['id'])->where('user_type', $user['type'])->pluck('id');
+        $attempts = AiChatMessage::whereIn('ai_chat_session_id', $sessions)
+            ->where('role', 'user')
+            ->whereDate('created_at', \Carbon\Carbon::today())
+            ->count();
         
         $remaining = max(0, $maxAttempts - $attempts);
         
