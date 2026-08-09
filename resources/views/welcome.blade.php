@@ -31,45 +31,169 @@
             --fl-green-dark: #3aa233;
             --fl-bg: #f5fbf6;
             --fl-muted: #94a3a1;
+
+            /* ---- Motion tokens (tidak mengubah warna, hanya ritme animasi) ---- */
+            --fl-ease: cubic-bezier(0.16, 1, 0.3, 1);      /* expo-out: halus & cinematic */
+            --fl-ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+            --fl-ease-back: cubic-bezier(0.34, 1.4, 0.5, 1); /* sedikit overshoot */
+            --fl-dur: 0.45s;
+            --fl-dur-fast: 0.22s;
+            --fl-dur-slow: 0.7s;
+        }
+
+        /* ============ GLOBAL & TIPOGRAFI ============ */
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 96px; /* offset navbar sticky saat lompat ke anchor */
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--fl-bg);
             color: #0f172a;
+            line-height: 1.65;
+            letter-spacing: -0.011em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-x: clip; /* buang scroll horizontal dari badge-float; aman untuk sticky */
+        }
+
+        h1, h2, h3, h4, h5, h6 { letter-spacing: -0.025em; }
+        .display-4, .display-6 { letter-spacing: -0.035em; }
+        .lead { line-height: 1.7; letter-spacing: -0.006em; }
+        p { letter-spacing: -0.005em; }
+        small, .small { letter-spacing: 0; }
+
+        ::selection { background-color: rgba(77, 180, 63, 0.22); color: #0f172a; }
+
+        :focus-visible {
+            outline: 2px solid var(--fl-green);
+            outline-offset: 3px;
+        }
+
+        img { -webkit-user-drag: none; }
+
+        /* ============ AOS: jarak travel lebih ringan + timing lebih halus ============ */
+        [data-aos="fade-up"]    { transform: translate3d(0, 32px, 0); }
+        [data-aos="fade-down"]  { transform: translate3d(0, -32px, 0); }
+        [data-aos="fade-left"]  { transform: translate3d(44px, 0, 0); }
+        [data-aos="fade-right"] { transform: translate3d(-44px, 0, 0); }
+        [data-aos="zoom-in"]    { transform: scale(0.965); }
+
+        /* Blok besar tidak boleh memantul: pakai kurva expo-out */
+        [data-aos="zoom-in"][data-aos="zoom-in"],
+        [data-aos="fade-left"][data-aos="fade-left"],
+        [data-aos="fade-right"][data-aos="fade-right"] {
+            transition-timing-function: var(--fl-ease);
         }
 
         .text-fl-green { color: var(--fl-green) !important; }
         .bg-fl-green { background-color: var(--fl-green) !important; }
         .bg-fl-green-subtle { background-color: rgba(77, 180, 63, 0.1) !important; }
 
+        /* ============ BUTTONS: mikro-interaksi ============ */
         .btn-fl-primary {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
             background-color: var(--fl-green);
             color: white;
             border: none;
-            padding: 0.75rem 1.25rem;
+            padding: 0.75rem 1.35rem;
             font-weight: 600;
-            border-radius: 0.5rem;
-            transition: all 0.3s;
+            letter-spacing: -0.01em;
+            border-radius: 0.65rem;
+            box-shadow: 0 6px 16px -8px rgba(77, 180, 63, 0.55);
+            transition: transform var(--fl-dur) var(--fl-ease-back),
+                        box-shadow var(--fl-dur) var(--fl-ease),
+                        background-color var(--fl-dur-fast) linear;
         }
-        .btn-fl-primary:hover {
+        /* kilau yang menyapu saat hover */
+        .btn-fl-primary::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(115deg, transparent 28%, rgba(255,255,255,0.26) 47%, transparent 66%);
+            transform: translateX(-130%);
+            transition: transform var(--fl-dur-slow) var(--fl-ease);
+        }
+        .btn-fl-primary:hover::after,
+        .btn-fl-primary:focus-visible::after { transform: translateX(130%); }
+
+        .btn-fl-primary:hover,
+        .btn-fl-primary:focus-visible {
             background-color: var(--fl-green-dark);
             color: white;
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.015);
+            box-shadow: 0 16px 32px -12px rgba(77, 180, 63, 0.7),
+                        0 4px 12px -6px rgba(6, 20, 10, 0.22) !important;
         }
+        .btn-fl-primary:active {
+            transform: translateY(-1px) scale(0.982);
+            transition-duration: 0.09s;
+            box-shadow: 0 6px 14px -9px rgba(77, 180, 63, 0.6) !important;
+        }
+        .btn-fl-primary svg { transition: transform var(--fl-dur) var(--fl-ease-back); }
+        .btn-fl-primary:hover svg { transform: translateX(3px); }
 
         .btn-fl-outline {
+            position: relative;
+            isolation: isolate;
             background-color: transparent;
             border: 1px solid var(--fl-green);
             color: var(--fl-green);
-            padding: 0.75rem 1.25rem;
+            padding: 0.75rem 1.35rem;
             font-weight: 600;
-            border-radius: 0.5rem;
+            letter-spacing: -0.01em;
+            border-radius: 0.65rem;
+            transition: color var(--fl-dur-fast) var(--fl-ease-soft),
+                        transform var(--fl-dur) var(--fl-ease-back),
+                        box-shadow var(--fl-dur) var(--fl-ease);
         }
-        .btn-fl-outline:hover {
+        /* latar hijau yang menyebar dari tengah, bukan berganti seketika */
+        .btn-fl-outline::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: inherit;
             background-color: var(--fl-green);
-            color: white;
+            transform: scale(0.25);
+            opacity: 0;
+            transition: transform var(--fl-dur) var(--fl-ease),
+                        opacity var(--fl-dur-fast) linear;
         }
+        .btn-fl-outline:hover::before,
+        .btn-fl-outline:focus-visible::before { transform: scale(1); opacity: 1; }
+
+        .btn-fl-outline:hover,
+        .btn-fl-outline:focus-visible {
+            background-color: transparent;
+            color: white;
+            transform: translateY(-3px) scale(1.015);
+            box-shadow: 0 16px 32px -14px rgba(77, 180, 63, 0.65) !important;
+        }
+        .btn-fl-outline:active {
+            transform: translateY(-1px) scale(0.982);
+            transition-duration: 0.09s;
+        }
+
+        /* Tombol Play Store (warna asli dipertahankan, hanya gerak) */
+        .btn-success {
+            transition: transform var(--fl-dur) var(--fl-ease-back),
+                        box-shadow var(--fl-dur) var(--fl-ease),
+                        filter var(--fl-dur-fast) linear;
+        }
+        .btn-success:hover {
+            transform: translateY(-3px) scale(1.015);
+            box-shadow: 0 16px 30px -14px rgba(6, 20, 10, 0.45) !important;
+        }
+        .btn-success:active { transform: translateY(-1px) scale(0.985); transition-duration: 0.09s; }
+        .btn-success svg { transition: transform var(--fl-dur) var(--fl-ease-back); }
+        .btn-success:hover svg { transform: translateY(2px); }
 
         .shadow-fl-card {
             box-shadow: 0 10px 30px rgba(6,20,10,0.08);
@@ -82,6 +206,59 @@
         .rounded-5 { border-radius: 1.5rem !important; }
         .rounded-xl-3 { border-radius: 28px !important; }
 
+        /* ============ CARDS: umpan balik hover yang elegan ============ */
+        .card {
+            transition: transform var(--fl-dur-slow) var(--fl-ease),
+                        box-shadow var(--fl-dur-slow) var(--fl-ease);
+            will-change: transform;
+        }
+        #fitur .card:hover,
+        #cara .card:hover,
+        #manfaat .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 55px -24px rgba(6, 20, 10, 0.3),
+                        0 12px 26px -16px rgba(77, 180, 63, 0.3);
+        }
+
+        /* ikon di dalam kartu ikut hidup */
+        #fitur .card .rounded-3,
+        #manfaat .card .rounded-3,
+        #cara .card .rounded-circle,
+        #fitur .bg-white.rounded-4.border .rounded-3 {
+            transition: transform var(--fl-dur) var(--fl-ease-back),
+                        box-shadow var(--fl-dur) var(--fl-ease),
+                        background-color var(--fl-dur) linear;
+        }
+        #fitur .card:hover .rounded-3,
+        #manfaat .card:hover .rounded-3,
+        #fitur .bg-white.rounded-4.border:hover .rounded-3 {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 12px 22px -10px rgba(6, 20, 10, 0.38);
+        }
+        #cara .card:hover .rounded-circle {
+            transform: scale(1.14);
+            box-shadow: 0 12px 22px -10px rgba(77, 180, 63, 0.6);
+        }
+        /* hijau yang sama, hanya sedikit lebih pekat saat hover */
+        #fitur .card:hover .bg-fl-green-subtle,
+        #manfaat .card:hover .bg-fl-green-subtle,
+        #fitur .bg-white.rounded-4.border:hover .bg-fl-green-subtle {
+            background-color: rgba(77, 180, 63, 0.18) !important;
+        }
+
+        /* kartu kecil "Efisiensi Bisnis / Keamanan / Real-time" */
+        #fitur .bg-white.rounded-4.border {
+            transition: transform var(--fl-dur-slow) var(--fl-ease),
+                        box-shadow var(--fl-dur-slow) var(--fl-ease),
+                        border-color var(--fl-dur) linear;
+        }
+        #fitur .bg-white.rounded-4.border:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 22px 40px -22px rgba(6, 20, 10, 0.26);
+            border-color: rgba(77, 180, 63, 0.35) !important;
+        }
+
+        /* ============ PHONE MOCKUP: glow + pantulan cahaya ============ */
         .phone-mockup {
             width: 320px;
             height: 640px;
@@ -92,8 +269,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 30px rgba(6,20,10,0.08);
+            box-shadow: 0 28px 60px -26px rgba(6, 20, 10, 0.45),
+                        0 18px 55px -22px rgba(77, 180, 63, 0.45);
             margin: 0 auto;
+            transition: transform var(--fl-dur-slow) var(--fl-ease),
+                        box-shadow var(--fl-dur-slow) var(--fl-ease);
+        }
+        .phone-mockup:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 44px 80px -30px rgba(6, 20, 10, 0.5),
+                        0 28px 72px -24px rgba(77, 180, 63, 0.6);
         }
         .phone-screen {
             position: absolute;
@@ -103,22 +288,121 @@
             width: 100%;
             height: 100%;
         }
+        /* pantulan cahaya statis di kaca layar */
+        .phone-screen::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                radial-gradient(120% 75% at 18% 0%, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.05) 44%, transparent 70%),
+                linear-gradient(165deg, rgba(255,255,255,0.10) 0%, transparent 38%);
+        }
+        /* kilau yang menyapu layar secara berkala */
+        .phone-screen::before {
+            content: "";
+            position: absolute;
+            top: -60%;
+            left: -45%;
+            width: 45%;
+            height: 220%;
+            z-index: 3;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent);
+            transform: rotate(18deg) translateX(-180%);
+            animation: flScreenSheen 7s var(--fl-ease-soft) infinite;
+        }
+        @keyframes flScreenSheen {
+            0%, 64%  { transform: rotate(18deg) translateX(-180%); opacity: 0; }
+            70%      { opacity: 0.9; }
+            100%     { transform: rotate(18deg) translateX(300%); opacity: 0; }
+        }
 
+        /* ============ BADGE FLOAT: bobbing dinamis ============ */
         .badge-float {
             position: absolute;
             background: white;
             padding: 0.75rem 1rem;
             border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 14px 28px -12px rgba(0, 0, 0, 0.22);
             display: flex;
             align-items: center;
             gap: 0.75rem;
             z-index: 20;
             max-width: 200px;
+            animation: flBob 5.4s ease-in-out infinite;
+            will-change: transform;
+            transition: box-shadow var(--fl-dur) var(--fl-ease);
+        }
+        .badge-float:nth-of-type(2) {
+            animation-duration: 6.9s;
+            animation-delay: -2.6s; /* desinkron sejak awal */
+        }
+        .badge-float:hover { box-shadow: 0 20px 38px -14px rgba(6, 20, 10, 0.3); }
+        @keyframes flBob {
+            0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+            50%      { transform: translate3d(0, -12px, 0) rotate(-1.2deg); }
         }
 
+        /* ============ GRADIENT BANNER ============ */
         .gradient-banner {
             background: linear-gradient(to right, #eaf9ec, #f6fff7);
+            background-size: 220% 100%;
+            animation: flGradientDrift 16s ease-in-out infinite alternate;
+        }
+        @keyframes flGradientDrift {
+            from { background-position: 0% 50%; }
+            to   { background-position: 100% 50%; }
+        }
+        .gradient-banner .badge {
+            transition: transform var(--fl-dur) var(--fl-ease-back),
+                        box-shadow var(--fl-dur) var(--fl-ease);
+        }
+        .gradient-banner .badge:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 22px -12px rgba(6, 20, 10, 0.32);
+        }
+        /* motif ekonomi sirkular: ikon ⟳ berputar pelan */
+        .gradient-banner .rounded-circle .rounded-circle {
+            animation: flSpin 18s linear infinite;
+        }
+        @keyframes flSpin { to { transform: rotate(360deg); } }
+
+        /* ============ BLOK DAMPAK (hijau) ============ */
+        #manfaat .bg-fl-green.text-white {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+        }
+        #manfaat .bg-fl-green.text-white::after {
+            content: "";
+            position: absolute;
+            inset: -35%;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.20), transparent 55%);
+            animation: flGlowDrift 18s ease-in-out infinite alternate;
+        }
+        @keyframes flGlowDrift {
+            from { transform: translate3d(-4%, -3%, 0); }
+            to   { transform: translate3d(6%, 5%, 0); }
+        }
+
+        /* ============ TIM ============ */
+        .rounded-circle.overflow-hidden.shadow-fl-soft {
+            transition: transform var(--fl-dur-slow) var(--fl-ease),
+                        box-shadow var(--fl-dur-slow) var(--fl-ease);
+        }
+        .rounded-circle.overflow-hidden.shadow-fl-soft img {
+            transition: transform 0.85s var(--fl-ease);
+        }
+        .d-inline-block.position-relative:hover > .rounded-circle.overflow-hidden.shadow-fl-soft {
+            transform: translateY(-6px) scale(1.04);
+            box-shadow: 0 28px 48px -20px rgba(21, 66, 30, 0.35);
+        }
+        .d-inline-block.position-relative:hover > .rounded-circle.overflow-hidden.shadow-fl-soft img {
+            transform: scale(1.08);
         }
 
         footer {
@@ -126,8 +410,73 @@
             border-top-left-radius: 1.5rem;
             border-top-right-radius: 1.5rem;
         }
+        footer a {
+            display: inline-block;
+            transition: color var(--fl-dur-fast) var(--fl-ease-soft),
+                        transform var(--fl-dur) var(--fl-ease);
+        }
+        footer a:hover {
+            color: #ffffff !important;
+            transform: translateX(5px);
+        }
 
-        /* AI Chat Widget Button */
+        /* ============ NAVBAR ============ */
+        .navbar-sticky-custom {
+            box-shadow: 0 1px 0 rgba(6, 20, 10, 0.05);
+            transition: box-shadow var(--fl-dur-slow) var(--fl-ease);
+        }
+        /* elevasi bayangan mengikuti scroll — murni CSS, tanpa JS */
+        @supports (animation-timeline: scroll()) {
+            .navbar-sticky-custom {
+                animation: flNavElevate linear both;
+                animation-timeline: scroll(root block);
+                animation-range: 0 140px;
+            }
+        }
+        @keyframes flNavElevate {
+            from { box-shadow: 0 1px 0 rgba(6, 20, 10, 0.05); }
+            to   { box-shadow: 0 12px 30px -14px rgba(6, 20, 10, 0.25); }
+        }
+
+        .navbar-brand { transition: transform var(--fl-dur) var(--fl-ease); }
+        .navbar-brand:hover { transform: translateY(-1px); }
+        .navbar-brand img { transition: transform var(--fl-dur-slow) var(--fl-ease-back); }
+        .navbar-brand:hover img { transform: scale(1.07) rotate(-4deg); }
+
+        .navbar-nav .nav-link {
+            position: relative;
+            transition: color var(--fl-dur-fast) var(--fl-ease-soft);
+        }
+        .navbar-nav .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0.5rem;
+            right: 0.5rem;
+            bottom: 0.15rem;
+            height: 2px;
+            border-radius: 2px;
+            background-color: var(--fl-green);
+            transform: scaleX(0);
+            transform-origin: right center;
+            transition: transform var(--fl-dur) var(--fl-ease);
+        }
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link:focus-visible::after {
+            transform: scaleX(1);
+            transform-origin: left center;
+        }
+        .navbar-nav .nav-link.hover-dark:hover,
+        .navbar-nav .nav-link.hover-dark:focus-visible { color: #0f172a !important; }
+
+        /* ============ MODAL ============ */
+        .modal.fade .modal-dialog {
+            transform: translateY(26px) scale(0.96);
+            transition: transform var(--fl-dur) var(--fl-ease),
+                        opacity var(--fl-dur) var(--fl-ease);
+        }
+        .modal.show .modal-dialog { transform: none; }
+
+        /* ============ AI Chat Widget Button ============ */
         .chat-widget-btn {
             position: fixed;
             bottom: 24px;
@@ -137,18 +486,51 @@
             border-radius: 50%;
             background-color: var(--fl-green);
             color: white;
-            box-shadow: 0 4px 12px rgba(77, 180, 63, 0.3);
+            box-shadow: 0 10px 24px -8px rgba(77, 180, 63, 0.55);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: transform var(--fl-dur) var(--fl-ease-back),
+                        box-shadow var(--fl-dur) var(--fl-ease),
+                        background-color var(--fl-dur-fast) linear;
         }
+        /* denyut halus saat idle */
+        .chat-widget-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: 50%;
+            background-color: var(--fl-green);
+            animation: flChatPulse 2.8s var(--fl-ease-soft) infinite;
+        }
+        @keyframes flChatPulse {
+            0%   { transform: scale(1); opacity: 0.45; }
+            70%  { transform: scale(1.8); opacity: 0; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+        .chat-widget-btn svg { transition: transform var(--fl-dur) var(--fl-ease-back); }
         .chat-widget-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-3px) scale(1.08);
             background-color: var(--fl-green-dark);
             color: white;
+            box-shadow: 0 20px 38px -10px rgba(77, 180, 63, 0.7);
+        }
+        .chat-widget-btn:hover::before { opacity: 0; animation-play-state: paused; }
+        .chat-widget-btn:hover svg { transform: rotate(-12deg) scale(1.1); }
+        .chat-widget-btn:active { transform: translateY(-1px) scale(0.96); transition-duration: 0.09s; }
+
+        /* ============ AKSESIBILITAS: hormati preferensi reduced motion ============ */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
         }
     </style>
     <link href="{{ asset('css/page-transitions.css') }}" rel="stylesheet">
@@ -199,21 +581,21 @@
         <header class="mt-5">
             <div class="row align-items-center gy-5">
 
-                <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
-                    <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-1 rounded-pill small fw-medium w-auto mb-3">
+                <div class="col-lg-6">
+                    <div class="d-inline-flex align-items-center gap-2 bg-fl-green-subtle text-fl-green px-3 py-1 rounded-pill small fw-medium w-auto mb-3" data-aos="fade-up" data-aos-delay="0">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M12 2v20"/></svg>
                         Ekosistem Ekonomi Sirkular
                     </div>
 
-                    <h1 class="display-4 fw-bolder lh-1 mb-4">
+                    <h1 class="display-4 fw-bolder lh-1 mb-4" data-aos="fade-up" data-aos-delay="100">
                         Ubah <span class="text-fl-green">Limbah</span><br class="d-none d-md-block" /> Makanan Jadi <span class="text-fl-green">Peluang Bisnis</span>
                     </h1>
 
-                    <p class="lead text-secondary mb-4" style="max-width: 550px;">
+                    <p class="lead text-secondary mb-4" style="max-width: 550px;" data-aos="fade-up" data-aos-delay="200">
                         FoodLink adalah platform inovatif yang menghubungkan bisnis dan konsumen dalam ekosistem sirkular untuk mengurangi pemborosan makanan melalui <strong>Jual-Cepat</strong>, <strong>Donasi</strong>, dan <strong>Barter B2B</strong>.
                     </p>
 
-                    <div class="d-flex flex-wrap gap-3 mb-5">
+                    <div class="d-flex flex-wrap gap-3 mb-5" data-aos="fade-up" data-aos-delay="300">
                         <a href="#cta" class="btn btn-fl-primary d-inline-flex align-items-center gap-2 shadow-fl-soft">
                             Mulai Sekarang
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -222,22 +604,22 @@
                     </div>
 
                     <div class="d-flex align-items-center gap-5">
-                        <div class="text-center">
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="400">
                             <div class="h3 fw-bolder text-fl-green mb-0">100+</div>
                             <small class="text-muted">Mitra Aktif</small>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="450">
                             <div class="h3 fw-bolder text-fl-green mb-0">1 Ton+</div>
                             <small class="text-muted">Makanan Diselamatkan</small>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="500">
                             <div class="h3 fw-bolder text-fl-green mb-0">100+</div>
                             <small class="text-muted">Kota Terjangkau</small>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+                <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end" data-aos="fade-left" data-aos-duration="1100" data-aos-delay="250">
                     <div class="phone-mockup me-lg-4">
                         <picture class="phone-screen">
                             <img src="https://i.ibb.co.com/nNq2SNHK/selamat-datang-foodlink.png" alt="App Preview" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
@@ -271,7 +653,7 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex align-items-start gap-3">
                             <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 text-white" style="width: 48px; height: 48px; background: linear-gradient(to top right, #fbbf24, #fb923c);">⚡</div>
@@ -283,7 +665,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="120">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex align-items-start gap-3">
                             <div class="rounded-3 bg-danger bg-opacity-75 d-flex align-items-center justify-content-center flex-shrink-0 text-white" style="width: 48px; height: 48px;">❤</div>
@@ -295,7 +677,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="240">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex align-items-start gap-3">
                             <div class="rounded-3 bg-fl-green d-flex align-items-center justify-content-center flex-shrink-0 text-white" style="width: 48px; height: 48px;">⟳</div>
@@ -309,7 +691,7 @@
             </div>
 
             <div class="row g-3 mt-4">
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="bg-white rounded-4 border p-3 d-flex align-items-center gap-3">
                         <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">↑</div>
                         <div class="lh-sm">
@@ -318,7 +700,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="bg-white rounded-4 border p-3 d-flex align-items-center gap-3">
                         <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">🔒</div>
                         <div class="lh-sm">
@@ -327,7 +709,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="bg-white rounded-4 border p-3 d-flex align-items-center gap-3">
                         <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">⏱️</div>
                         <div class="lh-sm">
@@ -347,28 +729,28 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="0">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">01</div>
                         <h3 class="h6 fw-bold mt-3">Daftar Bisnis</h3>
                         <p class="small text-secondary mt-2 mb-0">Kafe, restoran, toko kelontong—siapa saja dapat bergabung sebagai mitra FoodLink.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="110">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">02</div>
                         <h3 class="h6 fw-bold mt-3">Upload Surplus</h3>
                         <p class="small text-secondary mt-2 mb-0">Masukkan kelebihan stok makanan, tentukan Jual-Cepat / Donasi / Barter.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="220">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">03</div>
                         <h3 class="h6 fw-bold mt-3">Match & Connect</h3>
                         <p class="small text-secondary mt-2 mb-0">Sistem AI mencocokkan kebutuhan antar mitra — tukar kue dengan sayuran.</p>
                     </div>
                 </div>
-                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
+                <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="330">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="rounded-circle bg-fl-green text-white fw-bold d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">04</div>
                         <h3 class="h6 fw-bold mt-3">Selesai!</h3>
@@ -406,7 +788,7 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex gap-3">
                             <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">💼</div>
@@ -417,7 +799,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="120">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex gap-3">
                             <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">📊</div>
@@ -428,7 +810,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="240">
                     <div class="card h-100 border-0 shadow-fl-card rounded-4 p-4">
                         <div class="d-flex gap-3">
                             <div class="rounded-3 bg-fl-green-subtle text-fl-green d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">🌐</div>
@@ -446,19 +828,19 @@
                 <p class="small opacity-75 mx-auto" style="max-width: 600px;">Bersama-sama kita menciptakan perubahan yang berarti</p>
 
                 <div class="row justify-content-center mt-5 gy-4">
-                    <div class="col-md-3">
+                    <div class="col-md-3" data-aos="fade-up" data-aos-delay="0">
                         <div class="display-6 fw-bold">{{ number_format($mitraCount ?? 0) }}</div>
                         <div class="small">Restoran & Kafe</div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3" data-aos="fade-up" data-aos-delay="90">
                         <div class="display-6 fw-bold">{{ number_format($userCount ?? 0) }}</div>
                         <div class="small">Pengguna Aktif</div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3" data-aos="fade-up" data-aos-delay="180">
                         <div class="display-6 fw-bold">{{ number_format($makananDiselamatkan ?? 0) }}</div>
                         <div class="small">Makanan Diselamatkan</div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3" data-aos="fade-up" data-aos-delay="270">
                         <div class="display-6 fw-bold">{{ number_format($visitorCount ?? 0) }}</div>
                         <div class="small">Total Pengunjung</div>
                         @if(isset($dbError) && $dbError)
@@ -473,7 +855,7 @@
 
         <section class="mt-5 rounded-4 bg-white p-5 shadow-sm border" data-aos="fade-up" data-aos-duration="1200">
             <div class="row align-items-center">
-                <div class="col-md-6 mb-4 mb-md-0">
+                <div class="col-md-6 mb-4 mb-md-0" data-aos="fade-right" data-aos-delay="100">
                     <div class="small text-fl-green fw-bold">Tersedia di Android & iOS</div>
                     <h2 class="display-6 fw-bolder mt-2">Mulai Kurangi <span class="text-fl-green">Limbah Makanan</span> Hari Ini</h2>
                     <p class="text-secondary mt-3">Bergabung dengan ribuan mitra bisnis dan konsumen yang sudah merasakan manfaat ekosistem FoodLink</p>
@@ -494,7 +876,7 @@
                     <div class="small text-secondary mt-4">10,000+ Pengguna bergabung bulan ini</div>
                 </div>
 
-                <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end">
+                <div class="col-lg-5 d-flex justify-content-center justify-content-lg-end" data-aos="fade-left" data-aos-delay="250">
                     <div class="phone-mockup me-lg-4">
                         <picture class="phone-screen">
                             <img src="https://i.ibb.co.com/8n9VvhQw/Screenshot-2025-12-08-014225.png" alt="App Preview" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
@@ -504,7 +886,7 @@
             </div>
         </section>
 
-        <div class="text-center mt-5 mb-5">
+        <div class="text-center mt-5 mb-5" data-aos="zoom-in" data-aos-delay="50">
             <a id="cta" href="{{ route('mitra.login') }}" class="btn btn-fl-outline rounded-pill px-4 py-3">Daftar Sebagai Mitra →</a>
         </div>
 
@@ -519,7 +901,7 @@
 
             <div class="row g-4 justify-content-center">
                 @foreach($anggotaTim as $anggota)
-                <div class="col-6 col-md-4 col-lg-3 text-center" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
+                <div class="col-6 col-md-4 col-lg-3 text-center" data-aos="fade-up" data-aos-delay="{{ (($loop->iteration - 1) % 4) * 90 }}">
                     <div class="mb-3 d-inline-block position-relative">
                         <div class="rounded-circle overflow-hidden shadow-fl-soft" style="width: 150px; height: 150px; border: 4px solid white; background-color: var(--fl-bg);">
                             @if($anggota->foto_url)
@@ -649,9 +1031,17 @@
             // Initialize AOS
             AOS.init({
                 once: true,
-                offset: 50,
-                duration: 800,
-                easing: 'ease-out-cubic'
+                mirror: false,
+                offset: 80,
+                duration: 900,
+                delay: 0,
+                easing: 'ease-out-back',
+                anchorPlacement: 'top-bottom'
+            });
+
+            // Hitung ulang posisi setelah gambar (lazy) selesai dimuat agar trigger tetap akurat
+            window.addEventListener('load', function () {
+                AOS.refresh();
             });
 
             // ✅ Fix Download
