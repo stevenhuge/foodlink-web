@@ -184,4 +184,27 @@ class ProdukController extends Controller
 
         return redirect()->route('mitra.produk.index')->with('success', 'Produk berhasil ditarik (draft).');
     }
+
+    /**
+     * Tampilkan gambar produk tanpa membebani HTML payload
+     */
+    public function displayImage($id)
+    {
+        $produk = Produk::findOrFail($id);
+
+        if (str_starts_with($produk->foto_produk, 'data:image')) {
+            preg_match('/data:image\/(.*?);base64,(.*)/', $produk->foto_produk, $matches);
+            if (count($matches) == 3) {
+                $mime = 'image/' . $matches[1];
+                $data = base64_decode($matches[2]);
+                return response($data)->header('Content-Type', $mime)->header('Cache-Control', 'max-age=86400');
+            }
+        }
+
+        if ($produk->foto_produk) {
+            return redirect(\Illuminate\Support\Facades\Storage::url($produk->foto_produk));
+        }
+
+        abort(404);
+    }
 }

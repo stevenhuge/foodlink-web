@@ -39,7 +39,7 @@
                         <tr class="@if($produk->status_produk == 'Ditarik') table-active bg-opacity-10 @endif">
                             <td class="ps-4 py-3 border-bottom">
                                 @if($produk->foto_produk)
-                                    <img src="{{ str_starts_with($produk->foto_produk, 'data:image') ? $produk->foto_produk : Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}"
+                                    <img src="{{ route('mitra.produk.image', $produk->id) }}" alt="{{ $produk->nama_produk }}"
                                         class="rounded img-fluid border" style="width: 56px; height: 56px; object-fit: cover;">
                                 @else
                                     <div class="rounded bg-light border d-flex align-items-center justify-content-center text-muted border-secondary-subtle" style="width: 56px; height: 56px;">

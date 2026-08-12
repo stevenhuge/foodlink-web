@@ -196,7 +196,8 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
         // Manajemen Produk
         Route::resource('produk', ProdukController::class);
         Route::patch('produk/{produk}/publish', [ProdukController::class, 'publish'])->name('produk.publish');
-        Route::patch('produk/{produk}/unpublish', [ProdukController::class, 'unpublish'])->name('produk.unpublish');
+        Route::post('produk/{produk}/unpublish', [ProdukController::class, 'unpublish'])->name('produk.unpublish');
+        Route::get('produk/{id}/image', [ProdukController::class, 'displayImage'])->name('produk.image');
 
         // Barter
         Route::prefix('barter')->name('barter.')->group(function () {
