@@ -101,6 +101,7 @@
 </div>
 
 <!-- Modal Container -->
+@push('modals')
 @foreach($logs as $log)
     @if($log->payload)
     <div class="modal fade text-start" id="payloadModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
@@ -118,5 +119,6 @@
     </div>
     @endif
 @endforeach
+@endpush
 
 @endsection
