@@ -47,6 +47,9 @@ use App\Http\Controllers\User\Auth\RegisterController as UserRegisterController;
 */
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
+// Rute Publik untuk Gambar
+Route::get('mitra/{id}/logo', [\App\Http\Controllers\Mitra\ProfileController::class, 'publicLogo'])->name('mitra.logo.public');
+
 // Rute AI Chat (Frontend)
 Route::get('/chat-ai', function () {
     return view('chat-ai');

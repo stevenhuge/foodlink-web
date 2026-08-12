@@ -107,4 +107,26 @@ class ProfileController extends Controller
 
         return redirect(\Illuminate\Support\Facades\Storage::url($mitra->logo_mitra));
     }
+
+    /**
+     * Menampilkan logo mitra (Publik untuk API/Android)
+     */
+    public function publicLogo($id)
+    {
+        $mitra = \App\Models\Mitra::findOrFail($id);
+        if (!$mitra->logo_mitra) {
+            abort(404);
+        }
+
+        if (str_starts_with($mitra->logo_mitra, 'data:image')) {
+            preg_match('/data:image\/(.*?);base64,(.*)/', $mitra->logo_mitra, $matches);
+            if (count($matches) == 3) {
+                $mime = 'image/' . $matches[1];
+                $data = base64_decode($matches[2]);
+                return response($data)->header('Content-Type', $mime)->header('Cache-Control', 'max-age=86400');
+            }
+        }
+
+        return redirect(\Illuminate\Support\Facades\Storage::url($mitra->logo_mitra));
+    }
 }
