@@ -39,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role.admin' => \App\Http\Middleware\RoleMiddleware::class,
             'mitra.active' => \App\Http\Middleware\EnsureMitraIsActive::class, // <-- TAMBAHKAN INI
+            'audit' => \App\Http\Middleware\AuditTrailMiddleware::class,
         ]);
         // ------------------------------------
 

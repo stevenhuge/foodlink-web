@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\PenyanggahanController;
 use App\Http\Controllers\SuperAdmin\PemasukanController as SuperPemasukanController;
 use App\Http\Controllers\SuperAdmin\RekeningBankController as SuperRekeningController;
 use App\Http\Controllers\SuperAdmin\ReviewPenarikanController;
+use App\Http\Controllers\SuperAdmin\AuditLogController;
 
 // --- CONTROLLER MITRA ---
 use App\Http\Controllers\Mitra\Auth\RegisterController;
@@ -81,7 +82,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     // 2. Rute Terproteksi (Sudah Login)
-    Route::middleware('auth:admin')->group(function () {
+    Route::middleware(['auth:admin', 'audit'])->group(function () {
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
         // Dashboard
@@ -110,6 +111,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
             // Anggota Tim (Dinamic Section Home)
             Route::resource('anggota-tim', \App\Http\Controllers\SuperAdmin\AnggotaTimController::class)->except(['show']);
+
+            // Log Aktivitas / Audit Trail
+            Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
         });
 
         // --- ADMIN & SUPER ADMIN (BISA AKSES SEMUA INI) ---

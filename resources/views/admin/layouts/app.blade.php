@@ -283,6 +283,15 @@
                                 </div>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}"
+                               href="{{ route('admin.audit-logs.index') }}">
+                                <div>
+                                    <i class="fas fa-history icon-left"></i> Log Aktivitas
+                                </div>
+                            </a>
+                        </li>
                         @endif
                     </ul>
                 </div>

@@ -47,7 +47,11 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         @if($m->logo_mitra)
-                                            <img src="{{ asset($m->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px;">
+                                            @if(str_starts_with($m->logo_mitra, 'data:image'))
+                                                <img src="{{ $m->logo_mitra }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px;">
+                                            @else
+                                                <img src="{{ asset($m->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px;">
+                                            @endif
                                         @else
                                             <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm text-white" style="width: 36px; height: 36px; background-color: #4DB43F; font-size: 0.9rem;">
                                                 {{ substr($m->nama_mitra, 0, 1) }}
