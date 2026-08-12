@@ -49,6 +49,7 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 // Rute Publik untuk Gambar
 Route::get('mitra/{id}/logo', [\App\Http\Controllers\Mitra\ProfileController::class, 'publicLogo'])->name('mitra.logo.public');
+Route::get('mitra/produk/{id}/image', [\App\Http\Controllers\Mitra\ProdukController::class, 'displayImage'])->name('mitra.produk.image');
 
 // Rute AI Chat (Frontend)
 Route::get('/chat-ai', function () {
@@ -200,7 +201,6 @@ Route::prefix('mitra')->name('mitra.')->group(function () {
         Route::resource('produk', ProdukController::class);
         Route::patch('produk/{produk}/publish', [ProdukController::class, 'publish'])->name('produk.publish');
         Route::post('produk/{produk}/unpublish', [ProdukController::class, 'unpublish'])->name('produk.unpublish');
-        Route::get('produk/{id}/image', [ProdukController::class, 'displayImage'])->name('produk.image');
 
         // Barter
         Route::prefix('barter')->name('barter.')->group(function () {
