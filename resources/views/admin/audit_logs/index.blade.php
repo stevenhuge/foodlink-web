@@ -78,21 +78,6 @@
                                 <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#payloadModal{{ $log->id }}">
                                     <i class="fas fa-code me-1"></i> Lihat Data
                                 </button>
-                                
-                                <!-- Modal -->
-                                <div class="modal fade text-start" id="payloadModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Detail Payload</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body bg-light">
-                                                <pre class="mb-0 text-dark" style="white-space: pre-wrap; word-wrap: break-word;"><code>{{ json_encode($log->payload, JSON_PRETTY_PRINT) }}</code></pre>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             @else
                                 <span class="text-muted small">-</span>
                             @endif
@@ -114,4 +99,24 @@
     </div>
     @endif
 </div>
+
+<!-- Modal Container -->
+@foreach($logs as $log)
+    @if($log->payload)
+    <div class="modal fade text-start" id="payloadModal{{ $log->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Payload</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <pre class="mb-0 text-dark" style="white-space: pre-wrap; word-wrap: break-word;"><code>{{ json_encode($log->payload, JSON_PRETTY_PRINT) }}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
+
 @endsection

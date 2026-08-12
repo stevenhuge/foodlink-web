@@ -32,8 +32,11 @@
         .sidebar {
             background: var(--sidebar-bg);
             color: var(--sidebar-text);
-            min-height: 100vh;
-            border-right: 1px solid rgba(77, 180, 63, 0.15); /* Halus bercorak hijau */
+            height: 100vh;
+            overflow-y: auto;
+            position: sticky;
+            top: 0;
+            border-right: 1px solid rgba(77, 180, 63, 0.15);
             z-index: 1020;
             box-shadow: 2px 0 10px rgba(77, 180, 63, 0.03);
         }
