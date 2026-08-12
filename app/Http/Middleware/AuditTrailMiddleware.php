@@ -41,12 +41,12 @@ class AuditTrailMiddleware
                 // atau 'sanctum' / 'api' jika token-based. Kita cek keduanya.
                 $user = Auth::guard('web')->user();
                 $userType = 'User';
-                $userId = $user->id; // Sesuaikan dengan primary key user
+                $userId = $user->user_id ?? $user->id; // Menggunakan user_id
                 $userName = $user->nama_lengkap ?? $user->name ?? 'User';
             } elseif (Auth::guard('sanctum')->check()) {
                 $user = Auth::guard('sanctum')->user();
                 $userType = 'User (API)';
-                $userId = $user->id; // Sesuaikan dengan primary key user
+                $userId = $user->user_id ?? $user->id; // Menggunakan user_id
                 $userName = $user->nama_lengkap ?? $user->name ?? 'User';
             }
 
