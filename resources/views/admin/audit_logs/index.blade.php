@@ -16,13 +16,20 @@
         
         <!-- Filter dan Pencarian -->
         <form action="{{ route('admin.audit-logs.index') }}" method="GET" class="d-flex gap-2">
+            <select name="user_type" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">Semua User</option>
+                <option value="Admin" {{ request('user_type') == 'Admin' ? 'selected' : '' }}>Admin / SuperAdmin</option>
+                <option value="Mitra" {{ request('user_type') == 'Mitra' ? 'selected' : '' }}>Mitra</option>
+                <option value="User" {{ request('user_type') == 'User' ? 'selected' : '' }}>User (Pembeli)</option>
+                <option value="Guest/System" {{ request('user_type') == 'Guest/System' ? 'selected' : '' }}>Guest / Sistem</option>
+            </select>
             <select name="method" class="form-select form-select-sm" onchange="this.form.submit()">
                 <option value="">Semua Method</option>
                 <option value="POST" {{ request('method') == 'POST' ? 'selected' : '' }}>POST (Tambah)</option>
                 <option value="PUT" {{ request('method') == 'PUT' ? 'selected' : '' }}>PUT/PATCH (Edit)</option>
                 <option value="DELETE" {{ request('method') == 'DELETE' ? 'selected' : '' }}>DELETE (Hapus)</option>
             </select>
-            <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari admin atau URL..." value="{{ request('search') }}">
+            <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama atau URL..." value="{{ request('search') }}">
             <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
         </form>
     </div>
@@ -47,7 +54,8 @@
                             <small class="text-muted">{{ $log->created_at->format('H:i:s') }}</small>
                         </td>
                         <td>
-                            <div class="fw-bold text-dark">{{ $log->admin_name ?? 'Sistem' }}</div>
+                            <div class="fw-bold text-dark">{{ $log->user_name ?? 'Guest' }}</div>
+                            <span class="badge bg-secondary mb-1" style="font-size: 0.7rem;">{{ $log->user_type }}</span><br>
                             <small class="text-muted">IP: {{ $log->ip_address }}</small>
                         </td>
                         <td>

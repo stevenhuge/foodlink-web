@@ -22,30 +22,54 @@ class AuditTrailMiddleware
         // Hanya catat metode yang mengubah data
         if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             
-            // Periksa apakah user login sebagai admin atau superadmin
+            $userType = 'Guest/System';
+            $userId = null;
+            $userName = null;
+
             if (Auth::guard('admin')->check()) {
-                $admin = Auth::guard('admin')->user();
-                
-                // Ambil data payload kecuali field sensitif seperti password
-                $payload = $request->except(['password', 'password_confirmation', 'current_password', 'new_password']);
-
-                // Filter juga payload besar jika perlu, atau base64 gambar
-                foreach ($payload as $key => $value) {
-                    if (is_string($value) && str_starts_with($value, 'data:image')) {
-                        $payload[$key] = '[BASE64_IMAGE_DATA]';
-                    }
-                }
-
-                AuditLog::create([
-                    'admin_id' => $admin->admin_id,
-                    'admin_name' => $admin->nama_lengkap . ' (' . $admin->role . ')',
-                    'action' => $this->getActionName($request),
-                    'method' => $request->method(),
-                    'route_url' => $request->fullUrl(),
-                    'payload' => $payload,
-                    'ip_address' => $request->ip(),
-                ]);
+                $user = Auth::guard('admin')->user();
+                $userType = 'Admin';
+                $userId = $user->admin_id;
+                $userName = $user->nama_lengkap . ' (' . $user->role . ')';
+            } elseif (Auth::guard('mitra')->check()) {
+                $user = Auth::guard('mitra')->user();
+                $userType = 'Mitra';
+                $userId = $user->mitra_id;
+                $userName = $user->nama_mitra;
+            } elseif (Auth::guard('web')->check()) {
+                // Asumsi guard 'web' untuk user Android/umum jika session-based, 
+                // atau 'sanctum' / 'api' jika token-based. Kita cek keduanya.
+                $user = Auth::guard('web')->user();
+                $userType = 'User';
+                $userId = $user->id; // Sesuaikan dengan primary key user
+                $userName = $user->nama_lengkap ?? $user->name ?? 'User';
+            } elseif (Auth::guard('sanctum')->check()) {
+                $user = Auth::guard('sanctum')->user();
+                $userType = 'User (API)';
+                $userId = $user->id; // Sesuaikan dengan primary key user
+                $userName = $user->nama_lengkap ?? $user->name ?? 'User';
             }
+
+            // Ambil data payload kecuali field sensitif seperti password
+            $payload = $request->except(['password', 'password_confirmation', 'current_password', 'new_password']);
+
+            // Filter juga payload besar jika perlu, atau base64 gambar
+            foreach ($payload as $key => $value) {
+                if (is_string($value) && str_starts_with($value, 'data:image')) {
+                    $payload[$key] = '[BASE64_IMAGE_DATA]';
+                }
+            }
+
+            AuditLog::create([
+                'user_type' => $userType,
+                'user_id' => $userId,
+                'user_name' => $userName,
+                'action' => $this->getActionName($request),
+                'method' => $request->method(),
+                'route_url' => $request->fullUrl(),
+                'payload' => $payload,
+                'ip_address' => $request->ip(),
+            ]);
         }
 
         return $response;

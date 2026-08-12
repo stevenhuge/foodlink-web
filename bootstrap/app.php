@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        
+        // --- Global Middleware ---
+        $middleware->append(\App\Http\Middleware\AuditTrailMiddleware::class);
 
         // --- Redirect Logic ---
         $middleware->redirectGuestsTo(function (Request $request) {

@@ -82,7 +82,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     // 2. Rute Terproteksi (Sudah Login)
-    Route::middleware(['auth:admin', 'audit'])->group(function () {
+    Route::middleware('auth:admin')->group(function () {
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
         // Dashboard

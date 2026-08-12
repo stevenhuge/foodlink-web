@@ -10,8 +10,9 @@ class AuditLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'admin_id',
-        'admin_name',
+        'user_type',
+        'user_id',
+        'user_name',
         'action',
         'method',
         'route_url',
@@ -22,9 +23,4 @@ class AuditLog extends Model
     protected $casts = [
         'payload' => 'array',
     ];
-
-    public function admin()
-    {
-        return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
-    }
 }
