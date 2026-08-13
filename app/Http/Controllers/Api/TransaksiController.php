@@ -42,8 +42,11 @@ class TransaksiController extends Controller
                 throw new \Exception("Produk harus dari satu Mitra yang sama.");
             }
 
-            // Gunakan harga_diskon jika > 0, fallback ke harga_asli
-            $hargaSatuan = ($produk->harga_diskon > 0) ? $produk->harga_diskon : $produk->harga_asli;
+            // Perbaikan: Harga dihitung sepenuhnya di sisi server.
+            // Memprioritaskan harga_diskon (jika ada dan > 0), jika tidak, gunakan harga_normal.
+            // Menggunakan Null Coalescing & Type Casting agar memastikan nilainya float dan 0 diizinkan.
+            $hargaSatuan = ($produk->harga_diskon > 0) ? (float) $produk->harga_diskon : (float) ($produk->harga_normal ?? 0);
+            
             $totalHargaProduk += ($hargaSatuan * $item['jumlah']);
 
             $itemsToProcess[] = [
