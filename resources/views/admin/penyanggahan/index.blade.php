@@ -108,7 +108,7 @@
                                             @foreach($item->bukti_files as $file)
                                                 @php
                                                     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                                    $fileUrl = 'https://ekmyendwvrkxagmhobes.supabase.co/storage/v1/object/public/foodlink_bucket/' . $file;
+                                                    $fileUrl = 'https://jrufoexylmmpxqqrtdsa.supabase.co/storage/v1/object/public/foodlink_bucket/' . $file;
                                                 @endphp
 
                                                 <div class="col-md-4 col-sm-6">
