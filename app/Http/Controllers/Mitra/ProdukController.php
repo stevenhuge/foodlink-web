@@ -77,9 +77,8 @@ class ProdukController extends Controller
         ]);
 
         if ($request->hasFile('foto_produk')) {
-            $file = $request->file('foto_produk');
-            $base64 = 'data:image/' . $file->getClientOriginalExtension() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
-            $dataToSave['foto_produk'] = $base64;
+            $path = $request->file('foto_produk')->store('produk');
+            $dataToSave['foto_produk'] = $path;
         }
 
         Produk::create($dataToSave);
@@ -132,14 +131,13 @@ class ProdukController extends Controller
 
         // Logika Update Foto
         if ($request->hasFile('foto_produk')) {
-            // Hapus file lama di storage lokal JIKA formatnya BUKAN base64
+            // Hapus file lama di storage JIKA formatnya BUKAN base64
             if ($produk->foto_produk && !str_starts_with($produk->foto_produk, 'data:image')) {
-                Storage::disk('public')->delete($produk->foto_produk);
+                Storage::delete($produk->foto_produk);
             }
             
-            $file = $request->file('foto_produk');
-            $base64 = 'data:image/' . $file->getClientOriginalExtension() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
-            $dataToUpdate['foto_produk'] = $base64;
+            $path = $request->file('foto_produk')->store('produk');
+            $dataToUpdate['foto_produk'] = $path;
         }
 
         $produk->update($dataToUpdate);
@@ -154,8 +152,8 @@ class ProdukController extends Controller
     {
         $this->checkOwnership($produk); // Otorisasi
 
-        if ($produk->foto_produk) {
-            Storage::disk('public')->delete($produk->foto_produk);
+        if ($produk->foto_produk && !str_starts_with($produk->foto_produk, 'data:image')) {
+            Storage::delete($produk->foto_produk);
         }
 
         $produk->delete();

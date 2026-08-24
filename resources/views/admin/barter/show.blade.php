@@ -45,7 +45,7 @@
                         </div>
                     @else
                         @if($barter->pengajuMitra && $barter->pengajuMitra->logo_mitra)
-                            <img src="{{ asset($barter->pengajuMitra->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm bg-white" style="width: 50px; height: 50px;">
+                            <img src="{{ str_starts_with($barter->pengajuMitra->logo_mitra, 'data:image') ? $barter->pengajuMitra->logo_mitra : Storage::url($barter->pengajuMitra->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm bg-white" style="width: 50px; height: 50px;">
                         @else
                             <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 1.2rem;">
                                 {{ substr($barter->pengajuMitra->nama_mitra ?? 'M', 0, 1) }}
@@ -105,7 +105,7 @@
             <div class="card-body px-4 pb-4">
                 <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
                     @if($barter->penerimaMitra && $barter->penerimaMitra->logo_mitra)
-                        <img src="{{ asset($barter->penerimaMitra->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm bg-white" style="width: 50px; height: 50px;">
+                        <img src="{{ str_starts_with($barter->penerimaMitra->logo_mitra, 'data:image') ? $barter->penerimaMitra->logo_mitra : Storage::url($barter->penerimaMitra->logo_mitra) }}" alt="Logo" class="rounded-circle object-fit-cover shadow-sm bg-white" style="width: 50px; height: 50px;">
                     @else
                         <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 1.2rem;">
                             {{ substr($barter->penerimaMitra->nama_mitra ?? 'M', 0, 1) }}
@@ -125,7 +125,7 @@
                             <span class="badge bg-light text-dark border mb-2"><i class="fas fa-box"></i> Produk Target di Sistem</span>
                             <div class="d-flex align-items-center gap-3">
                                 @if($barter->produkDiminta->foto_produk)
-                                    <img src="{{ asset('storage/' . $barter->produkDiminta->foto_produk) }}" alt="Foto" class="rounded-2 object-fit-cover" style="width: 60px; height: 60px;">
+                                    <img src="{{ str_starts_with($barter->produkDiminta->foto_produk, 'data:image') ? $barter->produkDiminta->foto_produk : Storage::url($barter->produkDiminta->foto_produk) }}" alt="Foto" class="rounded-2 object-fit-cover" style="width: 60px; height: 60px;">
                                 @else
                                     <div class="rounded-2 bg-light d-flex align-items-center justify-content-center text-muted" style="width: 60px; height: 60px;">
                                         <i class="fas fa-image fs-4"></i>

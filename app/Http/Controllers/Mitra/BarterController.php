@@ -126,10 +126,10 @@ class BarterController extends Controller
                 'kategori_id' => 'required|exists:kategori_produk,kategori_id',
                 'harga_perkiraan' => 'required|numeric|min:0',
              ]);
-            $fotoPath = $request->file('foto_barang_manual')->store('barter/manual_foto', 'public');
+            $fotoPath = $request->file('foto_barang_manual')->store('barter/manual_foto');
             $dataToSave['foto_barang_manual'] = $fotoPath;
             if ($request->hasFile('bukti_struk')) {
-                $strukPath = $request->file('bukti_struk')->store('barter/struk', 'public');
+                $strukPath = $request->file('bukti_struk')->store('barter/struk');
                 $dataToSave['bukti_struk'] = $strukPath;
             }
             $dataToSave['nama_barang_manual'] = $validated['nama_barang_manual'];
