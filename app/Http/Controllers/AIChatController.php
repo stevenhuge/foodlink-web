@@ -129,7 +129,7 @@ class AIChatController extends Controller
             'message' => 'required|string|max:1000',
             'session_id' => 'nullable|integer',
             'history' => 'nullable|array',
-            'model' => 'nullable|string|in:gemini-3.5-flash,claude-sonnet-4.5,deepseek-v4-pro,qwen-3.7-max'
+            'model' => 'nullable|string|in:gemini-3.8-flash,claude-sonnet-5.5,deepseek-v4-pro,qwen-3.7-max'
         ]);
 
         $user = $this->getAuthenticatedUser();
@@ -137,11 +137,11 @@ class AIChatController extends Controller
         
         $userMessage = $request->input('message');
 
-        // Batasan karakter untuk guest
-        if (!$user && mb_strlen($userMessage) > 100) {
+        // Batasan karakter untuk guest (longgar untuk riset makanan & kalkulasi bahan)
+        if (!$user && mb_strlen($userMessage) > 500) {
             return response()->json([
                 'success' => false,
-                'reply' => 'Maaf, sebagai Guest Anda dibatasi maksimal 100 karakter per pesan. Silakan login untuk mengirim pesan lebih panjang.'
+                'reply' => 'Maaf, sebagai Guest Anda dibatasi maksimal 500 karakter per pesan. Silakan login untuk mengirim pesan lebih panjang.'
             ], 403);
         }
         
@@ -164,18 +164,45 @@ class AIChatController extends Controller
             }
         }
 
-        $apiKey = env('COSMOSHUB_API_KEY');
-        $baseUrl = 'https://api.cosmoshub.tech/v1/chat/completions';
+        $apiKey = config('services.cosmoshub.api_key', env('COSMOSHUB_API_KEY'));
+        $baseUrl = rtrim(config('services.cosmoshub.base_url', 'https://api.cosmoshub.tech/v1'), '/') . '/chat/completions';
         
+        if (empty($apiKey)) {
+            Log::error('CosmosHub API Key is not configured.');
+            return response()->json([
+                'success' => false,
+                'reply' => 'Maaf, konfigurasi API AI belum lengkap. Harap hubungi administrator.'
+            ], 500);
+        }
+
         $history = $request->input('history', []);
         $sessionId = $request->input('session_id');
 
-        // Stronger System prompt
+        // System prompt yang ramah, luas untuk riset kuliner, dan presisi akuntan biaya makanan
         $systemPrompt = [
             'role' => 'system',
-            'content' => 'Kamu adalah asisten virtual resmi FoodLink, platform ekonomi sirkular untuk mencegah food waste (Jual-Cepat, Donasi, Barter B2B).
-TUGAS UTAMA: Jawab pertanyaan secara ringkas, ramah, dan profesional. 
-PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politik, hiburan, dll), TOLAK DENGAN HALUS dan beritahu bahwa kamu hanya bisa membantu seputar layanan FoodLink.'
+            'content' => "Kamu adalah asisten AI resmi FoodLink — platform ekonomi sirkular pencegahan food waste, sekaligus konsultan ahli kuliner dan akuntan biaya makanan (Food Costing & Culinary Business Advisor).
+
+PERAN & TANGGUNG JAWAB UTAMA:
+1. Ekosistem FoodLink:
+   - Menguasai fitur-fitur FoodLink: Jual-Cepat (flash sale produk berlebih/mendekati kedaluwarsa dengan diskon), Donasi makanan ke panti/komunitas, dan Barter B2B bahan baku antar-pelaku usaha makanan.
+   - Mengedukasi cara pencegahan food waste (limbah makanan) dan keberlanjutan bisnis F&B.
+
+2. Riset Makanan & Inovasi Kuliner:
+   - Terbuka dan fleksibel membantu pengguna meriset resep, ide olahan kreatif dari bahan surplus, substitusi bahan baku, keamanan pangan, hingga teknik penyimpanan dan pengawetan yang tepat.
+   - Memberikan saran variasi menu yang efisien, lezat, dan bernilai jual tinggi.
+
+3. Kalkulasi Finansial & Akuntan Kuliner (Detail, Rapi, & Akurat):
+   - Bersikap selayaknya seorang akuntan profesional dan konsultan bisnis F&B yang teliti, sistematis, dan solutif.
+   - Menghitung HPP (Harga Pokok Penjualan / Cost of Goods Sold) secara mendalam, baik per porsi maupun per batch produksi.
+   - Menguraikan komponen biaya secara terperinci: Biaya Bahan Baku (Raw Material / Food Cost), Biaya Kemasan (Packaging), Estimasi Biaya Tenaga Kerja & Overhead (listrik, gas, air), serta Margin Keuntungan (Gross & Net Margin).
+   - Menghitung Food Cost Percentage (misal: rekomendasi standar industri 28%-35%), Break Even Point (BEP), dan rekomendasi penetapan harga jual (pricing strategy).
+   - Sajikan perhitungan dengan format rapi (tabel markdown, rincian biaya per item, formula perhitungan yang transparan, dan kesimpulan harga jual yang direkomendasikan).
+
+PANDUAN KOMUNIKASI:
+- Berikan respons dalam bahasa Indonesia yang ramah, profesional, percaya diri, dan mudah dipahami.
+- Scope percakapan luas untuk segala hal mengenai makanan, kuliner, riset bahan, bisnis F&B, akuntansi kuliner, dan FoodLink.
+- Jika pengguna menanyakan topik yang sama sekali di luar konteks makanan, kuliner, bisnis F&B, atau FoodLink (seperti politik praktis, coding aplikasi umum non-F&B, gosip artis), tolak dengan santun dan arahkan kembali ke topik kuliner, bisnis makanan, atau layanan FoodLink."
         ];
 
         $messages = [$systemPrompt];
@@ -225,26 +252,43 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
             ]);
         }
 
-        $selectedModel = $request->input('model', 'gemini-3.5-flash');
-        // If guest, force gemini
+        $allowedModels = ['gemini-3.8-flash', 'claude-sonnet-5.5', 'deepseek-v4-pro', 'qwen-3.7-max'];
+        $selectedModel = $request->input('model', 'gemini-3.8-flash');
+        if (!in_array($selectedModel, $allowedModels)) {
+            $selectedModel = 'gemini-3.8-flash';
+        }
+
+        // If guest, force gemini-3.8-flash
         if (!$user) {
-            $selectedModel = 'gemini-3.5-flash';
+            $selectedModel = 'gemini-3.8-flash';
         }
 
         try {
-            $response = Http::timeout(60)->withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])->post($baseUrl, [
+            $payload = [
                 'model' => $selectedModel,
                 'messages' => $messages,
                 'temperature' => 0.7,
-                'max_tokens' => 2000,
-            ]);
+                'max_tokens' => 2500,
+            ];
+
+            $response = Http::timeout(60)->withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($baseUrl, $payload);
+
+            // Fallback ke gemini-3.8-flash jika model non-default bermasalah di CosmosHub
+            if (!$response->successful() && $selectedModel !== 'gemini-3.8-flash') {
+                Log::warning("CosmosHub API failed for {$selectedModel}, attempting fallback to gemini-3.8-flash. Response: " . $response->body());
+                $payload['model'] = 'gemini-3.8-flash';
+                $response = Http::timeout(60)->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type' => 'application/json',
+                ])->post($baseUrl, $payload);
+            }
 
             if ($response->successful()) {
                 $data = $response->json();
-                $reply = $data['choices'][0]['message']['content'] ?? 'Maaf, saya tidak mengerti.';
+                $reply = $data['choices'][0]['message']['content'] ?? 'Maaf, saya tidak dapat memproses jawaban saat ini.';
                 
                 // Save AI message
                 if ($sessionId && isset($session)) {
@@ -277,7 +321,7 @@ PENTING: JIKA PENGGUNA BERTANYA DI LUAR KONTEKS FOODLINK (seperti coding, politi
                     ]
                 ]);
             } else {
-                Log::error('CosmosHub API Error: ' . $response->body());
+                Log::error('CosmosHub API Error: ' . $response->status() . ' - ' . $response->body());
                 return response()->json([
                     'success' => false,
                     'reply' => 'Maaf, sistem AI sedang sibuk. Silakan coba lagi nanti.'

@@ -42,4 +42,9 @@ return [
         'is_production' => env('MIDTRANS_IS_PRODUCTION', true),
     ],
 
+    'cosmoshub' => [
+        'api_key' => env('COSMOSHUB_API_KEY'),
+        'base_url' => env('COSMOSHUB_BASE_URL', 'https://api.cosmoshub.tech/v1'),
+    ],
+
 ];

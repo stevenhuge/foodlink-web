@@ -650,21 +650,21 @@
 
             <div class="chat-body" id="chatBody">
                 <div class="chat-msg bot">
-                    Halo! Saya asisten AI resmi dari FoodLink. Ada yang bisa saya bantu terkait ekosistem ekonomi sirkular kami hari ini? 😊
+                    Halo! Saya asisten AI resmi dari FoodLink. Saya siap membantu Anda meriset tentang makanan & resep, kalkulasi HPP dan biaya kuliner secara akurat, hingga layanan Jual-Cepat, Donasi, dan Barter B2B FoodLink. Ada yang bisa saya bantu hari ini? 😊
                 </div>
             </div>
 
             <div class="chat-footer-wrapper">
                 <!-- Prompt Bubbles -->
                 <div class="prompt-bubbles" id="promptBubbles">
-                    <div class="prompt-bubble" onclick="usePrompt('Apa itu FoodLink?')">Apa itu FoodLink?</div>
-                    <div class="prompt-bubble" onclick="usePrompt('Bagaimana cara ikut Jual-Cepat?')">Cara ikut Jual-Cepat?</div>
-                    <div class="prompt-bubble" onclick="usePrompt('Jelaskan sistem Barter B2B')">Sistem Barter B2B</div>
-                    <div class="prompt-bubble" onclick="usePrompt('Siapa saja yang bisa Donasi Makanan?')">Info Donasi Makanan</div>
+                    <div class="prompt-bubble" onclick="usePrompt('Bantu saya hitung HPP dan harga jual makanan')">Hitung HPP & Biaya Makanan</div>
+                    <div class="prompt-bubble" onclick="usePrompt('Riset ide olahan dari bahan makanan berlebih')">Riset Olahan Bahan Surplus</div>
+                    <div class="prompt-bubble" onclick="usePrompt('Bagaimana cara ikut Jual-Cepat di FoodLink?')">Cara Ikut Jual-Cepat</div>
+                    <div class="prompt-bubble" onclick="usePrompt('Jelaskan sistem Barter B2B dan Donasi Makanan')">Barter B2B & Donasi</div>
                 </div>
 
                 <div class="chat-footer">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Ketik pesan Anda di sini..." autocomplete="off">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Ketik pertanyaan atau data biaya makanan Anda di sini..." autocomplete="off">
                     <button class="chat-send-btn" id="chatSendBtn" title="Kirim Pesan">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -677,16 +677,16 @@
                             <i class="fas fa-bolt text-warning"></i>
                             <span>Pilih Model AI:</span>
                             <select id="modelSelect" class="form-select form-select-sm rounded-pill px-3 shadow-sm border-0" style="width: auto; font-size: 0.8rem; background-color: #f1f5f9;">
-                                <option value="gemini-3.5-flash">Gemini 3.5 Flash (Cepat)</option>
-                                <option value="claude-sonnet-4.5" selected>Claude Sonnet 4.5 (Pintar)</option>
-                                <option value="deepseek-v4-pro">DeepSeek V4 Pro (Logika Kuat)</option>
-                                <option value="qwen-3.7-max">Qwen 3.7 Max (Kreatif)</option>
+                                <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Pilihan Utama & Cepat)</option>
+                                <option value="claude-sonnet-5.5">Claude Sonnet 5.5 (Pintar & Analitis)</option>
+                                <option value="deepseek-v4-pro">DeepSeek V4 Pro (Logika & Kalkulasi)</option>
+                                <option value="qwen-3.7-max">Qwen 3.7 Max (Kreatif & Detail)</option>
                             </select>
                         </div>
                     @else
                         <div>
-                            <i class="fas fa-robot text-secondary"></i> Didukung oleh <strong>Gemini AI</strong>. 
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-success text-decoration-none fw-bold">Login atau daftar</a> untuk membuka akses ke model premium seperti Claude dan DeepSeek!
+                            <i class="fas fa-robot text-secondary"></i> Didukung oleh <strong>Gemini 3.8 Flash</strong>. 
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal" class="text-success text-decoration-none fw-bold">Login atau daftar</a> untuk menyimpan riwayat dan akses model lainnya!
                         </div>
                     @endif
                 </div>
@@ -927,7 +927,7 @@
                 chatBody.innerHTML = '';
                 chatHistory = [];
                 if (showGreeting) {
-                    appendMessage("Halo! Saya asisten AI resmi dari FoodLink. Ada yang bisa saya bantu terkait ekosistem ekonomi sirkular kami hari ini? 😊", 'bot', false);
+                    appendMessage("Halo! Saya asisten AI resmi dari FoodLink. Saya siap membantu Anda meriset tentang makanan & resep, kalkulasi HPP dan biaya kuliner secara akurat, hingga layanan Jual-Cepat, Donasi, dan Barter B2B FoodLink. Ada yang bisa saya bantu hari ini? 😊", 'bot', false);
                 }
             }
 
@@ -946,7 +946,7 @@
                 try {
                     // Get selected model if logged in
                     const modelSelect = document.getElementById('modelSelect');
-                    const selectedModel = modelSelect ? modelSelect.value : 'gemini-3.5-flash';
+                    const selectedModel = modelSelect ? modelSelect.value : 'gemini-3.8-flash';
 
                     const response = await fetch('/api/chat', {
                         method: 'POST',
