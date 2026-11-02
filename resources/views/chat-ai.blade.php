@@ -550,6 +550,142 @@
             60%, 100% { transform: translateX(100%); }
         }
 
+        /* ===== Widget Interaktif: Tabel, Grafik & Simulator Laba ===== */
+        .interactive-table-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.85rem;
+            margin: 1rem 0;
+            overflow: hidden;
+            box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.06);
+            transition: box-shadow 0.3s ease;
+        }
+        .interactive-table-card:hover {
+            box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.1);
+        }
+        .interactive-table-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+        }
+        .btn-copy-table {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.4rem;
+            font-size: 0.75rem;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-copy-table:hover {
+            background: var(--fl-green);
+            color: white;
+            border-color: var(--fl-green);
+            transform: translateY(-1px);
+        }
+        .interactive-table-card .table-responsive {
+            margin: 0;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+        .interactive-table-card table {
+            width: 100%;
+            margin-bottom: 0;
+            font-size: 0.88rem;
+            border-collapse: collapse;
+        }
+        .interactive-table-card thead th {
+            background: #f8fafc;
+            color: #1e293b;
+            font-weight: 700;
+            padding: 0.65rem 0.85rem;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .interactive-table-card tbody td {
+            padding: 0.6rem 0.85rem;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .interactive-table-card tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .interactive-table-card tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        .interactive-table-card tr.row-total-hpp {
+            background-color: #ecfdf5 !important;
+            font-weight: 700;
+            color: #065f46 !important;
+        }
+        .interactive-table-card tr.row-total-hpp td {
+            border-top: 2px solid #a7f3d0;
+            color: #047857 !important;
+            font-size: 0.92rem;
+        }
+
+        /* Interactive Chart Card */
+        .ai-chart-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            margin: 1.25rem 0;
+            padding: 1.25rem;
+            box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.08);
+            position: relative;
+        }
+        .ai-chart-card .chart-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .ai-chart-card canvas {
+            max-height: 270px;
+        }
+
+        /* Interactive Calculator Card */
+        .ai-calculator-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f9fbf9 100%);
+            border: 1px solid #c7ecd1;
+            border-radius: 1rem;
+            margin: 1.25rem 0;
+            padding: 1.25rem;
+            box-shadow: 0 6px 20px -6px rgba(77, 180, 63, 0.15);
+        }
+        .ai-calculator-card .calc-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .ai-calculator-card .form-range::-webkit-slider-thumb {
+            background: var(--fl-green);
+        }
+        .ai-calculator-card .form-range::-moz-range-thumb {
+            background: var(--fl-green);
+        }
+        .calc-stat-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.65rem;
+            padding: 0.65rem 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .calc-stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 position: absolute;
@@ -750,6 +886,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const isLoggedIn = {{ $isLoggedIn ? 'true' : 'false' }};
         let currentSessionId = null;
@@ -976,8 +1113,8 @@
                             currentSessionId = data.session_id;
                         }
 
-                        // Use typewriter effect for the AI reply
-                        await typeWriterMessage(data.reply, 'bot');
+                        // Render bot message with interactive widgets & fast delivery (no artificial typewriter delay)
+                        renderBotMessage(data.reply, true);
 
                         chatHistory.push({ role: 'user', content: message });
                         chatHistory.push({ role: 'assistant', content: data.reply });
@@ -987,11 +1124,11 @@
                             loadSessions();
                         }
                     } else {
-                        appendMessage(data.reply || 'Terjadi kesalahan sistem.', 'bot', false);
+                        renderBotMessage(data.reply || 'Terjadi kesalahan sistem.', false);
                     }
                 } catch (error) {
                     removeTypingIndicator(typingId);
-                    appendMessage('Terjadi kesalahan koneksi.', 'bot', false);
+                    renderBotMessage('Terjadi kesalahan koneksi saat menghubungi server AI.', false);
                 } finally {
                     isWaitingForResponse = false;
                     chatSendBtn.disabled = false;
@@ -999,40 +1136,309 @@
                 }
             }
 
-            // Typewriter effect function
-            function typeWriterMessage(text, sender) {
-                return new Promise(resolve => {
-                    const msgDiv = document.createElement('div');
-                    msgDiv.className = `chat-msg ${sender}`;
-                    chatBody.appendChild(msgDiv);
+            // Anti-LaTeX Cleaner (Mencegah tampilan rumus matematika rusak seperti $$\text{...}$$)
+            function cleanAntiLatex(text) {
+                if (!text) return '';
+                let res = text;
+                res = res.replace(/\\text\{([^}]+)\}/g, '$1');
+                res = res.replace(/\\mathbf\{([^}]+)\}/g, '$1');
+                res = res.replace(/\\mathrm\{([^}]+)\}/g, '$1');
+                res = res.replace(/\\times/g, '×');
+                res = res.replace(/\\div/g, '÷');
+                res = res.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)');
+                res = res.replace(/\$\$([\s\S]*?)\$\$/g, '$1');
+                res = res.replace(/\\\[([\s\S]*?)\\\]/g, '$1');
+                res = res.replace(/\\\(([\s\S]*?)\\\)/g, '$1');
+                res = res.replace(/\$([^\$\n]+)\$/g, '$1');
+                res = res.replace(/\\\&/g, '&');
+                return res;
+            }
 
-                    let i = 0;
-                    const speed = 15; // ms per char
+            // Extract Chart & Calculator Code Blocks to JSON
+            function extractAndProcessWidgets(text) {
+                let clean = cleanAntiLatex(text);
+                const charts = [];
+                const calculators = [];
 
-                    function type() {
-                        if (i < text.length) {
-                            // advance a chunk of characters for faster typing if text is long
-                            let chunkSize = text.length > 500 ? 5 : (text.length > 200 ? 3 : 1);
-                            i += chunkSize;
-                            if (i > text.length) i = text.length;
-
-                            // Parse markdown on the fly
-                            msgDiv.innerHTML = marked.parse(text.substring(0, i));
-                            scrollToBottom();
-                            setTimeout(type, speed);
-                        } else {
-                            msgDiv.innerHTML = marked.parse(text); // ensure final parse is clean
-                            appendChatActions(msgDiv, text);
-                            scrollToBottom();
-                            resolve();
-                        }
+                // Match ```chart { ... } ```
+                clean = clean.replace(/```(?:chart|json:chart)\s*([\s\S]*?)\s*```/gi, function(match, jsonStr) {
+                    try {
+                        const chartData = JSON.parse(jsonStr.trim());
+                        const id = 'chart-' + Math.random().toString(36).substr(2, 9);
+                        charts.push({ id, data: chartData });
+                        return `<div class="ai-chart-placeholder" id="${id}"></div>`;
+                    } catch (e) {
+                        return match;
                     }
-                    type();
+                });
+
+                // Match ```calculator { ... } ```
+                clean = clean.replace(/```(?:calculator|json:calculator)\s*([\s\S]*?)\s*```/gi, function(match, jsonStr) {
+                    try {
+                        const calcData = JSON.parse(jsonStr.trim());
+                        const id = 'calc-' + Math.random().toString(36).substr(2, 9);
+                        calculators.push({ id, data: calcData });
+                        return `<div class="ai-calc-placeholder" id="${id}"></div>`;
+                    } catch (e) {
+                        return match;
+                    }
+                });
+
+                return { markdownText: clean, charts, calculators };
+            }
+
+            // Post-Process Widgets (Render Chart.js, Simulator Slider, and Tables)
+            function postProcessInteractiveWidgets(container, charts, calculators) {
+                // 1. Render Chart.js
+                charts.forEach(c => {
+                    const el = container.querySelector('#' + c.id);
+                    if (!el) return;
+                    const card = document.createElement('div');
+                    card.className = 'ai-chart-card';
+                    const canvasId = 'canvas-' + c.id;
+                    const isBar = c.data.type === 'bar';
+                    card.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                                    <i class="fas ${isBar ? 'fa-chart-bar' : 'fa-chart-pie'}"></i>
+                                </span>
+                                <span class="chart-title">${c.data.title || 'Grafik Komposisi Biaya & Margin'}</span>
+                            </div>
+                            <span class="badge bg-light text-muted border px-2 py-1" style="font-size: 0.72rem;">
+                                <i class="fas fa-chart-simple text-success me-1"></i> Interaktif
+                            </span>
+                        </div>
+                        <div style="position: relative; height: 260px; max-width: 100%;">
+                            <canvas id="${canvasId}"></canvas>
+                        </div>
+                    `;
+                    el.replaceWith(card);
+
+                    const ctx = document.getElementById(canvasId);
+                    if (ctx && window.Chart) {
+                        new Chart(ctx, {
+                            type: c.data.type || 'doughnut',
+                            data: {
+                                labels: c.data.labels || [],
+                                datasets: [{
+                                    label: 'Nominal (Rp)',
+                                    data: c.data.data || [],
+                                    backgroundColor: c.data.colors || [
+                                        '#4DB43F', '#38bdf8', '#fbbf24', '#a855f7', '#f43f5e'
+                                    ],
+                                    borderWidth: 2,
+                                    borderColor: '#ffffff',
+                                    borderRadius: isBar ? 8 : 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: isBar ? 0 : '60%',
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            boxWidth: 14,
+                                            padding: 12,
+                                            font: { family: 'Inter', size: 12, weight: '500' }
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                        padding: 10,
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const val = context.raw || 0;
+                                                const formatted = 'Rp ' + Number(val).toLocaleString('id-ID');
+                                                if (!isBar) {
+                                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                                                    return ` ${context.label}: ${formatted} (${pct}%)`;
+                                                }
+                                                return ` ${context.label}: ${formatted}`;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: isBar ? {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(v) { return 'Rp ' + Number(v).toLocaleString('id-ID'); }
+                                        },
+                                        grid: { color: '#f1f5f9' }
+                                    },
+                                    x: { grid: { display: false } }
+                                } : {}
+                            }
+                        });
+                    }
+                });
+
+                // 2. Render Live Profit Simulator (Calculator Widget)
+                calculators.forEach(calc => {
+                    const el = container.querySelector('#' + calc.id);
+                    if (!el) return;
+                    const hpp = Number(calc.data.hpp) || 0;
+                    const defaultMargin = Number(calc.data.defaultMargin) || 40;
+                    const menu = calc.data.menu || 'Menu Kuliner';
+
+                    const card = document.createElement('div');
+                    card.className = 'ai-calculator-card';
+                    card.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                                    <i class="fas fa-calculator"></i>
+                                </span>
+                                <span class="calc-title">Simulator Margin & Laba: ${menu}</span>
+                            </div>
+                            <span class="badge bg-success text-white px-2 py-1" style="font-size: 0.75rem;">
+                                Modal HPP: Rp ${hpp.toLocaleString('id-ID')}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-muted mb-0">Geser Target Margin Keuntungan:</label>
+                                <span class="badge bg-dark px-2 py-1 fs-6 calc-margin-val">${defaultMargin}%</span>
+                            </div>
+                            <input type="range" class="form-range calc-slider" min="10" max="75" step="5" value="${defaultMargin}">
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem;">
+                                <span>10% (Promo/Volume)</span>
+                                <span>40% (Ideal F&B)</span>
+                                <span>75% (Premium)</span>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input calc-ojol-switch" type="checkbox" id="switch-${calc.id}">
+                            <label class="form-check-label small text-muted" for="switch-${calc.id}">
+                                Hitung harga khusus Ojek Online / GrabFood / GoFood (Komisi 20%)
+                            </label>
+                        </div>
+                        <div class="row g-2 text-center">
+                            <div class="col-4">
+                                <div class="calc-stat-box">
+                                    <div class="text-muted" style="font-size: 0.7rem;">Harga Jual Ideal</div>
+                                    <div class="fw-bold text-success fs-6 calc-res-price">Rp 0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="calc-stat-box">
+                                    <div class="text-muted" style="font-size: 0.7rem;">Laba Kotor / Porsi</div>
+                                    <div class="fw-bold text-primary fs-6 calc-res-profit">Rp 0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="calc-stat-box">
+                                    <div class="text-muted" style="font-size: 0.7rem;">Profit (100 Porsi)</div>
+                                    <div class="fw-bold text-dark fs-6 calc-res-total">Rp 0</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    el.replaceWith(card);
+
+                    const slider = card.querySelector('.calc-slider');
+                    const marginVal = card.querySelector('.calc-margin-val');
+                    const ojolSwitch = card.querySelector('.calc-ojol-switch');
+                    const resPrice = card.querySelector('.calc-res-price');
+                    const resProfit = card.querySelector('.calc-res-profit');
+                    const resTotal = card.querySelector('.calc-res-total');
+
+                    function updateCalc() {
+                        const m = Number(slider.value) / 100;
+                        marginVal.textContent = slider.value + '%';
+                        let idealPrice = hpp / (1 - m);
+                        let profit = idealPrice - hpp;
+                        if (ojolSwitch.checked) {
+                            idealPrice = idealPrice / 0.8;
+                            profit = (idealPrice * 0.8) - hpp;
+                        }
+                        const roundedPrice = Math.ceil(idealPrice / 500) * 500;
+                        const roundedProfit = Math.round(profit);
+                        resPrice.textContent = 'Rp ' + roundedPrice.toLocaleString('id-ID');
+                        resProfit.textContent = 'Rp ' + roundedProfit.toLocaleString('id-ID');
+                        resTotal.textContent = 'Rp ' + (roundedProfit * 100).toLocaleString('id-ID');
+                    }
+
+                    slider.addEventListener('input', updateCalc);
+                    ojolSwitch.addEventListener('change', updateCalc);
+                    updateCalc();
+                });
+
+                // 3. Tables Enhancement (Add copy button, sticky wrapper, and row highlight)
+                const tables = container.querySelectorAll('table');
+                tables.forEach(table => {
+                    if (table.closest('.interactive-table-card')) return;
+                    const card = document.createElement('div');
+                    card.className = 'interactive-table-card';
+                    card.innerHTML = `
+                        <div class="interactive-table-header">
+                            <span><i class="fas fa-table-list text-success me-2"></i>Tabel Rincian Biaya & HPP</span>
+                            <button type="button" class="btn-copy-table" title="Salin data tabel">
+                                <i class="fas fa-copy"></i> <span>Salin Tabel</span>
+                            </button>
+                        </div>
+                        <div class="table-responsive"></div>
+                    `;
+                    table.parentNode.insertBefore(card, table);
+                    const responsiveDiv = card.querySelector('.table-responsive');
+                    table.classList.add('table', 'table-hover', 'align-middle');
+                    responsiveDiv.appendChild(table);
+
+                    // Highlight Total HPP row
+                    table.querySelectorAll('tbody tr').forEach(tr => {
+                        if (/total\s*hpp|hpp\s*per\s*porsi|total\s*biaya/i.test(tr.textContent)) {
+                            tr.classList.add('row-total-hpp');
+                        }
+                    });
+
+                    // Copy Table to Clipboard as TSV
+                    const copyBtn = card.querySelector('.btn-copy-table');
+                    copyBtn.addEventListener('click', () => {
+                        let tsv = '';
+                        table.querySelectorAll('tr').forEach(tr => {
+                            const rowData = [];
+                            tr.querySelectorAll('th, td').forEach(cell => {
+                                rowData.push(cell.innerText.trim());
+                            });
+                            tsv += rowData.join('\t') + '\n';
+                        });
+                        navigator.clipboard.writeText(tsv).then(() => {
+                            const orig = copyBtn.innerHTML;
+                            copyBtn.innerHTML = '<i class="fas fa-check text-success"></i> <span>Tersalin!</span>';
+                            setTimeout(() => { copyBtn.innerHTML = orig; }, 2000);
+                        });
+                    });
                 });
             }
 
-            // Append Message to UI (Instant)
+            // Render Bot Message instantly without artificial typewriter lag
+            function renderBotMessage(text, animate = true) {
+                const { markdownText, charts, calculators } = extractAndProcessWidgets(text);
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-msg bot';
+                if (!animate) {
+                    msgDiv.style.animation = 'none';
+                    msgDiv.style.opacity = '1';
+                    msgDiv.style.transform = 'none';
+                }
+                msgDiv.innerHTML = marked.parse(markdownText);
+                postProcessInteractiveWidgets(msgDiv, charts, calculators);
+                appendChatActions(msgDiv, text);
+                chatBody.appendChild(msgDiv);
+                scrollToBottom();
+            }
+
+            // Append Message to UI
             function appendMessage(text, sender, animate = true) {
+                if (sender === 'bot') {
+                    renderBotMessage(text, animate);
+                    return;
+                }
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `chat-msg ${sender}`;
 
@@ -1042,13 +1448,7 @@
                     msgDiv.style.transform = 'translateY(0)';
                 }
 
-                if (sender === 'bot') {
-                    msgDiv.innerHTML = marked.parse(text);
-                    appendChatActions(msgDiv, text);
-                } else {
-                    msgDiv.innerHTML = text.replace(/\n/g, '<br>');
-                }
-
+                msgDiv.innerHTML = text.replace(/\n/g, '<br>');
                 chatBody.appendChild(msgDiv);
                 scrollToBottom();
             }
@@ -1094,13 +1494,18 @@
                 container.appendChild(actionsDiv);
             }
 
-            // Show Typing Indicator
+            // Show Typing Indicator (Modern Animated Loader)
             function showTypingIndicator() {
                 const id = 'typing-' + Date.now();
                 const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-msg bot';
+                msgDiv.className = 'chat-msg bot py-2 px-3';
                 msgDiv.id = id;
-                msgDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+                msgDiv.innerHTML = `
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="spinner-border spinner-border-sm text-success" role="status" style="width: 1rem; height: 1rem; border-width: 2px;"></div>
+                        <span class="text-muted fw-medium" style="font-size: 0.85rem;">Menghitung data & menyusun grafik...</span>
+                    </div>
+                `;
                 chatBody.appendChild(msgDiv);
                 scrollToBottom();
                 return id;
